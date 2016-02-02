@@ -134,8 +134,9 @@ params["S_mat"] = S_mat
 print "C_matrix is"
 C_mat.show_matrix()
 
-print "Orthogonality check"
+print "Orthogonality check!!!"
 (C_mat.T()*S_mat*C_mat).show_matrix()
+
 # overlap matrix
 #C_mat.Transpose()
 #CS_mat = C_mat * S_mat
