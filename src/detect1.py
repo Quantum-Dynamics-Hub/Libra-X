@@ -9,17 +9,9 @@
 #*
 #*********************************************************************************/
 
-
-# **************************************************************
-# This program read the output from Semi-Emipirical Calculation
-# where single point calculation is done 
-# and GRADIENTS are output.
-# **************************************************************
-
-import os
-import sys
-import math
-
+# ******************************************************************
+# This program can't read the output of Semi-Empirical Calculations.
+# ******************************************************************
 
 def detect_columns(l_gam,params):
     #this program detects the columns showing the prameters like
@@ -30,54 +22,54 @@ def detect_columns(l_gam,params):
         i += 1
         spline = line.split()
 
-        #if len(spline) == 6 and spline[0] == "TOTAL" and spline[3] == "ATOMS":
-            #params["lNatoms"] = i
-            #params["Natoms"] = int(spline[5])
+        if len(spline) == 6 and spline[0] == "TOTAL" and spline[3] == "ATOMS":
+            params["lNatoms"] = i
+            params["Natoms"] = int(spline[5])
 
-        # nGTO
-        #if len(spline) == 14 and spline[1] == "GTO" and spline[12] == "STO":
+        # the number of the gaussians
+        #if len(spline) == 4 and spline[1] == "IGAUSS=":
         #    params["lGTO"] = i
-        #    params["nGTO"] = int(spline[7])
+        #    params["nGTO"] = int(spline[2])
 
-        # the number of cartesian gaussian basis functions
+        # the number of the gaussian basis functions
         if len(spline) == 8 and spline[5] == "FUNCTIONS":
             params["lgbf"] = i
             params["Ngbf"] = int(spline[7])
-            #print params["Ngbf"]
-            
+
         # the atomic basis sets
         if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
             params["ab_start"] = i + 7
         if len(spline) == 8 and spline[5] == "SHELLS":
             params["ab_end"] = i - 2
 
-        # eigenvectors ( molecular orbitals)
-        if len(spline) > 0 and spline[0] == "EIGENVECTORS":
+        # the molecular orbitals
+        if len(spline) == 2 and spline[0] == "MOLECULAR":
             params["mo_start"] = i + 3
-            
-            params["mo_end"] = i + 1 + (params["Ngbf"] + 4) * int(math.ceil(params["Ngbf"]/5.0))
+        if len(spline) > 0 and spline[0] == "PROPERTY":
+            params["mo_end"] = i - 3
 
-        # the coordinates of the atoms (in Bohr)
+        # the coordinates of the atoms
 
-        if len(spline) == 4 and spline[2] == "COORDINATES" and spline[3] == "(BOHR)":
-            params["coor_start"] = i + 2
-        if len(spline) == 3 and spline[0] == "INTERNUCLEAR" and spline[1] == "DISTANCES":
-            params["coor_end"] = i -2 
-            params["Natoms"] = params["coor_end"] - params["coor_start"] + 1
+        if len(spline) == 6 and spline[0] == "COORDINATES" and spline[2] == "ALL":
+            params["coor_start"] = i + 3
+            params["coor_end"] = params["coor_start"] + params["Natoms"] -1
 
-        # the gradients(in Hartree/Bohr)
-
-        if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
+        # the gradients
+        if len(spline) == 2 and spline[0] == "GRADIENT" and spline[1] == "(HARTREE/BOHR)":
             params["grad_start"] = i + 4
             params["grad_end"] = params["grad_start"] + params["Natoms"] -1
 
-def show_outputs(l_gam,params):
-    #print "******************************************"
+def show_parameters(l_gam,params):
+    print "******************************************"
+    print "according to the",params["lNatoms"]+1,"th column,"
+    print l_gam[params["lNatoms"]] 
+    print "Natoms =",params["Natoms"]
+    print "******************************************"
     #print "according to the",params["lGTO"]+1,"th column,"
     #print l_gam[params["lGTO"]]
     #print "nGTO = ",params["nGTO"]
     #print "*******************************************"
-    #print
+    print
     print "******************************************"
     print "according to the",params["lgbf"]+1,"th column,"
     print l_gam[params["lgbf"]]
@@ -97,28 +89,27 @@ def show_outputs(l_gam,params):
     print "******************************************"
     print
     print "******************************************"
-    print "COORDINATES OF ATOMS (in Bohr) is within",params["coor_start"]+1,"-",params["coor_end"]+1,"th lines"
+    print "COORDINATES OF ATOMS is within",params["coor_start"]+1,"-",params["coor_end"]+1,"th lines"
     for l in range(params["coor_start"],params["coor_end"]+1):
         print l_gam[l]
-    print "And the number of atoms is ",params["Natoms"]
     print "******************************************"
     print
     print "******************************************"
-    print "GRADIENT (in Hartree/Bohr) is within",params["grad_start"]+1,"-",params["grad_end"]+1,"th lines"
+    print "GRADIENT is within",params["grad_start"]+1,"-",params["grad_end"]+1,"th lines"
     for l in range(params["grad_start"],params["grad_end"]+1):
         print l_gam[l]
     print "******************************************"
     print
 
+
+    #params = {}
+    #params["Natoms"] = Natoms
+#    print "params=", params
+#params[\"NP\"]=$NP
     return
 
-def detect(l_gam,params):
+def detect1(l_gam,params):
     
     detect_columns(l_gam,params)
 
-    show_outputs(l_gam,params)
-
-    print "*********************************************"
-    print "detect program ends"
-    print "*********************************************"
-    print 
+    show_parameters(l_gam,params)
