@@ -63,7 +63,7 @@ def atomic_basis_set(l_gam,params):
 
 def molecular_orbitals(l_gam,params):
 
-    import math
+    import math  # import should always be in the top of the module
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]

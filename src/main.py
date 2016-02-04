@@ -1,10 +1,18 @@
-#******************************************************
-# This program is coded by Kosueke Sato from 1/27/2016
-#******************************************************
+#*********************************************************************************
+#* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
+#*
+#* This file is distributed under the terms of the GNU General Public License
+#* as published by the Free Software Foundation, either version 2 of
+#* the License, or (at your option) any later version.
+#* See the file LICENSE in the root directory of this distribution
+#* or <http://www.gnu.org/licenses/>.
+#*
+#*********************************************************************************/
+
 
 from detect import *
 from extract import *
-from overlap import *
+from ao_basis import *
 #from test_AO import *
 
 import os
@@ -12,15 +20,21 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-cwd = os.getcwd()
-print "Current working directory", cwd
-sys.path.insert(1,cwd+"/../../../../libracode-code/_build/src/mmath")
-sys.path.insert(1,cwd+"/../../../../libracode-code/_build/src/qchem")
+cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
+print "Using the Libra installation at", cwd
+sys.path.insert(1,cwd+"/_build/src/mmath")
+sys.path.insert(1,cwd+"/_build/src/qchem")
 
 
 print "\nTest 1: Importing the library and its content"
 from libmmath import *
 from libqchem import *
+
+
+# !!!!!!!!!!!!!!!!
+# The code below must be a part of a bigger function - to run the code, just call the function
+# in the end of the file
+
 
 # *************** define vacant parameter list ******************
 params = {}
@@ -48,7 +62,7 @@ gradient(l_gam,params)
 
 # *************** the constructor of the molecular coefficients.
 
-mol_coef = params["mol_coef"]
+mol_coef = params["mol_coef"]  
 Ngbf = params["Ngbf"]
 C_mat = MATRIX(Ngbf,Ngbf)
 for a in range(0,Ngbf): # orbital number
@@ -101,41 +115,31 @@ for la in l_atoms: # all atoms
     orb_name.append(orb_name1)
 
 # define other constructor
-priG = PrimitiveG()
-vec = VECTOR(0,0,0)
-params["aoa"] = aoa
-params["orb_name"] = orb_name
-params["priG"] = priG
-params["vec"] = vec
-
 print "aoa=",aoa
 print "orb_name=",orb_name
+params["orb_name"] = orb_name
+params["aoa"] = aoa
 
-add_PrimitiveG(params)
 
-aoa = params["aoa"]
+ao = construct_ao_basis(params)
+Norb = len(ao)
 
-S_mat = MATRIX(Ngbf,Ngbf)
-# overlap matrix S
-ij = 0
-for i in range(0,len(l_atoms)): # all atoms
-    for j in range(0,len(aoa[i])):
-        kl = 0
-        for k in range(0,len(l_atoms)): # all atoms
-            for l in range(0,len(aoa[k])):
-                S_mat.set(ij,kl,gaussian_overlap(aoa[i][j],aoa[k][l]))
-                kl += 1
-        ij += 1
+S = MATRIX(Norb,Norb)
 
-print "S_matrix is"
-S_mat.show_matrix()
-params["S_mat"] = S_mat
+# overlap matrix 
+for i in range(0,Norb): # all orbitals
+    for j in range(0,Norb):
+        S.set(i,j,gaussian_overlap(ao[i],ao[j]))              
+
+print "The overlap matrix is"
+S.show_matrix()
+
 
 print "C_matrix is"
 C_mat.show_matrix()
 
 print "Orthogonality check!!!"
-(C_mat.T()*S_mat*C_mat).show_matrix()
+(C_mat.T()*S*C_mat).show_matrix()
 
 # overlap matrix
 #C_mat.Transpose()
