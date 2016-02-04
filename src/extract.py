@@ -1,6 +1,32 @@
-def atomic_basis_set(l_gam,params):
+#*********************************************************************************
+#* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
+#*
+#* This file is distributed under the terms of the GNU General Public License
+#* as published by the Free Software Foundation, either version 2 of
+#* the License, or (at your option) any later version.
+#* See the file LICENSE in the root directory of this distribution
+#* or <http://www.gnu.org/licenses/>.
+#*
+#*********************************************************************************/
 
-    # detect atoms
+import os
+import sys
+import math
+
+# First, we add the location of the library to test to the PYTHON path
+cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
+print "Using the Libra installation at", cwd
+sys.path.insert(1,cwd+"/_build/src/mmath")
+sys.path.insert(1,cwd+"/_build/src/qchem")
+from libmmath import *
+from libqchem import *
+
+
+def atomic_basis_set(l_gam,params):
+# This program extracts the atomic basis information,
+# and puts it into the gaussian basis information.
+
+    #  atomic species
     ab_start = params["ab_start"]
     ab_end = params["ab_end"]
     l_atom_spec = []
@@ -12,18 +38,7 @@ def atomic_basis_set(l_gam,params):
             atom_spec.append(spline[0])
     params["atom_spec"] = atom_spec
 
-    # produce the lists for exponent and coefficient
-    #o = ["s","p","d"]
-    #for s in atom_spec:
-    #    for i in range(1,4):
-    #        expo_ao = "expo_" + s + str(i)
-    #        expo_ao = []
-    #        for l in o:                
-    #            coef_ao = "coef_" + s + str(i) + l
-                #print coef_ao
-    #            coef_ao = []
-
-    # extract atomic basis sets
+    # atomic basis sets
     basis_type = []
     basis_expo = []
     basis_coef = []
@@ -47,7 +62,7 @@ def atomic_basis_set(l_gam,params):
                 if spline[1] == "L":
                     coef_tmp1.append(float(spline[4]))
                     coef_tmp1.append(float(spline[5]))
-                elif spline[1] == "S":
+                else:
                     coef_tmp1.append(float(spline[4]))
                 coef_tmp.append(coef_tmp1)
         basis_type.append(type_tmp)
@@ -55,15 +70,78 @@ def atomic_basis_set(l_gam,params):
         basis_coef.append(coef_tmp)
 
     params["basis_type"] = basis_type
-    params["basis_expo"] = basis_expo
-    params["basis_coef"] = basis_coef
+    #params["basis_expo"] = basis_expo
+    #params["basis_coef"] = basis_coef
 
-    print "params=",params
+    # ******* put into gaussian basis parameter
+
+    l_atoms = params["l_atoms"]
+    #nGTO = params["nGTO"]
+    Ngbf = params["Ngbf"]
+    expo_s = []
+    expo_p = []
+    expo_d = []
+
+    coef_s = []
+    coef_p = []
+    coef_d = []
+
+    for la in l_atoms: # all atoms
+        for j in range(0,len(atom_spec)): # specify the kind of the atom
+            if la == atom_spec[j]:
+                i = j
+        expo_stmp = []
+        expo_ptmp = []
+        expo_dtmp = []
+
+        coef_stmp = []
+        coef_ptmp = []
+        coef_dtmp = []
+        for j in range(0,len(basis_type[i])): # basis number of atoms
+            b_tmp = basis_type[i][j]
+            if b_tmp == "S":
+                expo_stmp.append(basis_expo[i][j])
+                coef_stmp.append(basis_coef[i][j][0])
+            elif b_tmp == "P":
+                expo_ptmp.append(basis_expo[i][j])
+                coef_ptmp.append(basis_coef[i][j][0])
+            elif b_tmp == "D":
+                expo_dtmp.append(basis_expo[i][j])
+                coef_dtmp.append(basis_coef[i][j][0])
+            elif b_tmp == "L":
+                expo_stmp.append(basis_expo[i][j])
+                expo_ptmp.append(basis_expo[i][j])
+                coef_stmp.append(basis_coef[i][j][0])
+                coef_ptmp.append(basis_coef[i][j][1])
+
+            # f orbitals are not taken into account, so should add them.
+        expo_s.append(expo_stmp)
+        expo_p.append(expo_ptmp)
+        expo_d.append(expo_dtmp)
+        coef_s.append(coef_stmp)
+        coef_p.append(coef_ptmp)
+        coef_d.append(coef_dtmp)
+
+    print "expo_s=",expo_s
+    print "expo_p=",expo_p
+    print "expo_d=",expo_d
+    print "coef_s=",coef_s
+    print "coef_p=",coef_p
+    print "coef_d=",coef_d
+
+    params["expo_s"] = expo_s
+    params["expo_p"] = expo_p
+    params["expo_d"] = expo_d
+    params["coef_s"] = coef_s
+    params["coef_p"] = coef_p
+    params["coef_d"] = coef_d
+
     return
+
 
 def molecular_orbitals(l_gam,params):
 
-    import math  # import should always be in the top of the module
+    #import math  # import should always be in the top of the module
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]
@@ -82,7 +160,7 @@ def molecular_orbitals(l_gam,params):
         if di % stat_span == 1 :
             l_tmp.append(i+2)
             for j in range(0,len(spline)):
-                mol_ene.append(spline[j])
+                mol_ene.append(float(spline[j]))
 
     # molecular coefficients
     for i in l_tmp:
@@ -97,11 +175,23 @@ def molecular_orbitals(l_gam,params):
                 for k in range(4,len(spline)):
                     mol_coef[j-i].append(float(spline[k]))
 
+    # define MATRIX of E, C
 
-    params["mol_ene"] = mol_ene
-    params["mol_coef"] = mol_coef
-    print "mol_ene=",params["mol_ene"]
-    print "mol_coef=",params["mol_coef"]
+    E = MATRIX(Ngbf,Ngbf)
+    C = MATRIX(Ngbf,Ngbf)
+
+    for i in range(0,Ngbf):
+        E.set(i,i,mol_ene[i])
+        for j in range(0,Ngbf):
+            C.set(i,j,mol_coef[i][j])
+    print "E Matrix is"
+    E.show_matrix()
+    print "C Matrix is"
+    C.show_matrix()
+    params["E"] = E
+    params["C"] = C
+    
+    return
 
 def coordinates_of_atoms(l_gam,params):
 
@@ -116,7 +206,7 @@ def coordinates_of_atoms(l_gam,params):
         l_atoms.append(spline[0])
         # coordinates of atoms
         coor_tmp = []
-        for j in range(2,5):
+        for j in range(len(spline)-3,len(spline)):
             coor_tmp.append(float(spline[j]))
         coor_atoms.append(coor_tmp)
 
@@ -124,6 +214,8 @@ def coordinates_of_atoms(l_gam,params):
     params["coor_atoms"] = coor_atoms
     print "l_atoms=",params["l_atoms"]
     print "coor_atoms=",params["coor_atoms"]
+
+    return
 
 def gradient(l_gam,params):
 
@@ -134,9 +226,30 @@ def gradient(l_gam,params):
     for i in range(grad_start,grad_end+1):
         spline = l_gam[i].split()
         grad_tmp = []
-        for j in range(3,6):
+        for j in range(len(spline)-3,len(spline)):
             grad_tmp.append(float(spline[j]))
         gradient.append(grad_tmp)
 
     params["gradient"] = gradient
     print "gradient=",params["gradient"]
+
+    return
+
+
+
+def extract(l_gam,params):
+    
+    coordinates_of_atoms(l_gam,params)
+
+    gradient(l_gam,params)
+
+    atomic_basis_set(l_gam,params)
+
+    molecular_orbitals(l_gam,params)
+
+    print "********************************************"
+    print "extract program ends"
+    print "********************************************"
+    print 
+
+    return

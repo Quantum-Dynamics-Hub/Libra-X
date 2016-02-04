@@ -18,84 +18,61 @@ cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
 print "Using the Libra installation at", cwd
 sys.path.insert(1,cwd+"/_build/src/mmath")
 sys.path.insert(1,cwd+"/_build/src/qchem")
+
 from libmmath import *
 from libqchem import *
 
+def input_AO_name(params):
+    # This funciton inputs the atomic orbital name(s, px, py, pz, etc...)
 
-
-def file_names(params):
-# The name of this function is not informative - choose a more appropriate one
-
-# Need a description of what this function does
-# what are the inputs and what are the outputs
-
-    l_atoms = params["l_atoms"]
     atom_spec = params["atom_spec"]
     basis_type = params["basis_type"]
-    basis_expo = params["basis_expo"]
-    basis_coef = params["basis_coef"]
-    nGTO = params["nGTO"]
-    Ngbf = params["Ngbf"]
-
-    expo_1 = []
-    expo_2 = []
-    expo_3 = []
-
-    coef_1s = []
-    coef_2s = []
-    coef_2p = []
-    coef_3s = []
-    coef_3p = []
-    coef_3d = []
+    l_atoms = params["l_atoms"]
+    orb_name = []
 
     for la in l_atoms: # all atoms
         for j in range(0,len(atom_spec)): # specify the kind of the atom
             if la == atom_spec[j]:
                 i = j
-        expo_1tmp = []
-        expo_2tmp = []
-        #expo_3tmp = []
-        coef_1stmp = []
-        coef_2stmp = []
-        coef_2ptmp = []
-        #coef_3stmp = []
-        #coef_3ptmp = []
-        #coef_3dtmp = []
+        aoa_tmp = []
+        orb_name1 = []
+        scount = 0
+        pcount = 0
+        dcount = 0
+        lcount = 0
         for j in range(0,len(basis_type[i])): # basis number of atoms
             b_tmp = basis_type[i][j]
             if b_tmp == "S":
-                expo_1tmp.append(basis_expo[i][j])
-                coef_1stmp.append(basis_coef[i][j][0])
+                scount += 1
+                if scount < 2:
+                    orb_name1.append("s")
+            if b_tmp == "P":
+                pcount += 1
+                if pcount < 2:
+                    orb_name1.append("px")
+                    orb_name1.append("py")
+                    orb_name1.append("pz")
+            if b_tmp == "D":
+                dcount += 1
+                if dcount < 2:
+                    orb_name1.append("dxy")
+                    orb_name1.append("dyz")
+                    orb_name1.append("dzx")
+                    orb_name1.append("dx^2-y^2")
+                    orb_name1.append("dz^2")
             elif b_tmp == "L":
-                expo_2tmp.append(basis_expo[i][j])
-                coef_2stmp.append(basis_coef[i][j][0])
-                coef_2ptmp.append(basis_coef[i][j][1])
-            #elif b_tmp == "D":
-            #    expo_3tmp.append(basis_expo[i][j])
-            #    coef_3dtmp.append(basis_coef[i][j][0])
-            #    print "you inputed illegal character (or D), so exit"
-            #    sys.exit
-            # f orbitals are not taken into account, so should add them.
-        expo_1.append(expo_1tmp)
-        expo_2.append(expo_2tmp)
-        coef_1s.append(coef_1stmp)
-        coef_2s.append(coef_2stmp)
-        coef_2p.append(coef_2ptmp)
+                lcount += 1
+                if lcount < 2:
+                    orb_name1.append("s")
+                    orb_name1.append("px")
+                    orb_name1.append("py")
+                    orb_name1.append("pz")
+        orb_name.append(orb_name1)
 
-    print "expo_1=",expo_1
-    print "expo_2=",expo_2
-    print "coef_1s=",coef_1s
-    print "coef_2s=",coef_2s
-    print "coef_2p=",coef_2p
-
-    params["expo_1"] = expo_1
-    params["expo_2"] = expo_2
-    #params["expo_3"] = expo_3
-    params["coef_1s"] = coef_1s
-    params["coef_2s"] = coef_2s
-    params["coef_2p"] = coef_2p
-
-    return 1.0
+    print "nGTO=",scount
+    params["nGTO"] = scount
+    print "orb_name=",orb_name
+    params["orb_name"] = orb_name
 
 def construct_ao_basis(params): # old add_PrimitiveG
 # The function takes the parameters in the format adopted for
@@ -104,51 +81,67 @@ def construct_ao_basis(params): # old add_PrimitiveG
     
     l_atoms = params["l_atoms"]
     coor_atoms = params["coor_atoms"]
-    expo_1 = params["expo_1"]
-    expo_2 = params["expo_2"]
-    coef_1s =  params["coef_1s"]
-    coef_2s =  params["coef_2s"]
-    coef_2p =  params["coef_2p"]
+    expo_s = params["expo_s"]
+    expo_p = params["expo_p"]
+    expo_d = params["expo_d"]
+    coef_s =  params["coef_s"]
+    coef_p =  params["coef_p"]
+    coef_d =  params["coef_d"]
+    nGTO = params["nGTO"]
     orb_name = params["orb_name"]
-    aoa = params["aoa"]
 
     ao_basis = []
-    # define atomic orbitals using the Gaussian basis
+    Bohr_to_Angs = 0.529177208
+    # define atomic orbitals by using the Gaussian basis
     for i in range(0,len(l_atoms)): # all atoms
-        for j in range(0,len(aoa[i])):
+
+        k_s = 0 # add nGTO for s orbital
+        k_p = 0 #              p orbital
+
+        for j in range(0,len(orb_name[i])):
 
             ao = AO()  # this is the AO we create - the j-th AO on the i-th atom
 
-            if orb_name[i][j] == "1s":
-                expo_tmp = expo_1[i];   coef_tmp = coef_1s[i]
+            if orb_name[i][j][0] == "s":
+                expo_tmp = expo_s[i][k_s:k_s+nGTO];   coef_tmp = coef_s[i][k_s:k_s+nGTO]
                 nx,ny,nz = 0,0,0
-
-            elif orb_name[i][j] == "2s":
-                expo_tmp = expo_2[i];   coef_tmp = coef_2s[i]
-                nx,ny,nz = 0,0,0
-
-            elif orb_name[i][j][0:2] == "2p":
-                expo_tmp = expo_2[i];   coef_tmp = coef_2p[i]
-
-                if orb_name[i][j][2] == "x":
+                k_s += nGTO
+            elif orb_name[i][j][0] == "p":
+                expo_tmp = expo_p[i][k_p:k_p+nGTO];   coef_tmp = coef_p[i][k_p:k_p+nGTO]
+                if orb_name[i][j][1] == "x":
                     nx,ny,nz = 1,0,0
-                elif orb_name[i][j][2] == "y":
+                elif orb_name[i][j][1] == "y":
                     nx,ny,nz = 0,1,0
-                elif orb_name[i][j][2] == "z":
+                elif orb_name[i][j][1] == "z":
                     nx,ny,nz = 0,0,1
+                    k_p += nGTO
+
+            elif orb_name[i][j][0] == "d":
+                expo_tmp = expo_p[i][k_p:k_p+nGTO];   coef_tmp = coef_p[i][k_p:k_p+nGTO]
+                if orb_name[i][j][1:3] == "xy":
+                    nx,ny,nz = 1,1,0
+                elif orb_name[i][j][1:3] == "yz":
+                    nx,ny,nz = 0,1,1
+                elif orb_name[i][j][1:3] == "zx":
+                    nx,ny,nz = 1,0,1
+                elif orb_name[i][j][1:3] == "z^":
+                    nx,ny,nz = 0,0,2
+                # in the case of dx^2-y^2, i should add AO later. 
 
             # Construct AO from the primitive Gaussians
             for k in range(0,len(expo_tmp)):         
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 R = VECTOR(coor_atoms[i][0], coor_atoms[i][1], coor_atoms[i][2])
-                g = PrimitiveG(nx,ny,nz, expo_tmp[k], R)
-
+                # single point ****************
+                #g = PrimitiveG(nx, ny, nz, expo_tmp[k], R)
+                # optimize     ****************
+                g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs)
                 # Contraction coefficients correspond to the Gaussian primitives as they are
-                #ao.add_primitive(coef_tmp[k], g )
+                ao.add_primitive(coef_tmp[k], g )
                    
                 # Contraction coefficients correspond to normalized Gaussian primitives
                 # this looks like a more probable case
-                ao.add_primitive(g.normalization_factor() * coef_tmp[k], g )
+                #ao.add_primitive(g.normalization_factor() * coef_tmp[k], g )
 
 
             # Normalize the overall contraction
@@ -156,6 +149,14 @@ def construct_ao_basis(params): # old add_PrimitiveG
 
             ao_basis.append(ao)
     
-    
     return ao_basis
 
+def ao_basis(params):
+
+    input_AO_name(params)
+    
+    ao = construct_ao_basis(params)
+
+    #params["ao"] = ao
+
+    return ao
