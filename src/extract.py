@@ -9,6 +9,10 @@
 #*
 #*********************************************************************************/
 
+#************************************************************
+# This program extracting parameters from gamess output file.
+#************************************************************
+
 import os
 import sys
 import math
@@ -24,7 +28,7 @@ from libqchem import *
 
 def atomic_basis_set(l_gam,params):
 # This program extracts the atomic basis information,
-# and puts it into the gaussian basis information.
+# and save it as the gaussian basis information.
 
     #  atomic species
     ab_start = params["ab_start"]
@@ -70,13 +74,10 @@ def atomic_basis_set(l_gam,params):
         basis_coef.append(coef_tmp)
 
     params["basis_type"] = basis_type
-    #params["basis_expo"] = basis_expo
-    #params["basis_coef"] = basis_coef
 
     # ******* put into gaussian basis parameter
 
     l_atoms = params["l_atoms"]
-    #nGTO = params["nGTO"]
     Ngbf = params["Ngbf"]
     expo_s = []
     expo_p = []
@@ -141,7 +142,8 @@ def atomic_basis_set(l_gam,params):
 
 def molecular_orbitals(l_gam,params):
 
-    #import math  # import should always be in the top of the module
+    # extract molecular orbitals information
+    # (eigenenergies and eigenfunctions)
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]
@@ -195,6 +197,8 @@ def molecular_orbitals(l_gam,params):
 
 def coordinates_of_atoms(l_gam,params):
 
+    # extract coordinates of atoms
+
     coor_start = params["coor_start"]
     coor_end = params["coor_end"]
 
@@ -218,6 +222,8 @@ def coordinates_of_atoms(l_gam,params):
     return
 
 def gradient(l_gam,params):
+
+    # extract gradient (force)
 
     grad_start = params["grad_start"]
     grad_end = params["grad_end"]

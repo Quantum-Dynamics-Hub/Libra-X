@@ -9,11 +9,12 @@
 #*
 #*********************************************************************************/
 
+# ******************************************************************************************
+# This is a GAMESS/Libra "interface" program which communicates the GAMESS output data
+# to Libra and vice versa.
+# GAMESS is used for Semi-Empirical Calculation and Libra for Classical MD.
+# ******************************************************************************************
 
-#from detect import *
-#from detect1 import *
-#from extract import *
-#from ao_basis import *
 from gamess_to_libra import *
 
 import os
@@ -30,14 +31,36 @@ import math
 #from libmmath import *
 #from libqchem import *
 
+#*********************************************************
+#***************** input parameters **********************
+#*********************************************************
 
-#**********************************************************
-#* This program extracts parameters from the GAMESS output
-#* and communicate them to Libra modules.
-#* Inside the modules, gradients acting on atoms are used 
-#* for classical molecular dynamics
-#* and eigenenergies and eigenfunctions are used 
-#* for simulating excited electron dynamics. 
-#**********************************************************
+# gamess output file
+gamess_out1 = "../gam_out/H2O_1.out"
 
-gamess_to_libra()
+#gamess_out2 = "../gam_out/exam03_AM1_single.out"
+gamess_out2 = "../gam_out/H2O_2.out"
+
+# ab initio or Semi-Empirical calculation ?
+basis_sets = 2                                              # "ab_initio" = 1 , "semi_empirical" = 2
+
+# single point or optimization ?
+runtype = 1                                                 # single = 1 , "optimization" = 2
+
+# time step for nuclear dynamics (in fsec)
+
+dt_nuc = 1.0
+
+inputs = {}
+inputs["gamess_out1"] = gamess_out1
+inputs["gamess_out2"] = gamess_out2
+inputs["basis_sets"] = basis_sets
+inputs["runtype"] = runtype
+inputs["dt_nuc"] = dt_nuc
+
+print "inputs=",inputs
+
+# ************************************************************************* 
+# extract parameters from gamess and communicate them to Libra.
+
+gamess_to_libra(inputs)

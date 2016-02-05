@@ -9,22 +9,21 @@
 #*
 #*********************************************************************************/
 
-#**********************************************************
-#* This program extracts parameters from the GAMESS output
-#* and communicate them to Libra modules.
-#* Inside the modules, gradients acting on atoms are used
-#* for classical molecular dynamics
-#* and eigenenergies and eigenfunctions are used
-#* for simulating excited electron dynamics.
-#**********************************************************
-
+#**********************************************************************************
+#* This program extracts from the gamess output file the parameters
+#* like forces , eigenenergies, eigenfunctions ,and atomic basis sets .
+#* The forces are used for simulating Classical MD on Libra.
+#* The eigenfunctions and the atomic basis sets are communicated to Libra modules
+#* to calculate the overlap matrix of the atomic orbitals and eigenfunctions.
+#* From the overlap matrix of eigenfunctions, We get Non-Adiabatic Couplings(NAC).
+#* Eigenenergies and NAC are used for simulating excited electron dynamics.
+#**********************************************************************************
 
 from detect import *
-from detect1 import *
 from extract import *
 from ao_basis import *
 from overlap import *
-#from test_AO import *
+from Ene_NAC import *
 
 import os
 import sys
@@ -40,41 +39,59 @@ import math
 #from libmmath import *
 #from libqchem import *
 
-def detect_and_extract(l_gam):
+def detect_and_extract(l_gam,runtype,basis_sets):
 
     params = {}
+    # detect the columns showing parameters
+    detect(l_gam,params,runtype)    
 
-    # ****** detect columns containing parameters*******************
-
-    detect1(l_gam,params)           # for optimize
-    #detect(l_gam,params)             # for single point
-
-    # ****** extract parameters from the columns detected***********
-
+    # extract the parameters from the columns detected
     extract(l_gam,params)
 
     # ****** construct atomic orbitals *****************************
 
-    ao = ao_basis(params)
+    ao = ao_basis(params,basis_sets)
 
     return ao, params["E"], params["C"], params["gradient"]
 
-def gamess_to_libra():
+def gamess_to_libra(inputs):
 
     # *************** open the GAMESS output file  ******************
-    f_gam1 = open("../input/exam01.out","r")
-    #f_gam1 = open("../input/exam03_STO_single.out","r")
-    #f_gam1 = open("../input/exam03_AM1_single.out","r")
+    # 1st
+    f_gam1 = open(inputs["gamess_out1"],"r")
     l_gam1 = f_gam1.readlines()
     f_gam1.close()
 
-    # extracte parameters and create AO constructor
-    ao1, E1, C1 ,gradient = detect_and_extract(l_gam1)
+    # 2nd
+    f_gam2 = open(inputs["gamess_out2"],"r")
+    l_gam2 = f_gam2.readlines()
+    f_gam2.close()
 
-    # calculate overlap matrix of AO and eigenfunctions
-    P11 , P22 = overlap(ao1,ao1,C1,C1)
+    # detect and extract parameters from GAMESS output file and create AO constructor
+    ao1, E1, C1 ,gradient = detect_and_extract(l_gam1,inputs["runtype"],inputs["basis_sets"])
+    ao2, E2, C2 ,gradient = detect_and_extract(l_gam2,inputs["runtype"],inputs["basis_sets"])
 
-    print "P11 matrix should show orthogonality"
+    # calculate overlap matrix of atomic orbitals and eigenfunctions
+    P11, P22, P12 , P21 = overlap(ao1,ao2,C1,C2,inputs["basis_sets"])
+
+    print "P11 and P22 matrixes should show orthogonality"
+    print "P11 is"
     P11.show_matrix()
-    
+    print "P22 is"
+    P22.show_matrix()
+
+    print "P12 and P21 matrixes show overlap of different eigenfunctions "
+    print "P12 is"
+    P12.show_matrix()
+    print "P21 is"
+    P21.show_matrix()
+
+    # calculating energies and Non-Adiabatic Coupling
+    E, D = Ene_NAC(E1,E2,P12,P21,inputs["dt_nuc"])
+
+    print "E matrix is"
+    print E.show_matrix()
+    print "D matrix is"
+    print D.show_matrix()
+
     return

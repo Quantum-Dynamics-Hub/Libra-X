@@ -74,7 +74,7 @@ def input_AO_name(params):
     print "orb_name=",orb_name
     params["orb_name"] = orb_name
 
-def construct_ao_basis(params): # old add_PrimitiveG
+def construct_ao_basis(params,basis_sets): # old add_PrimitiveG
 # The function takes the parameters in the format adopted for
 # storing info read from the Gamess output file
 # The function returns the list of AO objects - the basis
@@ -130,12 +130,23 @@ def construct_ao_basis(params): # old add_PrimitiveG
 
             # Construct AO from the primitive Gaussians
             for k in range(0,len(expo_tmp)):         
+
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 R = VECTOR(coor_atoms[i][0], coor_atoms[i][1], coor_atoms[i][2])
-                # single point ****************
-                #g = PrimitiveG(nx, ny, nz, expo_tmp[k], R)
-                # optimize     ****************
-                g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs)
+
+                if basis_sets == 1: # ab initio calculation
+                    g = PrimitiveG(nx, ny, nz, expo_tmp[k], R)
+                elif basis_sets == 2: # semi empirical calculation 
+                    g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs)
+                else:
+                    print "*********************************************************************"
+                    print "********************* CAUTION ***************************************"
+                    print "*********************************************************************" 
+                    print "*** basis_sets has an illegal value in construct ao_basis funtion ***"
+                    print "***                                                               ***"
+                    print "********************************************************************"
+                    sys.exit()
+
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 ao.add_primitive(coef_tmp[k], g )
                    
@@ -151,11 +162,11 @@ def construct_ao_basis(params): # old add_PrimitiveG
     
     return ao_basis
 
-def ao_basis(params):
+def ao_basis(params,basis_sets):
 
     input_AO_name(params)
     
-    ao = construct_ao_basis(params)
+    ao = construct_ao_basis(params,basis_sets)
 
     #params["ao"] = ao
 
