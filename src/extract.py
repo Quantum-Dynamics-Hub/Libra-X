@@ -137,8 +137,6 @@ def atomic_basis_set(l_gam,params):
     params["coef_p"] = coef_p
     params["coef_d"] = coef_d
 
-    return
-
 
 def molecular_orbitals(l_gam,params):
 
@@ -186,14 +184,11 @@ def molecular_orbitals(l_gam,params):
         E.set(i,i,mol_ene[i])
         for j in range(0,Ngbf):
             C.set(i,j,mol_coef[i][j])
-    print "E Matrix is"
-    E.show_matrix()
-    print "C Matrix is"
-    C.show_matrix()
+    print "E Matrix is";    E.show_matrix()
+    print "C Matrix is";    C.show_matrix()
     params["E"] = E
     params["C"] = C
     
-    return
 
 def coordinates_of_atoms(l_gam,params):
 
@@ -219,7 +214,6 @@ def coordinates_of_atoms(l_gam,params):
     print "l_atoms=",params["l_atoms"]
     print "coor_atoms=",params["coor_atoms"]
 
-    return
 
 def gradient(l_gam,params):
 
@@ -239,7 +233,6 @@ def gradient(l_gam,params):
     params["gradient"] = gradient
     print "gradient=",params["gradient"]
 
-    return
 
 
 
@@ -258,4 +251,3 @@ def extract(l_gam,params):
     print "********************************************"
     print 
 
-    return
