@@ -10,7 +10,7 @@
 #*********************************************************************************/
 
 #*********************************************************************************
-# This program calculate the overlap matrixes of atomic orbitals and eigenfunctions.
+# This module calculates the overlap matrixes of atomic and molecular orbitals.
 # When ab initio calculation is done, 
 # the overlap matrix of atomic orbitals is necessary for calculating 
 # the overlap matrix of eigenfunctions.
@@ -30,7 +30,7 @@ sys.path.insert(1,cwd+"/_build/src/qchem")
 from libmmath import *
 from libqchem import *
 
-def AO_overlap(ao_i,ao_j):
+def AO_overlap(ao_i, ao_j):
     # calculate overlap matrix of atomic orbitals.
 
     Norb = len(ao_i)
@@ -44,12 +44,17 @@ def AO_overlap(ao_i,ao_j):
 
     return S
 
-def eigenfunction_overlap(S,Ci,Cj,basis_sets):
-    # calculate overlap matrix of eigenfunctions
+def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
+    # calculate overlap matrix of MOs:
+    # <MO(i)|MO(j)> 
 
-    if basis_sets == 1: # ab initio calculation
+    Norb = len(ao_i)
+    P = MATRIX(Norb, Norb)
+
+    if basis_option == 1: # ab initio calculation
+        S = AO_overlap(ao_i, ao_j)
         P = Ci.T() * S * Cj
-    elif basis_sets == 2: # semi empirical calculation
+    elif basis_option == 2: # semi empirical calculation
         P = Ci.T() * Cj
     else:
         print "basis_sets has an illegal value, so stop"
@@ -57,16 +62,18 @@ def eigenfunction_overlap(S,Ci,Cj,basis_sets):
     
     return P
 
+
 def overlap(ao1,ao2,C1,C2,basis_sets):
+    # this is mostly a test function
 
     S11 = AO_overlap(ao1,ao1)
     S22 = AO_overlap(ao2,ao2)
     S12 = AO_overlap(ao1,ao2)
     S21 = AO_overlap(ao2,ao1)
 
-    P11 = eigenfunction_overlap(S11,C1,C1,basis_sets)
-    P22 = eigenfunction_overlap(S22,C2,C2,basis_sets)
-    P12 = eigenfunction_overlap(S12,C1,C2,basis_sets)
-    P21 = eigenfunction_overlap(S21,C2,C1,basis_sets)
+    P11 = MO_overlap(ao1,ao1,C1,C1,basis_sets)
+    P22 = MO_overlap(ao2,ao2,C2,C2,basis_sets)
+    P12 = MO_overlap(ao1,ao2,C1,C2,basis_sets)
+    P21 = MO_overlap(ao2,ao1,C2,C1,basis_sets)
     
     return P11, P22, P12, P21
