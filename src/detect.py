@@ -122,7 +122,6 @@ def show_outputs(l_gam,params):
     print "******************************************"
     print
 
-    return
 
 def detect(l_gam,params,runtype):
     

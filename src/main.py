@@ -35,32 +35,20 @@ import math
 #***************** input parameters **********************
 #*********************************************************
 
-# gamess output file
-gamess_out1 = "../gam_out/H2O_1.out"
+params = {}
 
-#gamess_out2 = "../gam_out/exam03_AM1_single.out"
-gamess_out2 = "../gam_out/H2O_2.out"
+params["gamess_out1"] = "../gam_out/H2O_1.out"  # GAMESS output file for time "t"
+#params["gamess_out2"] = "../gam_out/exam03_AM1_single.out"  # GAMESS output file for time "t+dt"    
+params["gamess_out2"] = "../gam_out/H2O_2.out"              # GAMESS output file for time "t+dt"
+params["basis_option"] = 2    # ab initio or Semi-Empirical calculation? 
+                              # Options: "ab_initio" = 1 , "semi_empirical" = 2
+params["runtype"] = 1         # single point or optimization? 
+                              # Options: single = 1 , "optimization" = 2
+params["dt_nuc"] = 1.0        # time step for nuclear dynamics (in fsec)
 
-# ab initio or Semi-Empirical calculation ?
-basis_sets = 2                                              # "ab_initio" = 1 , "semi_empirical" = 2
-
-# single point or optimization ?
-runtype = 1                                                 # single = 1 , "optimization" = 2
-
-# time step for nuclear dynamics (in fsec)
-
-dt_nuc = 1.0
-
-inputs = {}
-inputs["gamess_out1"] = gamess_out1
-inputs["gamess_out2"] = gamess_out2
-inputs["basis_sets"] = basis_sets
-inputs["runtype"] = runtype
-inputs["dt_nuc"] = dt_nuc
-
-print "inputs=",inputs
+print "params: ",params
 
 # ************************************************************************* 
 # extract parameters from gamess and communicate them to Libra.
 
-gamess_to_libra(inputs)
+gamess_to_libra(params)
