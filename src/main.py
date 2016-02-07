@@ -40,7 +40,7 @@ params = {}
 params["gamess_out1"] = "../gam_out/H2O_1.out"  # GAMESS output file for time "t"
 #params["gamess_out2"] = "../gam_out/exam03_AM1_single.out"  # GAMESS output file for time "t+dt"    
 params["gamess_out2"] = "../gam_out/H2O_2.out"              # GAMESS output file for time "t+dt"
-params["basis_sets"] = 2      # ab initio or Semi-Empirical calculation? 
+params["basis_option"] = 2    # ab initio or Semi-Empirical calculation? 
                               # Options: "ab_initio" = 1 , "semi_empirical" = 2
 params["runtype"] = 1         # single point or optimization? 
                               # Options: single = 1 , "optimization" = 2
