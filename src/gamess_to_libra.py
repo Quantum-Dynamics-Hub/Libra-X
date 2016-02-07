@@ -50,7 +50,7 @@ def unpack_file(filename,runtype,basis_opt):
     # \param[in] basis_op The option controlling assumed orthogonality of basis (as in semiempirics)
     # This function returns the data extracted from the file, in the form of dictionary
     #
-    # Used in:  gamess_to_libra/gamess_to_libra
+    # Used in:  gamess_to_libra.py/gamess_to_libra
 
     f_gam = open(filename,"r")
     l_gam = f_gam.readlines()
@@ -69,47 +69,41 @@ def unpack_file(filename,runtype,basis_opt):
     data["ao_basis"] = ao_basis(data,basis_opt) # the construction of the AO basis should not
                                                 # depend on basis_opt
 
-    return data
+    return data["ao_basis"], data["E"], data["C"], data["gradient"], data
 
     
 
-def gamess_to_libra(inputs):
+def gamess_to_libra(par):
     ## 
     # Extracts data (coordinates, forces, MOs, and basis info) GAMESS output file
     # and create AO basis
-    # \param[in] inputs The dictionary of all necessary information
+    # \param[in] par The dictionary of all necessary parameters
+    # 
+    # Used in: main.py/
 
 
     # 1-st file - time "t" 
-    data1 = unpack_file(inputs["gamess_out1"], inputs["runtype"], inputs["basis_option"])
-    ao1, E1, C1, Grad1 = data1["ao_basis"], data1["E"], data1["C"], data1["gradient"]
+    ao1, E1, C1, Grad1, data1 = unpack_file(par["gamess_out1"],par["runtype"],par["basis_option"])
 
     # 2-nd file - time "t+dt"
-    data2 = unpack_file(inputs["gamess_out2"], inputs["runtype"], inputs["basis_option"])
-    ao2, E2, C2, Grad2 = data2["ao_basis"], data2["E"], data2["C"], data2["gradient"]
+    ao2, E2, C2, Grad2, data2 = unpack_file(par["gamess_out2"],par["runtype"],par["basis_option"])
+
 
 
     # calculate overlap matrix of atomic orbitals and eigenfunctions
-    P11, P22, P12 , P21 = overlap(ao1,ao2,C1,C2,inputs["basis_option"])
+    P11, P22, P12, P21 = overlap(ao1,ao2,C1,C2,par["basis_option"])
 
     print "P11 and P22 matrixes should show orthogonality"
-    print "P11 is"
-    P11.show_matrix()
-    print "P22 is"
-    P22.show_matrix()
+    print "P11 is";    P11.show_matrix()
+    print "P22 is";    P22.show_matrix()
 
-    print "P12 and P21 matrixes show overlap of different eigenfunctions "
-    print "P12 is"
-    P12.show_matrix()
-    print "P21 is"
-    P21.show_matrix()
+    print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+    print "P12 is";    P12.show_matrix()
+    print "P21 is";    P21.show_matrix()
 
     # calculating energies and Non-Adiabatic Coupling
-    E, D = Ene_NAC(E1,E2,P12,P21,inputs["dt_nuc"])
+    E, D = Ene_NAC(E1,E2,P12,P21,par["dt_nuc"])
 
-    print "E matrix is"
-    print E.show_matrix()
-    print "D matrix is"
-    print D.show_matrix()
+    print "E matrix is";  E.show_matrix()
+    print "D matrix is";  D.show_matrix()
 
-    return
