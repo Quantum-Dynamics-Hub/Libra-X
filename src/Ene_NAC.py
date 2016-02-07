@@ -13,21 +13,29 @@ import os
 import sys
 import math
 
+from libmmath import *
+from libqchem import *
+
+
 # This program calculates the Energies and NACs necessary for 
 # simulating excited electron dynamics.
 
 def NAC(P12,P21,dt_nuc):
+    Norb = P12.num_of_rows
+    D = MATRIX(Norb,Norb)
+
     D = 0.50/dt_nuc * ( P12 - P21 )
     return D
 
 def average_E(E1,E2):
+    Norb = E1.num_of_rows
+    E = MATRIX(Norb,Norb)
+
     E = 0.50 * (E1 + E2)
     return E
 
 def Ene_NAC(E1,E2,P12,P21,dt_nuc):
-
     E = average_E(E1,E2)
-
     D = NAC(P12,P21,dt_nuc)
 
     return E, D
