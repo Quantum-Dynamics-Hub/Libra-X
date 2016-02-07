@@ -154,6 +154,9 @@ def construct_ao_basis(params,basis_sets): # old add_PrimitiveG
                 # this looks like a more probable case
                 #ao.add_primitive(g.normalization_factor() * coef_tmp[k], g )
 
+                # One more option:
+                #ao.add_primitive(g.norm1() * coef_tmp[k], g )
+
 
             # Normalize the overall contraction
             ao.normalize()
