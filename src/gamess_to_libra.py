@@ -11,16 +11,9 @@
 
 ## \file gamess_to_libra.py 
 # This module implements the functions that extract parameters from the gamess output file:
-# atomic forces , eigenenergies, eigenfunctions, and atomic basis information.
+# atomic forces , molecular energies, molecular orbitals, and atomic basis information.
 # The forces are used for simulating Classical MD on Libra.
 #
-
-# Need to move the descriptions below somewhere else:
-#* The eigenfunctions and the atomic basis sets are communicated to Libra modules
-#* to calculate the overlap matrix of the atomic orbitals and eigenfunctions.
-#* From the overlap matrix of eigenfunctions, We get Non-Adiabatic Couplings(NAC).
-#* Eigenenergies and NAC are used for simulating excited electron dynamics.
-#**********************************************************************************
 
 from detect import *
 from extract import *
@@ -42,13 +35,12 @@ import math
 #from libmmath import *
 #from libqchem import *
 
-def unpack_file(filename,runtype,basis_opt):
+def unpack_file(filename):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] filename The name of the (GAMESS output) file from which we will be getting data
-    # \param[in] runtype The option controlling how to interpret the file(single point or optimization)
-    # \param[in] basis_op The option controlling assumed orthogonality of basis (as in semiempirics)
-    # This function returns the data extracted from the file, in the form of dictionary
+    # This function returns the data extracted from the file, in the form of dictionary :
+    # atomic basis sets, molecular energies, molecular coefficients, gradients, respectively.
     #
     # Used in:  gamess_to_libra.py/gamess_to_libra
 
@@ -60,14 +52,13 @@ def unpack_file(filename,runtype,basis_opt):
     data = {}
 
     # detect the columns showing parameters
-    detect(l_gam,data,runtype)    
+    detect(l_gam,data)    
 
     # extract the parameters from the columns detected
     extract(l_gam,data)
 
     # Construct the AO basis
-    data["ao_basis"] = ao_basis(data,basis_opt) # the construction of the AO basis should not
-                                                # depend on basis_opt
+    data["ao_basis"] = ao_basis(data) 
 
     return data["ao_basis"], data["E"], data["C"], data["gradient"], data
 
@@ -83,14 +74,12 @@ def gamess_to_libra(par):
 
 
     # 1-st file - time "t" 
-    ao1, E1, C1, Grad1, data1 = unpack_file(par["gamess_out1"],par["runtype"],par["basis_option"])
+    ao1, E1, C1, Grad1, data1 = unpack_file(par["gamess_out1"])
 
     # 2-nd file - time "t+dt"
-    ao2, E2, C2, Grad2, data2 = unpack_file(par["gamess_out2"],par["runtype"],par["basis_option"])
+    ao2, E2, C2, Grad2, data2 = unpack_file(par["gamess_out2"])
 
-
-
-    # calculate overlap matrix of atomic orbitals and eigenfunctions
+    # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao1,ao2,C1,C2,par["basis_option"])
 
     print "P11 and P22 matrixes should show orthogonality"
@@ -101,7 +90,7 @@ def gamess_to_libra(par):
     print "P12 is";    P12.show_matrix()
     print "P21 is";    P21.show_matrix()
 
-    # calculating energies and Non-Adiabatic Coupling
+    # calculate averaged molecular energies and Non-Adiabatic Couplings(NACs)
     E, D = Ene_NAC(E1,E2,P12,P21,par["dt_nuc"])
 
     print "E matrix is";  E.show_matrix()

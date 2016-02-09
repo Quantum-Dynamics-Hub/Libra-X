@@ -17,8 +17,8 @@ from libmmath import *
 from libqchem import *
 
 
-# This program calculates the Energies and NACs necessary for 
-# simulating excited electron dynamics.
+# This program calculates the averaged molecular energies and 
+# NACs necessary for simulating excited electron dynamics.
 
 def NAC(P12,P21,dt_nuc):
     Norb = P12.num_of_rows
