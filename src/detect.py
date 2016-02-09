@@ -39,6 +39,23 @@ def detect_columns(l_gam,params):
         i += 1
         spline = line.split()
 
+        # the number of electrons
+        if len(spline) == 5 and spline[2] == "ELECTRONS":
+            params["lele"] = i
+            params["Nele"] = int(spline[4])
+
+        # the number of occupied orbitals (alpha and beta)
+        if len(spline) == 7 and spline[4] == "(ALPHA)":
+            params["locc_alp"] = i
+            params["Nocc_alp"] = int(spline[6])
+        if len(spline) == 8 and spline[4] == "(BETA":
+            params["locc_bet"] = i
+            params["Nocc_bet"] = int(spline[7])
+
+        #NUMBER OF ELECTRONS                          =    8
+        #NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+        #NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
         # the number of cartesian gaussian basis functions
         if len(spline) == 8 and spline[5] == "FUNCTIONS":
             params["lgbf"] = i
@@ -108,7 +125,21 @@ def show_outputs(l_gam,params):
     # This function shows the columns which includes the information.
     #
     # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/detect
- 
+
+    print "******************************************"
+    print "according to the",params["lele"]+1,"th column,"
+    print l_gam[params["lele"]]
+    print "Nele = ",params["Nele"]
+    print "*******************************************"
+    print "******************************************"
+    print "according to the",params["locc_alp"]+1,"th column,"
+    print l_gam[params["locc_alp"]]
+    print "Nocc_alp = ",params["Nocc_alp"]
+    print "according to the",params["locc_bet"]+1,"th column,"
+    print l_gam[params["locc_bet"]]
+    print "Nocc_bet = ",params["Nocc_bet"]
+    print "*******************************************"
+    print
     print "******************************************"
     print "according to the",params["lgbf"]+1,"th column,"
     print l_gam[params["lgbf"]]
