@@ -9,6 +9,12 @@
 #*
 #*********************************************************************************/
 
+## \file detect.py
+# This module implements the functions that detect columns showing
+# gradients , molecular energies, molecular orbitals, and atomic basis information
+# written in gamess output file.
+#
+# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
 
 # **************************************************************
 # This program detects the columns showing parameters.
@@ -19,10 +25,15 @@ import sys
 import math
 
 
-def detect_columns(l_gam,params,runtype):
-    #this program detects the columns showing the prameters like
-    # coordinates of atoms, gradients acting on atoms,
-    # atomic orbitals, eigenenergies and eigenvectors.
+def detect_columns(l_gam,params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file. 
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the data extracted from the file, in the form of dictionary
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/detect
+
     i = -1
     for line in l_gam:
         i += 1
@@ -41,55 +52,63 @@ def detect_columns(l_gam,params,runtype):
             params["ab_end"] = i - 2
 
         #***********   single point calculation  ************
-        if runtype == 1: 
-            # eigenvectors
-            if len(spline) > 0 and spline[0] == "EIGENVECTORS":
-                params["mo_start"] = i + 3
+
+        # eigenvectors
+        if len(spline) > 0 and spline[0] == "EIGENVECTORS":
+            params["mo_start"] = i + 3
             
-                params["mo_end"] = i + 1 + (params["Ngbf"] + 4) * int(math.ceil(params["Ngbf"]/5.0))
+            params["mo_end"] = i + 1 + (params["Ngbf"] + 4) * int(math.ceil(params["Ngbf"]/5.0))
 
-            # the coordinates of the atoms (in Bohr)
-            if len(spline) == 4 and spline[2] == "COORDINATES" and spline[3] == "(BOHR)":
-                params["coor_start"] = i + 2
-            if len(spline) == 3 and spline[0] == "INTERNUCLEAR" and spline[1] == "DISTANCES":
-                params["coor_end"] = i -2
-                params["Natoms"] = params["coor_end"] - params["coor_start"] + 1
+        # the coordinates of the atoms (in Bohr)
+        if len(spline) == 4 and spline[2] == "COORDINATES" and spline[3] == "(BOHR)":
+            params["coor_start"] = i + 2
+        if len(spline) == 3 and spline[0] == "INTERNUCLEAR" and spline[1] == "DISTANCES":
+            params["coor_end"] = i -2
+            params["Natoms"] = params["coor_end"] - params["coor_start"] + 1
 
-            # the gradients(in Hartree/Bohr)
+        # the gradients(in Hartree/Bohr)
 
-            if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
-                params["grad_start"] = i + 4
-                params["grad_end"] = params["grad_start"] + params["Natoms"] -1
+        if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
+            params["grad_start"] = i + 4
+            params["grad_end"] = params["grad_start"] + params["Natoms"] -1
 
         #***********   optimization   ***********************
-        elif runtype == 2: 
+
             # molecular orbitals
-            if len(spline) == 2 and spline[0] == "MOLECULAR":
-                params["mo_start"] = i + 3
-            if len(spline) > 0 and spline[0] == "PROPERTY":
-                params["mo_end"] = i - 3
+            #if len(spline) == 2 and spline[0] == "MOLECULAR":
+            #    params["mo_start"] = i + 3
+            #if len(spline) > 0 and spline[0] == "PROPERTY":
+            #    params["mo_end"] = i - 3
 
             # the coordinates of the atoms (in Angstrom)
 
-            if len(spline) == 6 and spline[0] == "COORDINATES" and spline[2] == "ALL":
-                params["coor_start"] = i + 3
-                params["coor_end"] = params["coor_start"] + params["Natoms"] -1
+            #if len(spline) == 6 and spline[0] == "COORDINATES" and spline[2] == "ALL":
+            #    params["coor_start"] = i + 3
+            #    params["coor_end"] = params["coor_start"] + params["Natoms"] -1
 
             # the gradients
-            if len(spline) == 2 and spline[0] == "GRADIENT" and spline[1] == "(HARTREE/BOHR)":
-                params["grad_start"] = i + 4
-                params["grad_end"] = params["grad_start"] + params["Natoms"] -1
+            #if len(spline) == 2 and spline[0] == "GRADIENT" and spline[1] == "(HARTREE/BOHR)":
+            #    params["grad_start"] = i + 4
+            #    params["grad_end"] = params["grad_start"] + params["Natoms"] -1
 
-        else :
-            print "*********************************************************************"
-            print "********************* CAUTION ***************************************"
-            print "*********************************************************************"
-            print "**** run_type has an illegal value in construct ao_basis funtion ****"
-            print "***                                                               ***"
-            print "********************************************************************"
-            sys.exit()
+            #else :
+            #print "*********************************************************************"
+            #print "********************* CAUTION ***************************************"
+            #print "*********************************************************************"
+            #print "**** run_type has an illegal value in construct ao_basis funtion ****"
+            #print "***                                                               ***"
+            #print "********************************************************************"
+            #sys.exit()
 
 def show_outputs(l_gam,params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which includes extracted data from l_gam file.
+    # This function shows the columns which includes the information.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/detect
+ 
     print "******************************************"
     print "according to the",params["lgbf"]+1,"th column,"
     print l_gam[params["lgbf"]]
@@ -123,9 +142,17 @@ def show_outputs(l_gam,params):
     print
 
 
-def detect(l_gam,params,runtype):
-    
-    detect_columns(l_gam,params,runtype)
+def detect(l_gam,params):
+    ## This module detects the columns which includes the information
+    #  of atomic basis sets, molecular energies , molecular orbitals,
+    #  and gradients.
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which includes extracted data from l_gam file.
+    #
+    # This function returns the data extracted from the file, in the form of dictionary
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
+
+    detect_columns(l_gam,params)
 
     show_outputs(l_gam,params)
 

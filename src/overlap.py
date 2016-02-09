@@ -9,13 +9,12 @@
 #*
 #*********************************************************************************/
 
-#*********************************************************************************
-# This module calculates the overlap matrixes of atomic and molecular orbitals.
-# When ab initio calculation is done, 
-# the overlap matrix of atomic orbitals is necessary for calculating 
-# the overlap matrix of eigenfunctions.
-# However, When semi-empirical calculation is done, it is not.
-#********************************************************************************
+## \file overlap.py
+# This program implements the module that calculates
+# the overlap matrixes of atomic and molecular orbitals with different time steps.
+# This returns the overlap matrix of molecular orbitals like  <MO(t)|MO(t+dt)>.
+#
+# Used in:  gamess_to_libra.py/gamess_to_libra 
 
 import os
 import sys
@@ -31,7 +30,13 @@ from libmmath import *
 from libqchem import *
 
 def AO_overlap(ao_i, ao_j):
-    # calculate overlap matrix of atomic orbitals.
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] ao_i, ao_j : atomic orbital basis 
+    # This function returns overlap matrix of atomic orbitals with different time step
+    # like <AO(t)|AO(t+dt)>.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/overlap
 
     Norb = len(ao_i)
 
@@ -45,8 +50,15 @@ def AO_overlap(ao_i, ao_j):
     return S
 
 def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
-    # calculate overlap matrix of MOs:
-    # <MO(i)|MO(j)> 
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] ao_i, ao_j : atomic orbital basis 
+    # \param[in] Ci, Cj : molecular coefficients 
+    # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
+    # This function returns overlap matrix of atomic orbitals with different time step
+    # like <MO(t)|MO(t+dt)>.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/overlap
 
     Norb = len(ao_i)
     P = MATRIX(Norb, Norb)
@@ -64,6 +76,16 @@ def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
 
 
 def overlap(ao1,ao2,C1,C2,basis_sets):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] ao_i, ao_j : atomic orbital basis
+    # \param[in] Ci, Cj : molecular coefficients
+    # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
+    # This function returns overlap matrix of atomic orbitals with different time step
+    # like <MO(t)|MO(t+dt)>.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra
+
     # this is mostly a test function
 
     S11 = AO_overlap(ao1,ao1)

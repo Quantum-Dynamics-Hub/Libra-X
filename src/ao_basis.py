@@ -9,6 +9,12 @@
 #*
 #*********************************************************************************/
 
+## \file ao_basis.py
+# This module implements the functions that constructs atomic orbital basis
+# by n Gaussian Type Orbitals (nGTO)
+#
+# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
+
 import os
 import sys
 import math
@@ -23,7 +29,12 @@ from libmmath import *
 from libqchem import *
 
 def input_AO_name(params):
-    # This funciton inputs the atomic orbital name(s, px, py, pz, etc...)
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] params : The list which contains extracted data from the file.
+    # This function returns the list of atomic orbital type (s, px, py, pz, etc...) 
+    # in params.
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
 
     atom_spec = params["atom_spec"]
     basis_type = params["basis_type"]
@@ -74,11 +85,14 @@ def input_AO_name(params):
     print "orb_name=",orb_name
     params["orb_name"] = orb_name
 
-def construct_ao_basis(params,basis_sets): # old add_PrimitiveG
-# The function takes the parameters in the format adopted for
-# storing info read from the Gamess output file
-# The function returns the list of AO objects - the basis
-    
+def construct_ao_basis(params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] params : The list which contains extracted data from the file.
+    # This function returns the list of atomic orbital basis as "ao_basis".
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
+
     l_atoms = params["l_atoms"]
     coor_atoms = params["coor_atoms"]
     expo_s = params["expo_s"]
@@ -134,18 +148,8 @@ def construct_ao_basis(params,basis_sets): # old add_PrimitiveG
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 R = VECTOR(coor_atoms[i][0], coor_atoms[i][1], coor_atoms[i][2])
 
-                if basis_sets == 1: # ab initio calculation
-                    g = PrimitiveG(nx, ny, nz, expo_tmp[k], R)
-                elif basis_sets == 2: # semi empirical calculation 
-                    g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs)
-                else:
-                    print "*********************************************************************"
-                    print "********************* CAUTION ***************************************"
-                    print "*********************************************************************" 
-                    print "*** basis_sets has an illegal value in construct ao_basis funtion ***"
-                    print "***                                                               ***"
-                    print "********************************************************************"
-                    sys.exit()
+                g = PrimitiveG(nx, ny, nz, expo_tmp[k], R) # single point
+                # g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs) : optimization
 
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 ao.add_primitive(coef_tmp[k], g )
@@ -165,11 +169,17 @@ def construct_ao_basis(params,basis_sets): # old add_PrimitiveG
     
     return ao_basis
 
-def ao_basis(params,basis_sets):
+def ao_basis(params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] params : The list which contains extracted data from the file.
+    # This function returns the list of atomic orbital basis as "ao".
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
 
     input_AO_name(params)
     
-    ao = construct_ao_basis(params,basis_sets)
+    ao = construct_ao_basis(params)
 
     #params["ao"] = ao
 

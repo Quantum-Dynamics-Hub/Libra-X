@@ -9,6 +9,13 @@
 #*
 #*********************************************************************************/
 
+## \file extract.py
+# This module implements the functions that extract
+# atomic forces , molecular energies, molecular orbitals, and atomic basis information
+# written in gamess output file.
+#
+# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
+
 #************************************************************
 # This program extracting parameters from gamess output file.
 #************************************************************
@@ -27,8 +34,13 @@ from libqchem import *
 
 
 def atomic_basis_set(l_gam,params):
-# This program extracts the atomic basis information,
-# and save it as the gaussian basis information.
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
 
     #  atomic species
     ab_start = params["ab_start"]
@@ -139,9 +151,13 @@ def atomic_basis_set(l_gam,params):
 
 
 def molecular_orbitals(l_gam,params):
-
-    # extract molecular orbitals information
-    # (eigenenergies and eigenfunctions)
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the molecular orbitals info. as "E" and "C" of params.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]
@@ -191,8 +207,13 @@ def molecular_orbitals(l_gam,params):
     
 
 def coordinates_of_atoms(l_gam,params):
-
-    # extract coordinates of atoms
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the coordinates of atoms info. as "l_atoms" and "coor_atoms" of params.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
 
     coor_start = params["coor_start"]
     coor_end = params["coor_end"]
@@ -216,8 +237,14 @@ def coordinates_of_atoms(l_gam,params):
 
 
 def gradient(l_gam,params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the gradients as "gradient" of params.
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
 
-    # extract gradient (force)
 
     grad_start = params["grad_start"]
     grad_end = params["grad_end"]
@@ -237,7 +264,15 @@ def gradient(l_gam,params):
 
 
 def extract(l_gam,params):
-    
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function returns the coordinates of atoms, gradients, atomic orbital basis,
+    # and molecular orbitals extracted from the file, in the form of dictionary
+    #
+    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
+
     coordinates_of_atoms(l_gam,params)
 
     gradient(l_gam,params)
