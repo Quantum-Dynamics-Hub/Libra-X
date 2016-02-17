@@ -1,6 +1,6 @@
 #*********************************************************************************
 #* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
-#* 
+#*
 #* This file is distributed under the terms of the GNU General Public License
 #* as published by the Free Software Foundation, either version 2 of
 #* the License, or (at your option) any later version.
@@ -9,13 +9,16 @@
 #*
 #*********************************************************************************/
 
-# ******************************************************************************************
-# This is a GAMESS/Libra "interface" program which communicates the GAMESS output data
+## \file main.py
+# This module defines the function which communicates the GAMESS output data
 # to Libra and vice versa.
-# GAMESS is used for Semi-Empirical Calculation and Libra for Classical MD.
-# ******************************************************************************************
+# It outputs the files needed for excited electron dynamics simulation.
+
 
 from gamess_to_libra import *
+from nve import *
+from create_gamess_input import *
+from exe_gamess import *
 
 import os
 import sys
@@ -31,22 +34,40 @@ import math
 #from libmmath import *
 #from libqchem import *
 
-#*********************************************************
-#***************** input parameters **********************
-#*********************************************************
+def initial_gamess_exe(params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] params : the input data from "submit_templ.slm", in the form of dictionary
+    # This function executes GAMESS program and then extracts data from GAMESS output files
+    # (mainly atomic orbitals, molecular energies, molecular coefficients, gradients).
+    #
+    # Used in:  main.py/main
 
-params = {}
+    GMS_DIR = params["GMS_DIR"]
+    GMS_JOB = params["GMS_JOB"]
+    params["l_gam_for"] = keep_GMS_INP_format(GMS_DIR,GMS_JOB)
 
-params["gamess_out1"] = "../gam_out/H2O_1.out"  # GAMESS output file for time "t"
-#params["gamess_out2"] = "../gam_out/exam03_AM1_single.out"  # GAMESS output file for time "t+dt"    
-params["gamess_out2"] = "../gam_out/H2O_2.out"              # GAMESS output file for time "t+dt"
-params["basis_option"] = 2    # ab initio or Semi-Empirical calculation? 
-                              # Options: "ab_initio" = 1 , "semi_empirical" = 2
-params["dt_nuc"] = 1.0        # time step for nuclear dynamics (in fsec)
+    exe_gamess(params,GMS_JOB)
 
-print "params: ",params
+    # 1-st file - time "t"  old
+    ao, E, C, Grad, data = unpack_file(GMS_DIR, GMS_JOB)
 
-# ************************************************************************* 
-# extract parameters from gamess and communicate them to Libra.
+    return ao, E, C, Grad, data
 
-gamess_to_libra(params)
+def main(params):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] params : the input data from "submit_templ.slm", in the form of dictionary
+    # This function prepares initial parameters from GAMESS output file
+    # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
+    # iteratively.
+    #
+    # Used in:  main.py
+
+    ao1, E1, C1, Grad, data = initial_gamess_exe(params)
+
+    print "data= ",data
+
+    # main routine
+
+    nve(data,params,ao1,E1,C1,Grad)

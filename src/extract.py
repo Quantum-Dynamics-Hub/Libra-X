@@ -14,7 +14,8 @@
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information
 # written in gamess output file.
 #
-# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
+# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+#        : main.py/main/initial_gamess_exe/unpack_file
 
 #************************************************************
 # This program extracting parameters from gamess output file.
@@ -40,7 +41,8 @@ def atomic_basis_set(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/initial_gamess_exe/unpack_file/extract
 
     #  atomic species
     ab_start = params["ab_start"]
@@ -157,7 +159,8 @@ def molecular_orbitals(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the molecular orbitals info. as "E" and "C" of params.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/initial_gamess_exe/unpack_file/extract
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]
@@ -213,17 +216,21 @@ def coordinates_of_atoms(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the coordinates of atoms info. as "l_atoms" and "coor_atoms" of params.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/initial_gamess_exe/unpack_file/extract
 
     coor_start = params["coor_start"]
     coor_end = params["coor_end"]
 
     l_atoms = []
+    l_charges = []
     coor_atoms = []
     for i in range(coor_start,coor_end+1):
         spline = l_gam[i].split()
         # explicit atoms
         l_atoms.append(spline[0])
+        # atomic charges
+        l_charges.append(float(spline[1]))
         # coordinates of atoms
         coor_tmp = []
         for j in range(len(spline)-3,len(spline)):
@@ -231,9 +238,11 @@ def coordinates_of_atoms(l_gam,params):
         coor_atoms.append(coor_tmp)
 
     params["l_atoms"] = l_atoms
+    params["l_charges"] = l_charges
     params["coor_atoms"] = coor_atoms
-    print "l_atoms=",params["l_atoms"]
-    print "coor_atoms=",params["coor_atoms"]
+    print "l_atoms=", params["l_atoms"]
+    print "l_charges=", params["l_charges"]
+    print "coor_atoms=", params["coor_atoms"]
 
 
 def gradient(l_gam,params):
@@ -243,7 +252,8 @@ def gradient(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the gradients as "gradient" of params.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/extract
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/initial_gamess_exe/unpack_file/extract
 
 
     grad_start = params["grad_start"]
@@ -261,8 +271,6 @@ def gradient(l_gam,params):
     print "gradient=",params["gradient"]
 
 
-
-
 def extract(l_gam,params):
     ##
     # Finds the keywords and their patterns and extracts the parameters
@@ -271,15 +279,17 @@ def extract(l_gam,params):
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, in the form of dictionary
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+    #        : main.py/main/initial_gamess_exe/unpack_file
 
     coordinates_of_atoms(l_gam,params)
 
     gradient(l_gam,params)
 
-    atomic_basis_set(l_gam,params)
-
     molecular_orbitals(l_gam,params)
+
+    atomic_basis_set(l_gam,params)
+    
 
     print "********************************************"
     print "extract program ends"

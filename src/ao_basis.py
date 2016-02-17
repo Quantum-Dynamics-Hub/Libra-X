@@ -13,7 +13,8 @@
 # This module implements the functions that constructs atomic orbital basis
 # by n Gaussian Type Orbitals (nGTO)
 #
-# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
+# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+#        : main.py/main/initial_gamess_exe/unpack_file
 
 import os
 import sys
@@ -34,7 +35,9 @@ def input_AO_name(params):
     # \param[in] params : The list which contains extracted data from the file.
     # This function returns the list of atomic orbital type (s, px, py, pz, etc...) 
     # in params.
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
+    #
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
+    #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
 
     atom_spec = params["atom_spec"]
     basis_type = params["basis_type"]
@@ -91,7 +94,8 @@ def construct_ao_basis(params):
     # \param[in] params : The list which contains extracted data from the file.
     # This function returns the list of atomic orbital basis as "ao_basis".
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
+    #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
 
     l_atoms = params["l_atoms"]
     coor_atoms = params["coor_atoms"]
@@ -175,7 +179,8 @@ def ao_basis(params):
     # \param[in] params : The list which contains extracted data from the file.
     # This function returns the list of atomic orbital basis as "ao".
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+    #        : main.py/main/initial_gamess_exe/unpack_file
 
     input_AO_name(params)
     

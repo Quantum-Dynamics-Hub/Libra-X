@@ -14,7 +14,8 @@
 # gradients , molecular energies, molecular orbitals, and atomic basis information
 # written in gamess output file.
 #
-# Used in: gamess_to_libra.py/gamess_to_libra/unpack_file
+# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+#        : main.py/main/initial_gamess_exe/unpack_file
 
 # **************************************************************
 # This program detects the columns showing parameters.
@@ -32,7 +33,8 @@ def detect_columns(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the data extracted from the file, in the form of dictionary
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/detect
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/detect
+    #        : main.py/main/initial_gamess_exe/unpack_file/detect
 
     i = -1
     for line in l_gam:
@@ -61,7 +63,7 @@ def detect_columns(l_gam,params):
             params["lgbf"] = i
             params["Ngbf"] = int(spline[7])
             #print params["Ngbf"]
-            
+
         # the atomic basis sets
         if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
             params["ab_start"] = i + 7
@@ -88,6 +90,12 @@ def detect_columns(l_gam,params):
         if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
             params["grad_start"] = i + 4
             params["grad_end"] = params["grad_start"] + params["Natoms"] -1
+
+        # total energy
+
+        if len(spline) == 8 and spline[0] == "FINAL" and spline[2] == "ENERGY":
+            params["ltot_ene"] = i
+            params["tot_ene"] = float(spline[4])
 
         #***********   optimization   ***********************
 
@@ -124,7 +132,8 @@ def show_outputs(l_gam,params):
     # \param[in] params : The list which includes extracted data from l_gam file.
     # This function shows the columns which includes the information.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file/detect
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/detect
+    #        : main.py/main/initial_gamess_exe/unpack_file/detect
 
     print "******************************************"
     print "according to the",params["lele"]+1,"th column,"
@@ -171,6 +180,12 @@ def show_outputs(l_gam,params):
         print l_gam[l]
     print "******************************************"
     print
+    print "******************************************"
+    print "according to the",params["ltot_ene"]+1,"th column,"
+    print l_gam[params["ltot_ene"]]
+    print "total energy = ",params["tot_ene"]
+    print "******************************************"
+    print
 
 
 def detect(l_gam,params):
@@ -179,9 +194,10 @@ def detect(l_gam,params):
     #  and gradients.
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
     # \param[in] params : The list which includes extracted data from l_gam file.
-    #
     # This function returns the data extracted from the file, in the form of dictionary
-    # Used in:  gamess_to_libra.py/gamess_to_libra/unpack_file
+    #
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
+    #        : main.py/main/initial_gamess_exe/unpack_file
 
     detect_columns(l_gam,params)
 

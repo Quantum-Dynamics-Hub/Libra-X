@@ -14,7 +14,8 @@
 # the overlap matrixes of atomic and molecular orbitals with different time steps.
 # This returns the overlap matrix of molecular orbitals like  <MO(t)|MO(t+dt)>.
 #
-# Used in:  gamess_to_libra.py/gamess_to_libra 
+# Used in: main.py/main/nve/nve_MD/gamess_to_libra
+
 
 import os
 import sys
@@ -32,11 +33,11 @@ from libqchem import *
 def AO_overlap(ao_i, ao_j):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis 
+    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <AO(t)|AO(t+dt)>.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/overlap
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/overlap
 
     Norb = len(ao_i)
 
@@ -52,13 +53,13 @@ def AO_overlap(ao_i, ao_j):
 def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis 
-    # \param[in] Ci, Cj : molecular coefficients 
+    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
+    # \param[in] Ci, Cj : molecular coefficients at different time step.
     # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra/overlap
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/overlap
 
     Norb = len(ao_i)
     P = MATRIX(Norb, Norb)
@@ -78,13 +79,13 @@ def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
 def overlap(ao1,ao2,C1,C2,basis_sets):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis
-    # \param[in] Ci, Cj : molecular coefficients
+    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
+    # \param[in] Ci, Cj : molecular coefficients at different time step.
     # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
-    # Used in:  gamess_to_libra.py/gamess_to_libra
+    # Used in: main.py/main/nve/nve_MD/gamess_to_libra
 
     # this is mostly a test function
 
