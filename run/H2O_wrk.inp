@@ -1,0 +1,15 @@
+! H2O test calculation
+!   semiempirical calculation, using the MOPAC/GAMESS combo
+!
+!
+ $CONTRL SCFTYP=RHF RUNTYP=GRADIENT COORD=UNIQUE ICHARG=0 UNITS=ANGS $END
+ $SYSTEM TIMLIM=10 $END
+ $BASIS  GBASIS=PM3 NGAUSS=3 $END
+ $DATA
+H2O in semiempirical models(PM3)
+Cn 1
+
+O   8.0       0.0000000      -0.0013264       0.0000000  
+H   1.0       0.7556604      -0.5765527       0.0000000  
+H   1.0      -0.7556604      -0.5765527       0.0000000  
+ $END 
