@@ -71,3 +71,7 @@ def main(params):
     # main routine
 
     nve(data,params,ao1,E1,C1,Grad)
+
+    print "*********************************"
+    print "      program finished"
+    print "*********************************"

@@ -1,10 +1,10 @@
 ----- GAMESS execution script 'rungms' -----
 This job is running on host cpn-p27-15.cbls.ccr.buffalo.edu
-under operating system Linux at Wed Feb 17 17:44:04 EST 2016
+under operating system Linux at Thu Feb 18 09:39:48 EST 2016
 Available scratch disk space (Kbyte units) at beginning of the job is
 Filesystem     1K-blocks  Used Available Use% Mounted on
 /dev/sda6      293532636 32944 293499692   1% /scratch
-GAMESS temporary binary files will be written to /scratch/291887
+GAMESS temporary binary files will be written to /scratch/291954
 GAMESS supplementary output files will be written to /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/in
 Copying input file H2Otmp.inp to your run's scratch directory...
 MPI kickoff will run GAMESS on 1 cores in 1 nodes.
@@ -12,16 +12,16 @@ The nodes are cpn-p27-15.
 The binary to be executed is /util/academic/gamess/v20130501r1/impi/gamess/gamess.01.x
 MPI will run 1 compute processes and 1 data servers,
     placing 2 of each process type onto each node.
-The scratch disk space on each node is /scratch/291887, with free space
+The scratch disk space on each node is /scratch/291954, with free space
 Filesystem     1K-blocks  Used Available Use% Mounted on
 /dev/sda6      293532636 32968 293499668   1% /scratch
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=cf717f0
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=d1fc7f0
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=c3607f0
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=b8517f0
 [1] MPI startup(): shm data transfer mode
 [0] MPI startup(): shm data transfer mode
 [0] MPI startup(): Rank    Pid      Node name                        Pin cpu
-[0] MPI startup(): 0       11044    cpn-p27-15.cbls.ccr.buffalo.edu  +1
-[0] MPI startup(): 1       11045    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 0       93109    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 1       93110    cpn-p27-15.cbls.ccr.buffalo.edu  +1
           ******************************************************
           *         GAMESS VERSION =  1 MAY 2013 (R1)          *
           *             FROM IOWA STATE UNIVERSITY             *
@@ -87,7 +87,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      N. COPERNICUS UNIVERSITY AND JACKSON STATE UNIVERSITY:
           MARIA BARYSZ
 
- EXECUTION OF GAMESS BEGUN Wed Feb 17 17:44:04 2016
+ EXECUTION OF GAMESS BEGUN Thu Feb 18 09:39:48 2016
 
             ECHO OF THE FIRST FEW INPUT CARDS -
  INPUT CARD>! H2O test calculation                                                          
@@ -252,7 +252,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
  ..... DONE SETTING UP THE RUN .....
  STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
 
                     --------------------------------
                     SINGLE POINT ENERGY AND GRADIENT
@@ -269,10 +269,10 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  MOPAC ONE- AND TWO-ELECTRON INTEGRALS REQUIRE        63 WORDS.
  ...... END OF ONE- AND TWO-ELECTRON INTEGRALS......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
  ...... END OF ONE-ELECTRON INTEGRALS ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
 
           -------------
           GUESS OPTIONS
@@ -289,7 +289,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      1=A        2=A        3=A        4=A        5=A        6=A   
  ...... END OF INITIAL ORBITAL SELECTION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
 
           --------------------------
                R-PM3 SCF CALCULATION
@@ -349,7 +349,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
     6  H  3  S    0.544550
  ...... END OF RHF CALCULATION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
 
      ----------------------------------------------------------------
      PROPERTY VALUES FOR THE RHF   SELF-CONSISTENT FIELD WAVEFUNCTION
@@ -373,7 +373,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      0.000000   -1.760588    0.000000    1.760588
  ...... END OF PROPERTY EVALUATION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
 
                          ----------------------
                          GRADIENT OF THE ENERGY
@@ -394,14 +394,14 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 ..... END OF SINGLE POINT GRADIENT .....
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  20.00%
                 580000  WORDS OF DYNAMIC MEMORY USED
- EXECUTION OF GAMESS TERMINATED NORMALLY Wed Feb 17 17:44:04 2016
+ EXECUTION OF GAMESS TERMINATED NORMALLY Thu Feb 18 09:39:48 2016
  DDI: 263624 bytes (0.3 MB / 0 MWords) used by master data server.
 
  ----------------------------------------
  CPU timing information for all processes
  ========================================
- 0: 0.13 + 0.27 = 0.40
- 1: 0.10 + 0.13 = 0.23
+ 0: 0.17 + 0.24 = 0.42
+ 1: 0.09 + 0.14 = 0.24
  ----------------------------------------

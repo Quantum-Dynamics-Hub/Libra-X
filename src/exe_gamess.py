@@ -37,9 +37,12 @@ def exe_gamess(params,job):
 
     os.system("/usr/bin/time rungms.slurm %s 01 %s > %s.out" % \
               (job,NPROCS,job))
-    
+
+    # copy FOCK MATRIX file to input directory
+    #os.system("cp -r %s/%s.F18 %s/%s.fock"% (scratch,job,INP_DIR,job))
     # delete unnecessary files
     os.system("rm -r %s/%s.dat"% (INP_DIR,job))
+    os.system("ls %s/"% (scratch))
     os.system("rm -r %s/%s.*"% (scratch,job)) 
     os.chdir(SRC_DIR)
     print "************GAMESS execution finished**************"
