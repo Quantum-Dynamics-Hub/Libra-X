@@ -28,16 +28,16 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-#cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-#print "Using the Libra installation at", cwd
-#sys.path.insert(1,cwd+"/_build/src/mmath")
-#sys.path.insert(1,cwd+"/_build/src/qchem")
+cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
+print "Using the Libra installation at", cwd
+sys.path.insert(1,cwd+"/_build/src/mmath")
+sys.path.insert(1,cwd+"/_build/src/qchem")
 
 #print "\nTest 1: Importing the library and its content"
 #from libmmath import *
 #from libqchem import *
 
-def unpack_file(GMS_DIR,job):
+def unpack_file(filename):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] GMS_DIR : The directory  where GAMESS is executed
@@ -48,7 +48,6 @@ def unpack_file(GMS_DIR,job):
     # Used in:  main.py/main/initial_gamess_exe
     #           main.py/main/nve/gamess_to_libra
 
-    filename =GMS_DIR + job + ".out"
     f_gam = open(filename,"r")
     l_gam = f_gam.readlines()
     f_gam.close()
@@ -66,14 +65,14 @@ def unpack_file(GMS_DIR,job):
 
     return data["ao_basis"], data["E"], data["C"], data["gradient"], data
 
-def gamess_to_libra(par, ao1, E1, C1, job,ite):
+
+def gamess_to_libra(params, ao, E, C, ite):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] par :  contains input parameters , in the directory form
-    # \param[in] ao1 :  atomic orbital basis at "t" old
-    # \param[in] E1  :  molecular energies at "t" old
-    # \param[in] C1  :  molecular coefficients at "t" old
-    # \param[in] job : The name of GAMESS output file
+    # \param[in] params :  contains input parameters , in the directory form
+    # \param[in,out] ao :  atomic orbital basis at "t" old
+    # \param[in,out] E  :  molecular energies at "t" old
+    # \param[in,out] C  :  molecular coefficients at "t" old
     # \param[in] ite : The number of iteration
     # This function outputs the files for excited electron dynamics
     # in "res" directory.
@@ -85,32 +84,32 @@ def gamess_to_libra(par, ao1, E1, C1, job,ite):
     # Used in: main.py/nve/nve_MD/
 
     # 2-nd file - time "t+dt"  new
-    ao2, E2, C2, Grad, data = unpack_file(par["GMS_DIR"], job)
+    ao2, E2, C2, Grad, data = unpack_file(params["gms_out"])
 
     # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao1,ao2,C1,C2,par["basis_option"])
+    P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
 
-    print "P11 and P22 matrixes should show orthogonality"
-    print "P11 is";    P11.show_matrix()
-    print "P22 is";    P22.show_matrix()
+    #print "P11 and P22 matrixes should show orthogonality"
+    #print "P11 is";    P11.show_matrix()
+    #print "P22 is";    P22.show_matrix()
 
-    print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
-    print "P12 is";    P12.show_matrix()
-    print "P21 is";    P21.show_matrix()
+    #print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+    #print "P12 is";    P12.show_matrix()
+    #print "P21 is";    P21.show_matrix()
 
     # calculate time-averaged molecular energies and Non-Adiabatic Couplings(NACs)
-    E, D = Ene_NAC(E1,E2,P12,P21,par["dt_nuc"])
+    E, D = Ene_NAC(E,E2,P12,P21,params["dt_nucl"])
 
-    ene = par["res"] + "E_" + par["GMS_JOB"] + "_" + str(ite)
-    nac = par["res"] + "D_" + par["GMS_JOB"] + "_" + str(ite)
+    ene_filename = params["res"] + "re_Ham_" + str(ite)
+    nac_filename = params["res"] + "im_Ham_" + str(ite)
     
-    E.show_matrix(ene)
-    D.show_matrix(nac)
+    E.show_matrix(ene_filename)
+    D.show_matrix(nac_filename)
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
-        ao1[i] = AO(ao2[i])
-    E1 = MATRIX(E2)
-    C1 = MATRIX(C2)
+        ao[i] = AO(ao2[i])
+    E = MATRIX(E2)
+    C = MATRIX(C2)
 
-    return ao1, E1, C1, Grad, data
+    return Grad, data

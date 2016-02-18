@@ -13,46 +13,27 @@
 # This module defines the function which communicates the GAMESS output data
 # to Libra and vice versa.
 # It outputs the files needed for excited electron dynamics simulation.
+import sys
 
+# Path the the source code
+sys.path.insert(1,"/user/alexeyak/Programming/libra-gamess_interface/src")
 
-from gamess_to_libra import *
-from nve import *
-from create_gamess_input import *
-from exe_gamess import *
+cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
+print "Using the Libra installation at", cwd
+sys.path.insert(1,cwd+"/_build/src/mmath")
+sys.path.insert(1,cwd+"/_build/src/qchem")
+sys.path.insert(1,cwd+"/_build/src/dyn")
+sys.path.insert(1,cwd+"/_build/src/chemobjects")
+sys.path.insert(1,cwd+"/_build/src/hamiltonian")
+
 
 import os
 import sys
 import math
+from gamess_to_libra import *
+from nve import *
+from create_gamess_input import *
 
-# First, we add the location of the library to test to the PYTHON path
-#cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-#print "Using the Libra installation at", cwd
-#sys.path.insert(1,cwd+"/_build/src/mmath")
-#sys.path.insert(1,cwd+"/_build/src/qchem")
-
-#print "\nTest 1: Importing the library and its content"
-#from libmmath import *
-#from libqchem import *
-
-def initial_gamess_exe(params):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params : the input data from "submit_templ.slm", in the form of dictionary
-    # This function executes GAMESS program and then extracts data from GAMESS output files
-    # (mainly atomic orbitals, molecular energies, molecular coefficients, gradients).
-    #
-    # Used in:  main.py/main
-
-    GMS_DIR = params["GMS_DIR"]
-    GMS_JOB = params["GMS_JOB"]
-    params["l_gam_for"] = keep_GMS_INP_format(GMS_DIR,GMS_JOB)
-
-    exe_gamess(params,GMS_JOB)
-
-    # 1-st file - time "t"  old
-    ao, E, C, Grad, data = unpack_file(GMS_DIR, GMS_JOB)
-
-    return ao, E, C, Grad, data
 
 def main(params):
     ##
@@ -64,14 +45,24 @@ def main(params):
     #
     # Used in:  main.py
 
-    ao1, E1, C1, Grad, data = initial_gamess_exe(params)
+    ################# Step 0: Use the initial file to create a working input file ###############
+ 
+    os.system("cp %s %s" %(params["gms_inp0"], params["gms_inp"]))
 
-    print "data= ",data
+    ################# Step 1: Read initial input and run first GMS calculation ##################    
+    
+    params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
 
-    # main routine
+    exe_gamess(params)
 
-    nve(data,params,ao1,E1,C1,Grad)
+    ao, E, C, Grad, data = unpack_file(params["gms_out"])
 
-    print "*********************************"
-    print "      program finished"
-    print "*********************************"
+    print data
+
+    ################## Step 2: Initialize molecular system and run MD ###########################
+
+    print "Initializing system..."
+    syst = init_system(data, Grad)
+
+    print "Starting MD..."
+    run_MD(syst,ao,E,C,data,params)
