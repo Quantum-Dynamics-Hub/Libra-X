@@ -1,27 +1,27 @@
 ----- GAMESS execution script 'rungms' -----
 This job is running on host cpn-p27-15.cbls.ccr.buffalo.edu
-under operating system Linux at Fri Feb 5 11:15:01 EST 2016
+under operating system Linux at Wed Feb 17 17:43:58 EST 2016
 Available scratch disk space (Kbyte units) at beginning of the job is
 Filesystem     1K-blocks  Used Available Use% Mounted on
-/dev/sda6      293532636 32928 293499708   1% /scratch
-GAMESS temporary binary files will be written to /scratch/288842
-GAMESS supplementary output files will be written to /projects/academic/alexeyak/kosukesa/test_cal/gamess/work
-Copying input file H2O_1.inp to your run's scratch directory...
+/dev/sda6      293532636 32944 293499692   1% /scratch
+GAMESS temporary binary files will be written to /scratch/291887
+GAMESS supplementary output files will be written to /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/in
+Copying input file H2O.inp to your run's scratch directory...
 MPI kickoff will run GAMESS on 1 cores in 1 nodes.
 The nodes are cpn-p27-15.
 The binary to be executed is /util/academic/gamess/v20130501r1/impi/gamess/gamess.01.x
 MPI will run 1 compute processes and 1 data servers,
     placing 2 of each process type onto each node.
-The scratch disk space on each node is /scratch/288842, with free space
+The scratch disk space on each node is /scratch/291887, with free space
 Filesystem     1K-blocks  Used Available Use% Mounted on
-/dev/sda6      293532636 32952 293499684   1% /scratch
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=c30f7f0
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=bb8f7f0
-[0] MPI startup(): shm data transfer mode
+/dev/sda6      293532636 32968 293499668   1% /scratch
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=c0557f0
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=b9667f0
 [1] MPI startup(): shm data transfer mode
+[0] MPI startup(): shm data transfer mode
 [0] MPI startup(): Rank    Pid      Node name                        Pin cpu
-[0] MPI startup(): 0       77608    cpn-p27-15.cbls.ccr.buffalo.edu  +1
-[0] MPI startup(): 1       77609    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 0       10879    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 1       10880    cpn-p27-15.cbls.ccr.buffalo.edu  +1
           ******************************************************
           *         GAMESS VERSION =  1 MAY 2013 (R1)          *
           *             FROM IOWA STATE UNIVERSITY             *
@@ -87,7 +87,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      N. COPERNICUS UNIVERSITY AND JACKSON STATE UNIVERSITY:
           MARIA BARYSZ
 
- EXECUTION OF GAMESS BEGUN Fri Feb  5 11:15:01 2016
+ EXECUTION OF GAMESS BEGUN Wed Feb 17 17:43:59 2016
 
             ECHO OF THE FIRST FEW INPUT CARDS -
  INPUT CARD>! H2O test calculation                                                          
@@ -252,7 +252,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
  ..... DONE SETTING UP THE RUN .....
  STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS 100.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
 
                     --------------------------------
                     SINGLE POINT ENERGY AND GRADIENT
@@ -269,10 +269,10 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  MOPAC ONE- AND TWO-ELECTRON INTEGRALS REQUIRE        63 WORDS.
  ...... END OF ONE- AND TWO-ELECTRON INTEGRALS......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
  ...... END OF ONE-ELECTRON INTEGRALS ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
 
           -------------
           GUESS OPTIONS
@@ -289,7 +289,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      1=A        2=A        3=A        4=A        5=A        6=A   
  ...... END OF INITIAL ORBITAL SELECTION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
 
           --------------------------
                R-PM3 SCF CALCULATION
@@ -348,7 +348,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
     5  H  2  S   -0.544646
     6  H  3  S    0.544646
  ...... END OF RHF CALCULATION ......
- STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
  TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
 
      ----------------------------------------------------------------
@@ -372,8 +372,8 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
          DX          DY          DZ         /D/  (DEBYE)
     -0.000000   -1.762282    0.000000    1.762282
  ...... END OF PROPERTY EVALUATION ......
- STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS 100.00%
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
 
                          ----------------------
                          GRADIENT OF THE ENERGY
@@ -394,14 +394,14 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 ..... END OF SINGLE POINT GRADIENT .....
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS 100.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
                 580000  WORDS OF DYNAMIC MEMORY USED
- EXECUTION OF GAMESS TERMINATED NORMALLY Fri Feb  5 11:15:01 2016
+ EXECUTION OF GAMESS TERMINATED NORMALLY Wed Feb 17 17:43:59 2016
  DDI: 263624 bytes (0.3 MB / 0 MWords) used by master data server.
 
  ----------------------------------------
  CPU timing information for all processes
  ========================================
- 0: 0.13 + 0.30 = 0.43
- 1: 0.07 + 0.17 = 0.25
+ 0: 0.20 + 0.22 = 0.43
+ 1: 0.08 + 0.16 = 0.25
  ----------------------------------------

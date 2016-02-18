@@ -1,0 +1,407 @@
+----- GAMESS execution script 'rungms' -----
+This job is running on host cpn-p27-15.cbls.ccr.buffalo.edu
+under operating system Linux at Wed Feb 17 17:44:04 EST 2016
+Available scratch disk space (Kbyte units) at beginning of the job is
+Filesystem     1K-blocks  Used Available Use% Mounted on
+/dev/sda6      293532636 32944 293499692   1% /scratch
+GAMESS temporary binary files will be written to /scratch/291887
+GAMESS supplementary output files will be written to /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/in
+Copying input file H2Otmp.inp to your run's scratch directory...
+MPI kickoff will run GAMESS on 1 cores in 1 nodes.
+The nodes are cpn-p27-15.
+The binary to be executed is /util/academic/gamess/v20130501r1/impi/gamess/gamess.01.x
+MPI will run 1 compute processes and 1 data servers,
+    placing 2 of each process type onto each node.
+The scratch disk space on each node is /scratch/291887, with free space
+Filesystem     1K-blocks  Used Available Use% Mounted on
+/dev/sda6      293532636 32968 293499668   1% /scratch
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=cf717f0
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=d1fc7f0
+[1] MPI startup(): shm data transfer mode
+[0] MPI startup(): shm data transfer mode
+[0] MPI startup(): Rank    Pid      Node name                        Pin cpu
+[0] MPI startup(): 0       11044    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 1       11045    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+          ******************************************************
+          *         GAMESS VERSION =  1 MAY 2013 (R1)          *
+          *             FROM IOWA STATE UNIVERSITY             *
+          * M.W.SCHMIDT, K.K.BALDRIDGE, J.A.BOATZ, S.T.ELBERT, *
+          *   M.S.GORDON, J.H.JENSEN, S.KOSEKI, N.MATSUNAGA,   *
+          *          K.A.NGUYEN, S.J.SU, T.L.WINDUS,           *
+          *       TOGETHER WITH M.DUPUIS, J.A.MONTGOMERY       *
+          *         J.COMPUT.CHEM.  14, 1347-1363(1993)        *
+          **************** 64 BIT INTEL VERSION ****************
+
+  SINCE 1993, STUDENTS AND POSTDOCS WORKING AT IOWA STATE UNIVERSITY
+  AND ALSO IN THEIR VARIOUS JOBS AFTER LEAVING ISU HAVE MADE IMPORTANT
+  CONTRIBUTIONS TO THE CODE:
+     IVANA ADAMOVIC, CHRISTINE AIKENS, YURI ALEXEEV, POOJA ARORA,
+     ANDREY ASADCHEV, ROB BELL, PRADIPTA BANDYOPADHYAY, JONATHAN BENTZ,
+     BRETT BODE, GALINA CHABAN, WEI CHEN, CHEOL HO CHOI, PAUL DAY,
+     ALBERT DEFUSCO, TIM DUDLEY, DMITRI FEDOROV, GRAHAM FLETCHER,
+     MARK FREITAG, KURT GLAESEMANN, DAN KEMP, GRANT MERRILL,
+     NORIYUKI MINEZAWA, JONATHAN MULLIN, TAKESHI NAGATA,
+     SEAN NEDD, HEATHER NETZLOFF, BOSILJKA NJEGIC, RYAN OLSON, MIKE PAK,
+     JIM SHOEMAKER, LYUDMILA SLIPCHENKO, SAROM SOK, JIE SONG,
+     TETSUYA TAKETSUGU, SIMON WEBB, SOOHAENG YOO, FEDERICO ZAHARIEV
+
+  ADDITIONAL CODE HAS BEEN PROVIDED BY COLLABORATORS IN OTHER GROUPS:
+     IOWA STATE UNIVERSITY:
+          JOE IVANIC, LAIMUTIS BYTAUTAS, KLAUS RUEDENBERG
+     UNIVERSITY OF TOKYO: KIMIHIKO HIRAO, TAKAHITO NAKAJIMA,
+          TAKAO TSUNEDA, MUNEAKI KAMIYA, SUSUMU YANAGISAWA,
+          KIYOSHI YAGI, MAHITO CHIBA, SEIKEN TOKURA, NAOAKI KAWAKAMI
+     UNIVERSITY OF AARHUS: FRANK JENSEN
+     UNIVERSITY OF IOWA: VISVALDAS KAIRYS, HUI LI
+     NATIONAL INST. OF STANDARDS AND TECHNOLOGY: WALT STEVENS, DAVID GARMER
+     UNIVERSITY OF PISA: BENEDETTA MENNUCCI, JACOPO TOMASI
+     UNIVERSITY OF MEMPHIS: HENRY KURTZ, PRAKASHAN KORAMBATH
+     UNIVERSITY OF ALBERTA: TOBY ZENG, MARIUSZ KLOBUKOWSKI
+     UNIVERSITY OF NEW ENGLAND: MARK SPACKMAN
+     MIE UNIVERSITY: HIROAKI UMEDA
+     MICHIGAN STATE UNIVERSITY:
+          KAROL KOWALSKI, MARTA WLOCH, JEFFREY GOUR, JESSE LUTZ,
+          WEI LI, PIOTR PIECUCH
+     UNIVERSITY OF SILESIA: MONIKA MUSIAL, STANISLAW KUCHARSKI
+     FACULTES UNIVERSITAIRES NOTRE-DAME DE LA PAIX:
+          OLIVIER QUINET, BENOIT CHAMPAGNE
+     UNIVERSITY OF CALIFORNIA - SANTA BARBARA: BERNARD KIRTMAN
+     INSTITUTE FOR MOLECULAR SCIENCE:
+          KAZUYA ISHIMURA, MICHIO KATOUDA, AND SHIGERU NAGASE
+     UNIVERSITY OF NOTRE DAME: DAN CHIPMAN
+     KYUSHU UNIVERSITY:
+          HARUYUKI NAKANO,
+          FENG LONG GU, JACEK KORCHOWIEC, MARCIN MAKOWSKI, AND YURIKO AOKI,
+          HIROTOSHI MORI AND EISAKU MIYOSHI
+     PENNSYLVANIA STATE UNIVERSITY:
+          TZVETELIN IORDANOV, CHET SWALINA, JONATHAN SKONE,
+          SHARON HAMMES-SCHIFFER
+     WASEDA UNIVERSITY:
+          MASATO KOBAYASHI, TOMOKO AKAMA, TSUGUKI TOUMA,
+          TAKESHI YOSHIKAWA, YASUHIRO IKABATA, HIROMI NAKAI
+     NANJING UNIVERSITY: SHUHUA LI
+     UNIVERSITY OF NEBRASKA:
+          PEIFENG SU, DEJUN SI, NANDUN THELLAMUREGE, YALI WANG, HUI LI
+     UNIVERSITY OF ZURICH:
+          ROBERTO PEVERATI, KIM BALDRIDGE
+     N. COPERNICUS UNIVERSITY AND JACKSON STATE UNIVERSITY:
+          MARIA BARYSZ
+
+ EXECUTION OF GAMESS BEGUN Wed Feb 17 17:44:04 2016
+
+            ECHO OF THE FIRST FEW INPUT CARDS -
+ INPUT CARD>! H2O test calculation                                                          
+ INPUT CARD>!   semiempirical calculation, using the MOPAC/GAMESS combo                     
+ INPUT CARD>!                                                                               
+ INPUT CARD>!                                                                               
+ INPUT CARD> $CONTRL SCFTYP=RHF RUNTYP=GRADIENT COORD=UNIQUE ICHARG=0 UNITS=ANGS $END       
+ INPUT CARD> $SYSTEM TIMLIM=10 $END                                                         
+ INPUT CARD> $BASIS  GBASIS=PM3 NGAUSS=3 $END                                               
+ INPUT CARD> $DATA                                                                          
+ INPUT CARD>H2O in semiempirical models(PM3)                                                
+ INPUT CARD>Cn 1                                                                            
+ INPUT CARD>                                                                                
+ INPUT CARD>O   8.0       0.0000000      -0.0002088       0.0000000                         
+ INPUT CARD>H   1.0       0.7572673      -0.5854229       0.0000000                         
+ INPUT CARD>H   1.0      -0.7572673      -0.5854229       0.0000000                         
+ INPUT CARD> $END                                                                           
+    1000000 WORDS OF MEMORY AVAILABLE
+
+     BASIS OPTIONS
+     -------------
+     GBASIS=PM3          IGAUSS=       0      POLAR=NONE    
+     NDFUNC=       0     NFFUNC=       0     DIFFSP=       F
+     NPFUNC=       0      DIFFS=       F     BASNAM=        
+
+
+     RUN TITLE
+     ---------
+ H2O in semiempirical models(PM3)                                                
+
+ THE POINT GROUP OF THE MOLECULE IS CN      
+ THE ORDER OF THE PRINCIPAL AXIS IS     1
+
+ ATOM      ATOMIC                      COORDINATES (BOHR)
+           CHARGE         X                   Y                   Z
+ O           8.0     0.0000000000       -0.0003945748        0.0000000000
+ H           1.0     1.4310276965       -1.1062888679        0.0000000000
+ H           1.0    -1.4310276965       -1.1062888679        0.0000000000
+
+          INTERNUCLEAR DISTANCES (ANGS.)
+          ------------------------------
+
+                1 O          2 H          3 H     
+
+   1 O       0.0000000    0.9570420 *  0.9570420 *
+   2 H       0.9570420 *  0.0000000    1.5145346 *
+   3 H       0.9570420 *  1.5145346 *  0.0000000  
+
+  * ... LESS THAN  3.000
+
+
+
+
+ PLEASE NOTE:
+ SEMI-EMPIRICAL CALCULATIONS ACTUALLY USE VALENCE-ONLY SLATER TYPE ORBITALS.
+ FOR PLOTTING PURPOSES, STO-NG EXPANSIONS CAN APPROXIMATE THE STO FUNCTIONS.
+ THE GTO BASIS LISTED BELOW USES N=  3 EXPANSIONS OF THE VALENCE STO BASIS.
+
+
+
+     ATOMIC BASIS SET
+     ----------------
+ THE CONTRACTED PRIMITIVE FUNCTIONS HAVE BEEN UNNORMALIZED
+ THE CONTRACTED BASIS FUNCTIONS ARE NOW NORMALIZED TO UNITY
+
+  SHELL TYPE  PRIMITIVE        EXPONENT          CONTRACTION COEFFICIENT(S)
+
+ O         
+ 
+      1   S       1            37.2102162   -0.059944749340
+      1   S       2             2.2595307    0.596038539800
+      1   S       3             0.8674671    0.458178629100
+ 
+      2   P       4             5.2481516    0.162394855300
+      2   P       5             1.3469212    0.566170886200
+      2   P       6             0.4572992    0.422307175200
+
+ H         
+ 
+      3   S       7             2.0865392    0.154328967300
+      3   S       8             0.3800657    0.535328142300
+      3   S       9             0.1028606    0.444634542200
+
+ H         
+ 
+      4   S      10             2.0865392    0.154328967300
+      4   S      11             0.3800657    0.535328142300
+      4   S      12             0.1028606    0.444634542200
+
+ TOTAL NUMBER OF BASIS SET SHELLS             =    4
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+ NUMBER OF ELECTRONS                          =    8
+ CHARGE OF MOLECULE                           =    0
+ SPIN MULTIPLICITY                            =    1
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+ TOTAL NUMBER OF ATOMS                        =    3
+ THE NUCLEAR REPULSION ENERGY IS        9.1962799200
+
+ THE PARAMETERS USED IN THIS CALCULATION ARE DESCRIBED IN:
+
+  H: (PM3): J. J. P. STEWART, J. COMP. CHEM. 10, 209 (1989).                    
+  O: (PM3): J. J. P. STEWART, J. COMP. CHEM. 10, 209 (1989).                    
+
+ THERE ARE    1 HEAVY AND    2 LIGHT ATOMS,
+ YIELDING A TOTAL OF        21 MOPAC 2E- INTEGRALS.
+
+     $CONTRL OPTIONS
+     ---------------
+ SCFTYP=RHF          RUNTYP=GRADIENT     EXETYP=RUN     
+ MPLEVL=       0     CITYP =NONE         CCTYP =NONE         VBTYP =NONE    
+ DFTTYP=NONE         TDDFT =NONE    
+ MULT  =       1     ICHARG=       0     NZVAR =       0     COORD =UNIQUE  
+ PP    =NONE         RELWFN=NONE         LOCAL =NONE         NUMGRD=       F
+ ISPHER=      -1     NOSYM =       0     MAXIT =      30     UNITS =ANGS    
+ PLTORB=       F     MOLPLT=       F     AIMPAC=       F     FRIEND=        
+ NPRINT=       7     IREST =       0     GEOM  =INPUT   
+ NORMF =       0     NORMP =       0     ITOL  =      20     ICUT  =       9
+ INTTYP=BEST         GRDTYP=BEST         QMTTOL= 1.0E-06
+
+     $SYSTEM OPTIONS
+     ---------------
+  REPLICATED MEMORY=     1000000 WORDS (ON EVERY NODE).
+ DISTRIBUTED MEMDDI=           0 MILLION WORDS IN AGGREGATE,
+ MEMDDI DISTRIBUTED OVER   1 PROCESSORS IS           0 WORDS/PROCESSOR.
+ TOTAL MEMORY REQUESTED ON EACH PROCESSOR=     1000000 WORDS.
+ TIMLIM=          10.00 MINUTES, OR       0.0 DAYS.
+ PARALL= F  BALTYP=  DLB     KDIAG=    0  COREFL= F
+ MXSEQ2=     300 MXSEQ3=     150
+
+          ----------------
+          PROPERTIES INPUT
+          ----------------
+
+     MOMENTS            FIELD           POTENTIAL          DENSITY
+ IEMOM =       1   IEFLD =       0   IEPOT =       0   IEDEN =       0
+ WHERE =COMASS     WHERE =NUCLEI     WHERE =NUCLEI     WHERE =NUCLEI  
+ OUTPUT=BOTH       OUTPUT=BOTH       OUTPUT=BOTH       OUTPUT=BOTH    
+ IEMINT=       0   IEFINT=       0                     IEDINT=       0
+                                                       MORB  =       0
+          EXTRAPOLATION IN EFFECT
+ ORBITAL PRINTING OPTION: NPREO=     1     6     2     1
+
+     -------------------------------
+     INTEGRAL TRANSFORMATION OPTIONS
+     -------------------------------
+     NWORD  =            0
+     CUTOFF = 1.0E-09     MPTRAN =       0
+     DIRTRF =       F     AOINTS =DUP     
+
+          ----------------------
+          INTEGRAL INPUT OPTIONS
+          ----------------------
+ NOPK  =       1 NORDER=       0 SCHWRZ=       F
+
+     ------------------------------------------
+     THE POINT GROUP IS CN , NAXIS= 1, ORDER= 1
+     ------------------------------------------
+
+     DIMENSIONS OF THE SYMMETRY SUBSPACES ARE
+ A   =    6
+
+ ..... DONE SETTING UP THE RUN .....
+ STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+
+                    --------------------------------
+                    SINGLE POINT ENERGY AND GRADIENT
+                    --------------------------------
+
+          ********************
+          1 ELECTRON INTEGRALS
+          ********************
+
+          **************************
+          1 AND 2 ELECTRON INTEGRALS
+          **************************
+
+ MOPAC ONE- AND TWO-ELECTRON INTEGRALS REQUIRE        63 WORDS.
+ ...... END OF ONE- AND TWO-ELECTRON INTEGRALS......
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+ ...... END OF ONE-ELECTRON INTEGRALS ......
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+
+          -------------
+          GUESS OPTIONS
+          -------------
+          GUESS =HUCKEL            NORB  =       0          NORDER=       0
+          MIX   =       F          PRTMO =       F          PUNMO =       F
+          TOLZ  = 1.0E-08          TOLE  = 1.0E-05
+          SYMDEN=       F          PURIFY=       F
+
+ INITIAL GUESS ORBITALS GENERATED BY HUCKEL   ROUTINE.
+
+ SYMMETRIES FOR INITIAL GUESS ORBITALS FOLLOW.   BOTH SET(S).
+     4 ORBITALS ARE OCCUPIED (    0 CORE ORBITALS).
+     1=A        2=A        3=A        4=A        5=A        6=A   
+ ...... END OF INITIAL ORBITAL SELECTION ......
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+
+          --------------------------
+               R-PM3 SCF CALCULATION
+          --------------------------
+
+     NUCLEAR ENERGY =         5.4709724836
+     MAXIT =   30     NPUNCH=    2
+     EXTRAP=T  DAMP=F  SHIFT=F  RSTRCT=F  DIIS=F  DEM=F  SOSCF=F
+     DENSITY MATRIX CONV=  1.00E-05
+     MEMORY REQUIRED FOR RHF ITERS=       405 WORDS.
+
+ ITER EX DEM     TOTAL ENERGY        E CHANGE  DENSITY CHANGE    DIIS ERROR
+   1  0  0      -11.8586419552   -11.8586419552   0.234258945   0.000000000
+   2  1  0      -11.9331410703    -0.0744991151   0.086426980   0.000000000
+   3  2  0      -11.9389340304    -0.0057929601   0.032420555   0.000000000
+   4  3  0      -11.9395909719    -0.0006569415   0.012641358   0.000000000
+   5  0  0      -11.9396881022    -0.0000971303   0.008614005   0.000000000
+   6  1  0      -11.9397079790    -0.0000198768   0.000185572   0.000000000
+   7  2  0      -11.9397080008    -0.0000000218   0.000088206   0.000000000
+   8  3  0      -11.9397080057    -0.0000000049   0.000041939   0.000000000
+   9  4  0      -11.9397080068    -0.0000000011   0.000019958   0.000000000
+  10  5  0      -11.9397080071    -0.0000000003   0.000009508   0.000000000
+  11  6  0      -11.9397080071    -0.0000000001   0.000004534   0.000000000
+
+          -----------------
+          DENSITY CONVERGED
+          -----------------
+     TIME TO FORM FOCK OPERATORS=       0.0 SECONDS (       0.0 SEC/ITER)
+     TIME TO SOLVE SCF EQUATIONS=       0.0 SECONDS (       0.0 SEC/ITER)
+
+ FINAL R-PM3 ENERGY IS      -11.9397080071 AFTER  11 ITERATIONS
+
+ HEAT OF FORMATION IS      -53.24868 KCAL/MOL
+
+          ------------
+          EIGENVECTORS
+          ------------
+
+                      1          2          3          4          5
+                   -1.3500    -0.6399    -0.5391    -0.4532     0.1499
+                     A          A          A          A          A   
+    1  O  1  S    0.877577   0.000000   0.339539   0.000000  -0.338484
+    2  O  1  X   -0.000000   0.770110   0.000000  -0.000000   0.000000
+    3  O  1  Y   -0.107989  -0.000000   0.827852   0.000000   0.550453
+    4  O  1  Z    0.000000   0.000000  -0.000000   1.000000  -0.000000
+    5  H  2  S    0.330300   0.451071  -0.315732  -0.000000   0.539644
+    6  H  3  S    0.330300  -0.451071  -0.315732   0.000000   0.539644
+
+                      6
+                    0.1902
+                     A   
+    1  O  1  S    0.000000
+    2  O  1  X    0.637911
+    3  O  1  Y   -0.000000
+    4  O  1  Z   -0.000000
+    5  H  2  S   -0.544550
+    6  H  3  S    0.544550
+ ...... END OF RHF CALCULATION ......
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+
+     ----------------------------------------------------------------
+     PROPERTY VALUES FOR THE RHF   SELF-CONSISTENT FIELD WAVEFUNCTION
+     ----------------------------------------------------------------
+
+                    -------------
+                    MOPAC CHARGES
+                    -------------
+         ATOM NO.   TYPE          CHARGE        ATOM  ELECTRON DENSITY
+           1         O             -0.3510          6.3510
+           2         H              0.1755          0.8245
+           3         H              0.1755          0.8245
+
+          ---------------------
+          ELECTROSTATIC MOMENTS
+          ---------------------
+
+ POINT   1           X           Y           Z (ANGS)      CHARGE
+                 0.000000    0.000000    0.000000       -0.00 (A.U.)
+         DX          DY          DZ         /D/  (DEBYE)
+     0.000000   -1.760588    0.000000    1.760588
+ ...... END OF PROPERTY EVALUATION ......
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
+
+                         ----------------------
+                         GRADIENT OF THE ENERGY
+                         ----------------------
+
+ UNITS ARE HARTREE/BOHR    E'X               E'Y               E'Z 
+    1 O                0.000000000       0.012774428       0.000000000
+    2 H                0.000360235      -0.006387214       0.000000000
+    3 H               -0.000360235      -0.006387214       0.000000000
+
+                   MAXIMUM GRADIENT =    0.012774428
+                       RMS GRADIENT =    0.005217903
+  $VIB   
+          IVIB=   0 IATOM=   0 ICOORD=   0 E=      -11.9397080071
+  0.000000000E+00 1.277442809E-02 0.000000000E+00 3.602354165E-04-6.387214046E-03
+  0.000000000E+00-3.602354165E-04-6.387214046E-03 0.000000000E+00
+  3.214358672E-16-1.760587658E+00 8.410136759E-17
+
+..... END OF SINGLE POINT GRADIENT .....
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  25.00%
+                580000  WORDS OF DYNAMIC MEMORY USED
+ EXECUTION OF GAMESS TERMINATED NORMALLY Wed Feb 17 17:44:04 2016
+ DDI: 263624 bytes (0.3 MB / 0 MWords) used by master data server.
+
+ ----------------------------------------
+ CPU timing information for all processes
+ ========================================
+ 0: 0.13 + 0.27 = 0.40
+ 1: 0.10 + 0.13 = 0.23
+ ----------------------------------------
