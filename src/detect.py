@@ -33,8 +33,8 @@ def detect_columns(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the data extracted from the file, in the form of dictionary
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/detect
-    #        : main.py/main/initial_gamess_exe/unpack_file/detect
+    # Used in: main.py/main/nve/gamess_to_libra/unpack_file/detect
+    #        : main.py/main/unpack_file/detect
 
     i = -1
     for line in l_gam:
@@ -53,10 +53,6 @@ def detect_columns(l_gam,params):
         if len(spline) == 8 and spline[4] == "(BETA":
             params["locc_bet"] = i
             params["Nocc_bet"] = int(spline[7])
-
-        #NUMBER OF ELECTRONS                          =    8
-        #NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
-        #NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
 
         # the number of cartesian gaussian basis functions
         if len(spline) == 8 and spline[5] == "FUNCTIONS":
@@ -132,8 +128,8 @@ def show_outputs(l_gam,params):
     # \param[in] params : The list which includes extracted data from l_gam file.
     # This function shows the columns which includes the information.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/detect
-    #        : main.py/main/initial_gamess_exe/unpack_file/detect
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/detect
+    #        : main.py/main/unpack_file/detect
 
     print "******************************************"
     print "according to the",params["lele"]+1,"th column,"
@@ -196,8 +192,8 @@ def detect(l_gam,params):
     # \param[in] params : The list which includes extracted data from l_gam file.
     # This function returns the data extracted from the file, in the form of dictionary
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-    #        : main.py/main/initial_gamess_exe/unpack_file
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
+    #        : main.py/main/unpack_file
 
     detect_columns(l_gam,params)
 

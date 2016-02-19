@@ -13,23 +13,20 @@
 # This module defines the function which communicates the GAMESS output data
 # to Libra and vice versa.
 # It outputs the files needed for excited electron dynamics simulation.
-import sys
-
-# Path the the source code
-sys.path.insert(1,"/user/alexeyak/Programming/libra-gamess_interface/src")
-
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-print "Using the Libra installation at", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/qchem")
-sys.path.insert(1,cwd+"/_build/src/dyn")
-sys.path.insert(1,cwd+"/_build/src/chemobjects")
-sys.path.insert(1,cwd+"/_build/src/hamiltonian")
-
 
 import os
 import sys
 import math
+
+
+# First, we add the location of the library to test to the PYTHON path
+sys.path.insert(1,os.environ["src_path"]) # Path the the source code
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_qchem_path"])
+sys.path.insert(1,os.environ["libra_dyn_path"])
+sys.path.insert(1,os.environ["libra_chemobjects_path"])
+sys.path.insert(1,os.environ["libra_hamiltonian_path"])
+
 from gamess_to_libra import *
 from nve import *
 from create_gamess_input import *
@@ -57,7 +54,7 @@ def main(params):
 
     ao, E, C, Grad, data = unpack_file(params["gms_out"])
 
-    print data
+    #print data
 
     ################## Step 2: Initialize molecular system and run MD ###########################
 
@@ -66,5 +63,3 @@ def main(params):
 
     print "Starting MD..."
     run_MD(syst,ao,E,C,data,params)
-
-  

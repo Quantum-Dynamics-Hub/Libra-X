@@ -14,7 +14,7 @@
 # the overlap matrixes of atomic and molecular orbitals with different time steps.
 # This returns the overlap matrix of molecular orbitals like  <MO(t)|MO(t+dt)>.
 #
-# Used in: main.py/main/nve/nve_MD/gamess_to_libra
+# Used in: main.py/main/nve_MD/gamess_to_libra
 
 
 import os
@@ -22,10 +22,8 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-print "Using the Libra installation at", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/qchem")
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_qchem_path"])
 
 from libmmath import *
 from libqchem import *
@@ -37,7 +35,7 @@ def AO_overlap(ao_i, ao_j):
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <AO(t)|AO(t+dt)>.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/overlap
+    # Used in: main.py/main/nve_MD/gamess_to_libra/overlap
 
     Norb = len(ao_i)
 
@@ -59,7 +57,7 @@ def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/overlap
+    # Used in: main.py/main/nve_MD/gamess_to_libra/overlap
 
     Norb = len(ao_i)
     P = MATRIX(Norb, Norb)
@@ -85,7 +83,7 @@ def overlap(ao1,ao2,C1,C2,basis_sets):
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra
+    # Used in: main.py/main/nve_MD/gamess_to_libra
 
     # this is mostly a test function
 

@@ -16,10 +16,8 @@ import math
 
 
 # Fisrt, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-print "Current working directory", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/chemobjects")
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_chemobjects_path"])
 
 from libmmath import *
 from libchemobjects import *

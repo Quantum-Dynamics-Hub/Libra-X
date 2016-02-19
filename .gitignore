@@ -1,2 +1,7 @@
 *.*~
 *.pyc
+re_*
+im_*
+slurm*
+*.out
+*.xyz

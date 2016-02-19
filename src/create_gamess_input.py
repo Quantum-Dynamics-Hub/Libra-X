@@ -17,13 +17,11 @@ import os
 import sys
 import math
 
-# Fisrt, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-#print "Current working directory", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/chemobjects")
-sys.path.insert(1,cwd+"/_build/src/hamiltonian")
-sys.path.insert(1,cwd+"/_build/src/dyn")
+# First, we add the location of the library to test to the PYTHON path
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_chemobjects_path"])
+sys.path.insert(1,os.environ["libra_hamiltonian_path"])
+sys.path.insert(1,os.environ["libra_dyn_path"])
 #sys.path.insert(1,cwd+"/../../_build/src/hamiltonian/hamiltonian_atomistic")
 
 #print "\nTest 1: Importing the library and its content"
@@ -41,7 +39,7 @@ def read_gms_inp_templ(inp_filename):
     # This function returns the format of GAMESS information before 
     # coordinates of atoms.
     #
-    # Used in:  main.py/main/initial_gamess_exe    
+    # Used in:  main.py/main
 
     f = open(inp_filename,"r")
     templ = f.readlines()
