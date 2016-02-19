@@ -1,27 +1,27 @@
 ----- GAMESS execution script 'rungms' -----
 This job is running on host cpn-p27-15.cbls.ccr.buffalo.edu
-under operating system Linux at Thu Feb 18 15:18:05 EST 2016
+under operating system Linux at Fri Feb 19 15:36:04 EST 2016
 Available scratch disk space (Kbyte units) at beginning of the job is
 Filesystem     1K-blocks  Used Available Use% Mounted on
-/dev/sda6      293532636 34304 293498332   1% /scratch
-GAMESS temporary binary files will be written to /scratch/292067
-GAMESS supplementary output files will be written to /user/alexeyak/Programming/libra-gamess_interface/run
+/dev/sda6      293532636 32944 293499692   1% /scratch
+GAMESS temporary binary files will be written to /scratch/292325
+GAMESS supplementary output files will be written to /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run
 Copying input file H2O_wrk.inp to your run's scratch directory...
 MPI kickoff will run GAMESS on 1 cores in 1 nodes.
 The nodes are cpn-p27-15.
 The binary to be executed is /util/academic/gamess/v20130501r1/impi/gamess/gamess.01.x
 MPI will run 1 compute processes and 1 data servers,
     placing 2 of each process type onto each node.
-The scratch disk space on each node is /scratch/292067, with free space
+The scratch disk space on each node is /scratch/292325, with free space
 Filesystem     1K-blocks  Used Available Use% Mounted on
-/dev/sda6      293532636 34304 293498332   1% /scratch
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=bb6f7f0
-[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=c8df7f0
+/dev/sda6      293532636 32968 293499668   1% /scratch
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=c1467f0
+[-1] MPI startup(): Imported environment partly inaccesible. Map=0 Info=cf367f0
 [1] MPI startup(): shm data transfer mode
 [0] MPI startup(): shm data transfer mode
 [0] MPI startup(): Rank    Pid      Node name                        Pin cpu
-[0] MPI startup(): 0       135061   cpn-p27-15.cbls.ccr.buffalo.edu  +1
-[0] MPI startup(): 1       135062   cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 0       10141    cpn-p27-15.cbls.ccr.buffalo.edu  +1
+[0] MPI startup(): 1       10142    cpn-p27-15.cbls.ccr.buffalo.edu  +1
           ******************************************************
           *         GAMESS VERSION =  1 MAY 2013 (R1)          *
           *             FROM IOWA STATE UNIVERSITY             *
@@ -87,7 +87,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      N. COPERNICUS UNIVERSITY AND JACKSON STATE UNIVERSITY:
           MARIA BARYSZ
 
- EXECUTION OF GAMESS BEGUN Thu Feb 18 15:18:05 2016
+ EXECUTION OF GAMESS BEGUN Fri Feb 19 15:36:04 2016
 
             ECHO OF THE FIRST FEW INPUT CARDS -
  INPUT CARD>! H2O test calculation                                                          
@@ -101,9 +101,9 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  INPUT CARD>H2O in semiempirical models(PM3)                                                
  INPUT CARD>Cn 1                                                                            
  INPUT CARD>                                                                                
- INPUT CARD>O 8.0           0           0  0                                                
- INPUT CARD>H 1.0   0.7575408  -0.5870796  0                                                
- INPUT CARD>H 1.0  -0.7575408  -0.5870796  0                                                
+ INPUT CARD>O   8.0       0.0000000      -0.0011662       0.0000000                         
+ INPUT CARD>H   1.0       0.7569404      -0.5778237       0.0000000                         
+ INPUT CARD>H   1.0      -0.7569404      -0.5778237       0.0000000                         
  INPUT CARD> $END                                                                           
     1000000 WORDS OF MEMORY AVAILABLE
 
@@ -123,18 +123,18 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
  ATOM      ATOMIC                      COORDINATES (BOHR)
            CHARGE         X                   Y                   Z
- O           8.0     0.0000000000        0.0000000000        0.0000000000
- H           1.0     1.4315445365       -1.1094195770        0.0000000000
- H           1.0    -1.4315445365       -1.1094195770        0.0000000000
+ O           8.0     0.0000000000       -0.0022037984        0.0000000000
+ H           1.0     1.4304099450       -1.0919284622        0.0000000000
+ H           1.0    -1.4304099450       -1.0919284622        0.0000000000
 
           INTERNUCLEAR DISTANCES (ANGS.)
           ------------------------------
 
                 1 O          2 H          3 H     
 
-   1 O       0.0000000    0.9584000 *  0.9584000 *
-   2 H       0.9584000 *  0.0000000    1.5150816 *
-   3 H       0.9584000 *  1.5150816 *  0.0000000  
+   1 O       0.0000000    0.9515738 *  0.9515738 *
+   2 H       0.9515738 *  0.0000000    1.5138808 *
+   3 H       0.9515738 *  1.5138808 *  0.0000000  
 
   * ... LESS THAN  3.000
 
@@ -185,7 +185,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
  NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
  TOTAL NUMBER OF ATOMS                        =    3
- THE NUCLEAR REPULSION ENERGY IS        9.1836180203
+ THE NUCLEAR REPULSION ENERGY IS        9.2472691073
 
  THE PARAMETERS USED IN THIS CALCULATION ARE DESCRIBED IN:
 
@@ -251,8 +251,8 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  A   =    6
 
  ..... DONE SETTING UP THE RUN .....
- STEP CPU TIME =     0.02 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  66.67%
+ STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS   0.00%
 
                     --------------------------------
                     SINGLE POINT ENERGY AND GRADIENT
@@ -269,10 +269,10 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  MOPAC ONE- AND TWO-ELECTRON INTEGRALS REQUIRE        63 WORDS.
  ...... END OF ONE- AND TWO-ELECTRON INTEGRALS......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS   0.00%
  ...... END OF ONE-ELECTRON INTEGRALS ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS   0.00%
 
           -------------
           GUESS OPTIONS
@@ -289,30 +289,29 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      1=A        2=A        3=A        4=A        5=A        6=A   
  ...... END OF INITIAL ORBITAL SELECTION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS   0.00%
 
           --------------------------
                R-PM3 SCF CALCULATION
           --------------------------
 
-     NUCLEAR ENERGY =         5.4659217704
+     NUCLEAR ENERGY =         5.4911410439
      MAXIT =   30     NPUNCH=    2
      EXTRAP=T  DAMP=F  SHIFT=F  RSTRCT=F  DIIS=F  DEM=F  SOSCF=F
      DENSITY MATRIX CONV=  1.00E-05
      MEMORY REQUIRED FOR RHF ITERS=       405 WORDS.
 
  ITER EX DEM     TOTAL ENERGY        E CHANGE  DENSITY CHANGE    DIIS ERROR
-   1  0  0      -11.8587217898   -11.8587217898   0.234298806   0.000000000
-   2  1  0      -11.9330888858    -0.0743670960   0.086512591   0.000000000
-   3  2  0      -11.9388838032    -0.0057949174   0.032459383   0.000000000
-   4  3  0      -11.9395415620    -0.0006577588   0.012656871   0.000000000
-   5  0  0      -11.9396388755    -0.0000973135   0.008626682   0.000000000
-   6  1  0      -11.9396588254    -0.0000199499   0.000189811   0.000000000
-   7  2  0      -11.9396588481    -0.0000000228   0.000090133   0.000000000
-   8  3  0      -11.9396588533    -0.0000000051   0.000042815   0.000000000
-   9  4  0      -11.9396588544    -0.0000000012   0.000020358   0.000000000
-  10  5  0      -11.9396588547    -0.0000000003   0.000009691   0.000000000
-  11  6  0      -11.9396588548    -0.0000000001   0.000004618   0.000000000
+   1  0  0      -11.8583477664   -11.8583477664   0.233888347   0.000000000
+   2  1  0      -11.9333137126    -0.0749659462   0.085918461   0.000000000
+   3  2  0      -11.9390834213    -0.0057697087   0.032184517   0.000000000
+   4  3  0      -11.9397344386    -0.0006510172   0.012542857   0.000000000
+   5  0  0      -11.9398303615    -0.0000959229   0.008534701   0.000000000
+   6  1  0      -11.9398498339    -0.0000194725   0.000165021   0.000000000
+   7  2  0      -11.9398498514    -0.0000000174   0.000078804   0.000000000
+   8  3  0      -11.9398498553    -0.0000000040   0.000037635   0.000000000
+   9  4  0      -11.9398498563    -0.0000000009   0.000017983   0.000000000
+  10  5  0      -11.9398498565    -0.0000000002   0.000008599   0.000000000
 
           -----------------
           DENSITY CONVERGED
@@ -320,36 +319,36 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
      TIME TO FORM FOCK OPERATORS=       0.0 SECONDS (       0.0 SEC/ITER)
      TIME TO SOLVE SCF EQUATIONS=       0.0 SECONDS (       0.0 SEC/ITER)
 
- FINAL R-PM3 ENERGY IS      -11.9396588548 AFTER  11 ITERATIONS
+ FINAL R-PM3 ENERGY IS      -11.9398498565 AFTER  10 ITERATIONS
 
- HEAT OF FORMATION IS      -53.21783 KCAL/MOL
+ HEAT OF FORMATION IS      -53.33769 KCAL/MOL
 
           ------------
           EIGENVECTORS
           ------------
 
                       1          2          3          4          5
-                   -1.3492    -0.6394    -0.5393    -0.4532     0.1496
+                   -1.3536    -0.6425    -0.5378    -0.4532     0.1511
                      A          A          A          A          A   
-    1  O  1  S    0.877780   0.000000   0.339690   0.000000  -0.337805
-    2  O  1  X    0.000000   0.770246  -0.000000   0.000000  -0.000000
-    3  O  1  Y   -0.108040   0.000000   0.827338   0.000000   0.551215
-    4  O  1  Z   -0.000000  -0.000000  -0.000000   1.000000   0.000000
-    5  H  2  S    0.330022   0.450955  -0.316324   0.000000   0.539467
-    6  H  3  S    0.330022  -0.450955  -0.316324  -0.000000   0.539467
+    1  O  1  S    0.876847   0.000000   0.338517   0.000000  -0.341388
+    2  O  1  X    0.000000   0.769466  -0.000000   0.000000  -0.000000
+    3  O  1  Y   -0.107580   0.000000   0.830234   0.000000   0.546935
+    4  O  1  Z   -0.000000  -0.000000  -0.000000   1.000000  -0.000000
+    5  H  2  S    0.331335   0.451620  -0.313144   0.000000   0.540516
+    6  H  3  S    0.331335  -0.451620  -0.313144  -0.000000   0.540516
 
                       6
-                    0.1896
+                    0.1926
                      A   
     1  O  1  S   -0.000000
-    2  O  1  X    0.637747
+    2  O  1  X    0.638688
     3  O  1  Y    0.000000
     4  O  1  Z   -0.000000
-    5  H  2  S   -0.544646
-    6  H  3  S    0.544646
+    5  H  2  S   -0.544095
+    6  H  3  S    0.544095
  ...... END OF RHF CALCULATION ......
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS   0.00%
 
      ----------------------------------------------------------------
      PROPERTY VALUES FOR THE RHF   SELF-CONSISTENT FIELD WAVEFUNCTION
@@ -359,9 +358,9 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
                     MOPAC CHARGES
                     -------------
          ATOM NO.   TYPE          CHARGE        ATOM  ELECTRON DENSITY
-           1         O             -0.3507          6.3507
-           2         H              0.1753          0.8247
-           3         H              0.1753          0.8247
+           1         O             -0.3528          6.3528
+           2         H              0.1764          0.8236
+           3         H              0.1764          0.8236
 
           ---------------------
           ELECTROSTATIC MOMENTS
@@ -370,38 +369,38 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
  POINT   1           X           Y           Z (ANGS)      CHARGE
                  0.000000    0.000000    0.000000       -0.00 (A.U.)
          DX          DY          DZ         /D/  (DEBYE)
-    -0.000000   -1.762282    0.000000    1.762282
+    -0.000000   -1.752766    0.000000    1.752766
  ...... END OF PROPERTY EVALUATION ......
- STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  40.00%
+ STEP CPU TIME =     0.01 TOTAL CPU TIME =        0.0 (    0.0 MIN)
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  50.00%
 
                          ----------------------
                          GRADIENT OF THE ENERGY
                          ----------------------
 
  UNITS ARE HARTREE/BOHR    E'X               E'Y               E'Z 
-    1 O                0.000000000       0.014620307       0.000000000
-    2 H                0.001305763      -0.007310154       0.000000000
-    3 H               -0.001305763      -0.007310154       0.000000000
+    1 O                0.000000000       0.004980347       0.000000000
+    2 H               -0.003278001      -0.002490173       0.000000000
+    3 H                0.003278001      -0.002490173       0.000000000
 
-                   MAXIMUM GRADIENT =    0.014620307
-                       RMS GRADIENT =    0.006000371
+                   MAXIMUM GRADIENT =    0.004980347
+                       RMS GRADIENT =    0.002553785
   $VIB   
-          IVIB=   0 IATOM=   0 ICOORD=   0 E=      -11.9396588548
-  0.000000000E+00 1.462030718E-02 0.000000000E+00 1.305762638E-03-7.310153590E-03
-  0.000000000E+00-1.305762638E-03-7.310153590E-03 0.000000000E+00
- -2.477653376E-15-1.762281699E+00 1.933692717E-15
+          IVIB=   0 IATOM=   0 ICOORD=   0 E=      -11.9398498565
+  0.000000000E+00 4.980346711E-03 0.000000000E+00-3.278001457E-03-2.490173357E-03
+  0.000000000E+00 3.278001459E-03-2.490173354E-03 0.000000000E+00
+ -4.461926490E-15-1.752765742E+00 2.191775884E-15
 
 ..... END OF SINGLE POINT GRADIENT .....
  STEP CPU TIME =     0.00 TOTAL CPU TIME =        0.0 (    0.0 MIN)
- TOTAL WALL CLOCK TIME=        0.1 SECONDS, CPU UTILIZATION IS  33.33%
+ TOTAL WALL CLOCK TIME=        0.0 SECONDS, CPU UTILIZATION IS  33.33%
                 580000  WORDS OF DYNAMIC MEMORY USED
- EXECUTION OF GAMESS TERMINATED NORMALLY Thu Feb 18 15:18:05 2016
+ EXECUTION OF GAMESS TERMINATED NORMALLY Fri Feb 19 15:36:04 2016
  DDI: 263624 bytes (0.3 MB / 0 MWords) used by master data server.
 
  ----------------------------------------
  CPU timing information for all processes
  ========================================
- 0: 0.12 + 0.24 = 0.36
- 1: 0.07 + 0.12 = 0.20
+ 0: 0.10 + 0.19 = 0.30
+ 1: 0.06 + 0.10 = 0.16
  ----------------------------------------

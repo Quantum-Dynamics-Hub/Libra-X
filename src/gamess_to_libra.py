@@ -28,25 +28,22 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-print "Using the Libra installation at", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/qchem")
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_qchem_path"])
 
 #print "\nTest 1: Importing the library and its content"
-#from libmmath import *
-#from libqchem import *
+from libmmath import *
+from libqchem import *
 
 def unpack_file(filename):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] GMS_DIR : The directory  where GAMESS is executed
-    # \param[in] job : The name of GAMESS output file
+    # \param[in] filename  GAMESS output file name
     # This function returns the data extracted from the file, in the form of dictionary :
     # atomic basis sets, molecular energies, molecular coefficients, gradients, respectively.
     #
-    # Used in:  main.py/main/initial_gamess_exe
-    #           main.py/main/nve/gamess_to_libra
+    # Used in:  main.py/main
+    #           main.py/main/nve_MD/gamess_to_libra
 
     f_gam = open(filename,"r")
     l_gam = f_gam.readlines()
@@ -81,7 +78,7 @@ def gamess_to_libra(params, ao, E, C, ite):
     # molecular coefficients used for calculating time-averaged
     # molecular energies and Non-Adiabatic Couplings(NACs).
     #
-    # Used in: main.py/nve/nve_MD/
+    # Used in: main.py/nve_MD/
 
     # 2-nd file - time "t+dt"  new
     ao2, E2, C2, Grad, data = unpack_file(params["gms_out"])
@@ -98,7 +95,8 @@ def gamess_to_libra(params, ao, E, C, ite):
     #print "P21 is";    P21.show_matrix()
 
     # calculate time-averaged molecular energies and Non-Adiabatic Couplings(NACs)
-    E, D = Ene_NAC(E,E2,P12,P21,params["dt_nucl"])
+    E = average_E(E,E2)
+    D = NAC(P12,P21,params["dt_nucl"])
 
     ene_filename = params["res"] + "re_Ham_" + str(ite)
     nac_filename = params["res"] + "im_Ham_" + str(ite)

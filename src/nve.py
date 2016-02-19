@@ -11,34 +11,29 @@
 
 ## \file nve.py
 # This module implements the functions which execute classical MD.
-# 
-# Used in : main.py/
+#
+
 
 
 from create_gamess_input import *
-#from create_pdb_file import *
-#from exe_gamess import *
 from gamess_to_libra import *
 
 import os
 import sys
 import math
 
-# Fisrt, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-print "Current working directory", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/chemobjects")
-sys.path.insert(1,cwd+"/_build/src/hamiltonian")
-sys.path.insert(1,cwd+"/_build/src/dyn")
+# First, we add the location of the library to test to the PYTHON path
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_chemobjects_path"])
+sys.path.insert(1,os.environ["libra_hamiltonian_path"])
+sys.path.insert(1,os.environ["libra_dyn_path"])
 #sys.path.insert(1,cwd+"/../../_build/src/hamiltonian/hamiltonian_atomistic")
 
-print "\nTest 1: Importing the library and its content"
 from libmmath import *
 from libchemobjects import *
 from libhamiltonian import *
 from libdyn import *
-#from cyghamiltonian_atomistic import *
+#from libhamiltonian_atomistic import *
 from LoadPT import * # Load_PT
 
 ##############################################################
@@ -49,14 +44,18 @@ def exe_gamess(params):
     # This is a function that call GAMESS execution on the compute node
     # \param[in] params Input data containing all manual settings and some extracted data.
     #
+    # Used in main.py/main
+    #         main.py/main/nve_MD
 
     inp = params["gms_inp"]
     out = params["gms_out"]
     nproc = params["nproc"]
+    scr_dir = os.environ['SLURMTMPDIR']
     os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
 
-    os.system("rm *.dat")
-
+    # delete the files except input and output ones to do another GAMESS calculation.
+    os.system("rm *.dat")              
+    os.system("rm -r %s/*" %(scr_dir)) 
 
 
 def run_MD(syst,ao,E,C,data,params):
@@ -71,7 +70,7 @@ def run_MD(syst,ao,E,C,data,params):
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively.
     #
-    # Used in:  main.py/main/nve
+    # Used in:  main.py/main
 
 
     # Open and close energy and trajectory files - this will effectively 
@@ -133,9 +132,9 @@ def run_MD(syst,ao,E,C,data,params):
             ekin = compute_kinetic_energy(mol)
        
             t = dt*ij # simulation time in a.u.
-            fe = open(params["ene_file"],"a")
-            fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
-            fe.close()
+        fe = open(params["ene_file"],"a")
+        fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
+        fe.close()
 
 
 def init_system(data, g):
@@ -145,7 +144,7 @@ def init_system(data, g):
     # \param[in] g      The list of gradients on all atoms
     # This function returns System object which will be used in classical MD.
     #
-    # Used in:  main.py/main/nve
+    # Used in:  main.py/main
 
 
     # Create Universe and populate it

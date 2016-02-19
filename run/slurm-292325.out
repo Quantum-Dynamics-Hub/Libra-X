@@ -1,0 +1,1886 @@
+SLURM_JOBID=292325
+SLURM_JOB_NODELIST=cpn-p27-15
+SLURM_NNODES=1
+SLURMTMPDIR=/scratch/292325
+working directory=/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run
+NPROCS=1
+
+The following have been reloaded with a version change:
+  1) intel/13.1 => intel/16.0
+
+
+The following have been reloaded with a version change:
+  1) intel-mpi/4.1.3 => intel-mpi/5.1.1
+
+
+The following have been reloaded with a version change:
+  1) mkl/11.1 => mkl/11.3
+
+
+The following have been reloaded with a version change:
+  1) intel-mpi/5.1.1 => intel-mpi/4.1.3  3) mkl/11.3 => mkl/11.1
+  2) intel/16.0 => intel/13.1
+
+libra_pot_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/pot
+libra_chemobjects_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/chemobjects
+libra_cell_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/cell
+libra_dyn_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/dyn
+libra_context_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/context
+libra_qchem_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/qchem
+libra_converters_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/converters
+libra_io_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/io
+libra_hamiltonian_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/hamiltonian
+libra_mmath_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/mmath
+libra_scripts_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/scripts
+libra_calculators_path = /projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src/calculators
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.21user 0.03system 0:02.63elapsed 9%CPU (0avgtext+0avgdata 4976maxresident)k
+0inputs+1160outputs (0major+8267minor)pagefaults 0swaps
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 331 - 349 th lines
+                      1          2          3          4          5
+
+                   -1.3492    -0.6394    -0.5393    -0.4532     0.1496
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.877780   0.000000   0.339690   0.000000  -0.337805
+
+    2  O  1  X    0.000000   0.770246  -0.000000   0.000000  -0.000000
+
+    3  O  1  Y   -0.108040   0.000000   0.827338   0.000000   0.551215
+
+    4  O  1  Z   -0.000000  -0.000000  -0.000000   1.000000   0.000000
+
+    5  H  2  S    0.330022   0.450955  -0.316324   0.000000   0.539467
+
+    6  H  3  S    0.330022  -0.450955  -0.316324  -0.000000   0.539467
+
+
+
+                      6
+
+                    0.1896
+
+                     A   
+
+    1  O  1  S   -0.000000
+
+    2  O  1  X    0.637747
+
+    3  O  1  Y    0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544646
+
+    6  H  3  S    0.544646
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000        0.0000000000        0.0000000000
+
+ H           1.0     1.4315445365       -1.1094195770        0.0000000000
+
+ H           1.0    -1.4315445365       -1.1094195770        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 383 - 385 th lines
+    1 O                0.000000000       0.014620307       0.000000000
+
+    2 H                0.001305763      -0.007310154       0.000000000
+
+    3 H               -0.001305763      -0.007310154       0.000000000
+
+******************************************
+
+******************************************
+according to the 323 th column,
+ FINAL R-PM3 ENERGY IS      -11.9396588548 AFTER  11 ITERATIONS
+
+total energy =  -11.9396588548
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, 0.0, 0.0], [1.4315445365, -1.109419577, 0.0], [-1.4315445365, -1.109419577, 0.0]]
+gradient= [[0.0, 0.014620307, 0.0], [0.001305763, -0.007310154, 0.0], [-0.001305763, -0.007310154, 0.0]]
+E Matrix is
+
+        -1.3492              0              0              0              0              0
+              0        -0.6394              0              0              0              0
+              0              0        -0.5393              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1496              0
+              0              0              0              0              0         0.1896
+C Matrix is
+
+        0.87778              0        0.33969              0      -0.337805             -0
+              0       0.770246             -0              0             -0       0.637747
+       -0.10804              0       0.827338              0       0.551215              0
+             -0             -0             -0              1              0             -0
+       0.330022       0.450955      -0.316324              0       0.539467      -0.544646
+       0.330022      -0.450955      -0.316324             -0       0.539467       0.544646
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]
+Initializing system...
+CREATE_ATOM  O
+CREATE_ATOM  H
+CREATE_ATOM  H
+Atom_id = 1
+Atom_displ2 = 0
+Atom_Z = 8
+Atom_element = O
+Atom_min_ring_size = 1
+
+Atom_id = 2
+Atom_displ2 = 0
+Atom_Z = 1
+Atom_element = H
+Atom_min_ring_size = 1
+
+Atom_id = 3
+Atom_displ2 = 0
+Atom_Z = 1
+Atom_element = H
+Atom_min_ring_size = 1
+
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.22user 0.02system 0:02.64elapsed 9%CPU (0avgtext+0avgdata 4984maxresident)k
+0inputs+1160outputs (0major+8266minor)pagefaults 0swaps
+Number of atoms in the system =  3
+Starting MD...
+mass m= 29165.1172117 29165.1172117 29165.1172117
+coordinates q =  0.0 0.0 0.0
+momenta p=  0.0 0.0 0.0
+forces f=  -0.0 -0.014620307 -0.0
+********************************************************
+mass m= 1837.3801451 1837.3801451 1837.3801451
+coordinates q =  1.4315445365 -1.109419577 0.0
+momenta p=  0.0 0.0 0.0
+forces f=  -0.001305763 0.007310154 -0.0
+********************************************************
+mass m= 1837.3801451 1837.3801451 1837.3801451
+coordinates q =  -1.4315445365 -1.109419577 0.0
+momenta p=  0.0 0.0 0.0
+forces f=  0.001305763 0.007310154 -0.0
+********************************************************
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 331 - 349 th lines
+                      1          2          3          4          5
+
+                   -1.3494    -0.6395    -0.5393    -0.4532     0.1497
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.877728  -0.000000   0.339654  -0.000000  -0.337979
+
+    2  O  1  X   -0.000000   0.770212  -0.000000   0.000000  -0.000000
+
+    3  O  1  Y   -0.108028   0.000000   0.827469  -0.000000   0.551022
+
+    4  O  1  Z    0.000000   0.000000   0.000000   1.000000  -0.000000
+
+    5  H  2  S    0.330094   0.450984  -0.316173  -0.000000   0.539512
+
+    6  H  3  S    0.330094  -0.450984  -0.316173   0.000000   0.539512
+
+
+
+                      6
+
+                    0.1898
+
+                     A   
+
+    1  O  1  S   -0.000000
+
+    2  O  1  X    0.637788
+
+    3  O  1  Y    0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544622
+
+    6  H  3  S    0.544622
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000       -0.0001003444        0.0000000000
+
+ H           1.0     1.4314022402       -1.1086238134        0.0000000000
+
+ H           1.0    -1.4314022402       -1.1086238134        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 383 - 385 th lines
+    1 O                0.000000000       0.014147202       0.000000000
+
+    2 H                0.001061330      -0.007073601       0.000000000
+
+    3 H               -0.001061330      -0.007073601       0.000000000
+
+******************************************
+
+******************************************
+according to the 323 th column,
+ FINAL R-PM3 ENERGY IS      -11.9396720815 AFTER  11 ITERATIONS
+
+total energy =  -11.9396720815
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, -0.0001003444, 0.0], [1.4314022402, -1.1086238134, 0.0], [-1.4314022402, -1.1086238134, 0.0]]
+gradient= [[0.0, 0.014147202, 0.0], [0.00106133, -0.007073601, 0.0], [-0.00106133, -0.007073601, 0.0]]
+E Matrix is
+
+        -1.3494              0              0              0              0              0
+              0        -0.6395              0              0              0              0
+              0              0        -0.5393              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1497              0
+              0              0              0              0              0         0.1898
+C Matrix is
+
+       0.877728             -0       0.339654             -0      -0.337979             -0
+             -0       0.770212             -0              0             -0       0.637788
+      -0.108028              0       0.827469             -0       0.551022              0
+              0              0              0              1             -0             -0
+       0.330094       0.450984      -0.316173             -0       0.539512      -0.544622
+       0.330094      -0.450984      -0.316173              0       0.539512       0.544622
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.23user 0.03system 0:02.65elapsed 10%CPU (0avgtext+0avgdata 4984maxresident)k
+0inputs+1160outputs (0major+8257minor)pagefaults 0swaps
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 331 - 349 th lines
+                      1          2          3          4          5
+
+                   -1.3500    -0.6399    -0.5391    -0.4532     0.1499
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.877578   0.000000   0.339539  -0.000000  -0.338484
+
+    2  O  1  X    0.000000   0.770110  -0.000000  -0.000000  -0.000000
+
+    3  O  1  Y   -0.107989   0.000000   0.827853  -0.000000   0.550453
+
+    4  O  1  Z    0.000000   0.000000   0.000000   1.000000   0.000000
+
+    5  H  2  S    0.330300   0.451071  -0.315732   0.000000   0.539644
+
+    6  H  3  S    0.330300  -0.451071  -0.315732   0.000000   0.539644
+
+
+
+                      6
+
+                    0.1902
+
+                     A   
+
+    1  O  1  S   -0.000000
+
+    2  O  1  X    0.637911
+
+    3  O  1  Y    0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544550
+
+    6  H  3  S    0.544550
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000       -0.0003945748        0.0000000000
+
+ H           1.0     1.4310290193       -1.1062881120        0.0000000000
+
+ H           1.0    -1.4310290193       -1.1062881120        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 383 - 385 th lines
+    1 O                0.000000000       0.012774617       0.000000000
+
+    2 H                0.000360668      -0.006387309       0.000000000
+
+    3 H               -0.000360668      -0.006387309       0.000000000
+
+******************************************
+
+******************************************
+according to the 323 th column,
+ FINAL R-PM3 ENERGY IS      -11.9397080158 AFTER  11 ITERATIONS
+
+total energy =  -11.9397080158
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, -0.0003945748, 0.0], [1.4310290193, -1.106288112, 0.0], [-1.4310290193, -1.106288112, 0.0]]
+gradient= [[0.0, 0.012774617, 0.0], [0.000360668, -0.006387309, 0.0], [-0.000360668, -0.006387309, 0.0]]
+E Matrix is
+
+          -1.35              0              0              0              0              0
+              0        -0.6399              0              0              0              0
+              0              0        -0.5391              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1499              0
+              0              0              0              0              0         0.1902
+C Matrix is
+
+       0.877578              0       0.339539             -0      -0.338484             -0
+              0        0.77011             -0             -0             -0       0.637911
+      -0.107989              0       0.827853             -0       0.550453              0
+              0              0              0              1              0             -0
+         0.3303       0.451071      -0.315732              0       0.539644       -0.54455
+         0.3303      -0.451071      -0.315732              0       0.539644        0.54455
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.23user 0.02system 0:02.62elapsed 9%CPU (0avgtext+0avgdata 4976maxresident)k
+0inputs+1168outputs (0major+8268minor)pagefaults 0swaps
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 331 - 349 th lines
+                      1          2          3          4          5
+
+                   -1.3511    -0.6406    -0.5388    -0.4532     0.1503
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.877355   0.000000   0.339327  -0.000000  -0.339272
+
+    2  O  1  X   -0.000000   0.769947  -0.000000  -0.000000  -0.000000
+
+    3  O  1  Y   -0.107912   0.000000   0.828467  -0.000000   0.549543
+
+    4  O  1  Z    0.000000   0.000000   0.000000   1.000000  -0.000000
+
+    5  H  2  S    0.330608   0.451211  -0.315039   0.000000   0.539859
+
+    6  H  3  S    0.330608  -0.451211  -0.315039   0.000000   0.539859
+
+
+
+                      6
+
+                    0.1908
+
+                     A   
+
+    1  O  1  S    0.000000
+
+    2  O  1  X    0.638108
+
+    3  O  1  Y   -0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544435
+
+    6  H  3  S    0.544435
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000       -0.0008639827        0.0000000000
+
+ H           1.0     1.4305773748       -1.1025619503        0.0000000000
+
+ H           1.0    -1.4305773748       -1.1025619503        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 383 - 385 th lines
+    1 O                0.000000000       0.010637955       0.000000000
+
+    2 H               -0.000701749      -0.005318978       0.000000000
+
+    3 H                0.000701749      -0.005318978       0.000000000
+
+******************************************
+
+******************************************
+according to the 323 th column,
+ FINAL R-PM3 ENERGY IS      -11.9397569818 AFTER  11 ITERATIONS
+
+total energy =  -11.9397569818
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, -0.0008639827, 0.0], [1.4305773748, -1.1025619503, 0.0], [-1.4305773748, -1.1025619503, 0.0]]
+gradient= [[0.0, 0.010637955, 0.0], [-0.000701749, -0.005318978, 0.0], [0.000701749, -0.005318978, 0.0]]
+E Matrix is
+
+        -1.3511              0              0              0              0              0
+              0        -0.6406              0              0              0              0
+              0              0        -0.5388              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1503              0
+              0              0              0              0              0         0.1908
+C Matrix is
+
+       0.877355              0       0.339327             -0      -0.339272              0
+             -0       0.769947             -0             -0             -0       0.638108
+      -0.107912              0       0.828467             -0       0.549543             -0
+              0              0              0              1             -0             -0
+       0.330608       0.451211      -0.315039              0       0.539859      -0.544435
+       0.330608      -0.451211      -0.315039              0       0.539859       0.544435
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.22user 0.03system 0:02.60elapsed 9%CPU (0avgtext+0avgdata 4988maxresident)k
+0inputs+1168outputs (0major+8274minor)pagefaults 0swaps
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 330 - 348 th lines
+                      1          2          3          4          5
+
+                   -1.3523    -0.6415    -0.5384    -0.4532     0.1507
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.877096   0.000000   0.338996   0.000000  -0.340271
+
+    2  O  1  X   -0.000000   0.769729  -0.000000   0.000000   0.000000
+
+    3  O  1  Y   -0.107781   0.000000   0.829275   0.000000   0.548349
+
+    4  O  1  Z    0.000000   0.000000  -0.000000   1.000000   0.000000
+
+    5  H  2  S    0.330973   0.451396  -0.314153  -0.000000   0.540153
+
+    6  H  3  S    0.330973  -0.451396  -0.314153  -0.000000   0.540153
+
+
+
+                      6
+
+                    0.1916
+
+                     A   
+
+    1  O  1  S    0.000000
+
+    2  O  1  X    0.638371
+
+    3  O  1  Y   -0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544281
+
+    6  H  3  S    0.544281
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000       -0.0014794665        0.0000000000
+
+ H           1.0     1.4302784201       -1.0976777646        0.0000000000
+
+ H           1.0    -1.4302784201       -1.0976777646        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 382 - 384 th lines
+    1 O                0.000000000       0.007949095       0.000000000
+
+    2 H               -0.001977462      -0.003974547       0.000000000
+
+    3 H                0.001977462      -0.003974547       0.000000000
+
+******************************************
+
+******************************************
+according to the 322 th column,
+ FINAL R-PM3 ENERGY IS      -11.9398073025 AFTER  10 ITERATIONS
+
+total energy =  -11.9398073025
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, -0.0014794665, 0.0], [1.4302784201, -1.0976777646, 0.0], [-1.4302784201, -1.0976777646, 0.0]]
+gradient= [[0.0, 0.007949095, 0.0], [-0.001977462, -0.003974547, 0.0], [0.001977462, -0.003974547, 0.0]]
+E Matrix is
+
+        -1.3523              0              0              0              0              0
+              0        -0.6415              0              0              0              0
+              0              0        -0.5384              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1507              0
+              0              0              0              0              0         0.1916
+C Matrix is
+
+       0.877096              0       0.338996              0      -0.340271              0
+             -0       0.769729             -0              0              0       0.638371
+      -0.107781              0       0.829275              0       0.548349             -0
+              0              0             -0              1              0             -0
+       0.330973       0.451396      -0.314153             -0       0.540153      -0.544281
+       0.330973      -0.451396      -0.314153             -0       0.540153       0.544281
+sbcast H2O_wrk.inp /scratch/292325/H2O_wrk.F05
+else
+source /util/academic/gamess/v20130501r1/impi/gamess/gms-files.csh
+setenv AUXDATA /util/academic/gamess/v20130501r1/impi/gamess/auxdata
+setenv EXTBAS /dev/null
+setenv NUCBAS /dev/null
+setenv POSBAS /dev/null
+setenv ERICFMT /util/academic/gamess/v20130501r1/impi/gamess/auxdata/ericfmt.dat
+setenv MCPPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/MCP
+setenv BASPATH /util/academic/gamess/v20130501r1/impi/gamess/auxdata/BASES
+setenv QUANPOL /util/academic/gamess/v20130501r1/impi/gamess/auxdata/QUANPOL
+setenv MAKEFP /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.efp
+setenv GAMMA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.gamma
+setenv TRAJECT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.trj
+setenv RESTART /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.rst
+setenv INPUT /scratch/292325/H2O_wrk.F05
+setenv PUNCH /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.dat
+setenv AOINTS /scratch/292325/H2O_wrk.F08
+setenv MOINTS /scratch/292325/H2O_wrk.F09
+setenv DICTNRY /scratch/292325/H2O_wrk.F10
+setenv DRTFILE /scratch/292325/H2O_wrk.F11
+setenv CIVECTR /scratch/292325/H2O_wrk.F12
+setenv CASINTS /scratch/292325/H2O_wrk.F13
+setenv CIINTS /scratch/292325/H2O_wrk.F14
+setenv WORK15 /scratch/292325/H2O_wrk.F15
+setenv WORK16 /scratch/292325/H2O_wrk.F16
+setenv CSFSAVE /scratch/292325/H2O_wrk.F17
+setenv FOCKDER /scratch/292325/H2O_wrk.F18
+setenv WORK19 /scratch/292325/H2O_wrk.F19
+setenv DASORT /scratch/292325/H2O_wrk.F20
+setenv DIABDAT /scratch/292325/H2O_wrk.F21
+setenv DFTINTS /scratch/292325/H2O_wrk.F21
+setenv DFTGRID /scratch/292325/H2O_wrk.F22
+setenv JKFILE /scratch/292325/H2O_wrk.F23
+setenv ORDINT /scratch/292325/H2O_wrk.F24
+setenv EFPIND /scratch/292325/H2O_wrk.F25
+setenv PCMDATA /scratch/292325/H2O_wrk.F26
+setenv PCMINTS /scratch/292325/H2O_wrk.F27
+setenv SVPWRK1 /scratch/292325/H2O_wrk.F26
+setenv SVPWRK2 /scratch/292325/H2O_wrk.F27
+setenv COSCAV /scratch/292325/H2O_wrk.F26
+setenv COSDATA /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.cosmo
+setenv COSPOT /projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/H2O_wrk.pot
+setenv MLTPL /scratch/292325/H2O_wrk.F28
+setenv MLTPLT /scratch/292325/H2O_wrk.F29
+setenv DAFL30 /scratch/292325/H2O_wrk.F30
+setenv SOINTX /scratch/292325/H2O_wrk.F31
+setenv SOINTY /scratch/292325/H2O_wrk.F32
+setenv SOINTZ /scratch/292325/H2O_wrk.F33
+setenv SORESC /scratch/292325/H2O_wrk.F34
+setenv GCILIST /scratch/292325/H2O_wrk.F37
+setenv HESSIAN /scratch/292325/H2O_wrk.F38
+setenv QMMMTEI /scratch/292325/H2O_wrk.F39
+setenv SOCCDAT /scratch/292325/H2O_wrk.F40
+setenv AABB41 /scratch/292325/H2O_wrk.F41
+setenv BBAA42 /scratch/292325/H2O_wrk.F42
+setenv BBBB43 /scratch/292325/H2O_wrk.F43
+setenv REMD /scratch/292325/H2O_wrk.F44
+setenv MCQD50 /scratch/292325/H2O_wrk.F50
+setenv MCQD51 /scratch/292325/H2O_wrk.F51
+setenv MCQD52 /scratch/292325/H2O_wrk.F52
+setenv MCQD53 /scratch/292325/H2O_wrk.F53
+setenv MCQD54 /scratch/292325/H2O_wrk.F54
+setenv MCQD55 /scratch/292325/H2O_wrk.F55
+setenv MCQD56 /scratch/292325/H2O_wrk.F56
+setenv MCQD57 /scratch/292325/H2O_wrk.F57
+setenv MCQD58 /scratch/292325/H2O_wrk.F58
+setenv MCQD59 /scratch/292325/H2O_wrk.F59
+setenv MCQD60 /scratch/292325/H2O_wrk.F60
+setenv MCQD61 /scratch/292325/H2O_wrk.F61
+setenv MCQD62 /scratch/292325/H2O_wrk.F62
+setenv MCQD63 /scratch/292325/H2O_wrk.F63
+setenv MCQD64 /scratch/292325/H2O_wrk.F64
+setenv NMRINT1 /scratch/292325/H2O_wrk.F61
+setenv NMRINT2 /scratch/292325/H2O_wrk.F62
+setenv NMRINT3 /scratch/292325/H2O_wrk.F63
+setenv NMRINT4 /scratch/292325/H2O_wrk.F64
+setenv NMRINT5 /scratch/292325/H2O_wrk.F65
+setenv NMRINT6 /scratch/292325/H2O_wrk.F66
+setenv DCPHFH2 /scratch/292325/H2O_wrk.F67
+setenv DCPHF21 /scratch/292325/H2O_wrk.F68
+setenv ELNUINT /scratch/292325/H2O_wrk.F67
+setenv NUNUINT /scratch/292325/H2O_wrk.F68
+setenv GVVPT /scratch/292325/H2O_wrk.F69
+setenv NUMOIN /scratch/292325/H2O_wrk.F69
+setenv NUMOCAS /scratch/292325/H2O_wrk.F70
+setenv NUELMO /scratch/292325/H2O_wrk.F71
+setenv NUELCAS /scratch/292325/H2O_wrk.F72
+setenv RIVMAT /scratch/292325/H2O_wrk.F51
+setenv RIT2A /scratch/292325/H2O_wrk.F52
+setenv RIT3A /scratch/292325/H2O_wrk.F53
+setenv RIT2B /scratch/292325/H2O_wrk.F54
+setenv RIT3B /scratch/292325/H2O_wrk.F55
+setenv GMCREF /scratch/292325/H2O_wrk.F70
+setenv GMCO2R /scratch/292325/H2O_wrk.F71
+setenv GMCROC /scratch/292325/H2O_wrk.F72
+setenv GMCOOC /scratch/292325/H2O_wrk.F73
+setenv GMCCC0 /scratch/292325/H2O_wrk.F74
+setenv GMCHMA /scratch/292325/H2O_wrk.F75
+setenv GMCEI1 /scratch/292325/H2O_wrk.F76
+setenv GMCEI2 /scratch/292325/H2O_wrk.F77
+setenv GMCEOB /scratch/292325/H2O_wrk.F78
+setenv GMCEDT /scratch/292325/H2O_wrk.F79
+setenv GMCERF /scratch/292325/H2O_wrk.F80
+setenv GMCHCR /scratch/292325/H2O_wrk.F81
+setenv GMCGJK /scratch/292325/H2O_wrk.F82
+setenv GMCGAI /scratch/292325/H2O_wrk.F83
+setenv GMCGEO /scratch/292325/H2O_wrk.F84
+setenv GMCTE1 /scratch/292325/H2O_wrk.F85
+setenv GMCTE2 /scratch/292325/H2O_wrk.F86
+setenv GMCHEF /scratch/292325/H2O_wrk.F87
+setenv GMCMOL /scratch/292325/H2O_wrk.F88
+setenv GMCMOS /scratch/292325/H2O_wrk.F89
+setenv GMCWGT /scratch/292325/H2O_wrk.F90
+setenv GMCRM2 /scratch/292325/H2O_wrk.F91
+setenv GMCRM1 /scratch/292325/H2O_wrk.F92
+setenv GMCR00 /scratch/292325/H2O_wrk.F93
+setenv GMCRP1 /scratch/292325/H2O_wrk.F94
+setenv GMCRP2 /scratch/292325/H2O_wrk.F95
+setenv GMCVEF /scratch/292325/H2O_wrk.F96
+setenv GMCDIN /scratch/292325/H2O_wrk.F97
+setenv GMC2SZ /scratch/292325/H2O_wrk.F98
+setenv GMCCCS /scratch/292325/H2O_wrk.F99
+unset echo
+0.22user 0.03system 0:02.62elapsed 9%CPU (0avgtext+0avgdata 4988maxresident)k
+0inputs+1160outputs (0major+8267minor)pagefaults 0swaps
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]
+******************************************
+according to the 182 th column,
+ NUMBER OF ELECTRONS                          =    8
+
+Nele =  8
+*******************************************
+******************************************
+according to the 185 th column,
+ NUMBER OF OCCUPIED ORBITALS (ALPHA)          =    4
+
+Nocc_alp =  4
+according to the 186 th column,
+ NUMBER OF OCCUPIED ORBITALS (BETA )          =    4
+
+Nocc_bet =  4
+*******************************************
+
+******************************************
+according to the 181 th column,
+ NUMBER OF CARTESIAN GAUSSIAN BASIS FUNCTIONS =    6
+
+Ngbf =  6
+*******************************************
+
+******************************************
+ATOMIC BASIS SET is within 158 - 178 th lines.
+ O         
+
+ 
+
+      1   S       1            37.2102162   -0.059944749340
+
+      1   S       2             2.2595307    0.596038539800
+
+      1   S       3             0.8674671    0.458178629100
+
+ 
+
+      2   P       4             5.2481516    0.162394855300
+
+      2   P       5             1.3469212    0.566170886200
+
+      2   P       6             0.4572992    0.422307175200
+
+
+
+ H         
+
+ 
+
+      3   S       7             2.0865392    0.154328967300
+
+      3   S       8             0.3800657    0.535328142300
+
+      3   S       9             0.1028606    0.444634542200
+
+
+
+ H         
+
+ 
+
+      4   S      10             2.0865392    0.154328967300
+
+      4   S      11             0.3800657    0.535328142300
+
+      4   S      12             0.1028606    0.444634542200
+
+******************************************
+
+******************************************
+MOLECULAR ORBITALS is within 330 - 348 th lines
+                      1          2          3          4          5
+
+                   -1.3536    -0.6425    -0.5378    -0.4532     0.1511
+
+                     A          A          A          A          A   
+
+    1  O  1  S    0.876847   0.000000   0.338517   0.000000  -0.341388
+
+    2  O  1  X    0.000000   0.769466  -0.000000   0.000000  -0.000000
+
+    3  O  1  Y   -0.107580   0.000000   0.830234   0.000000   0.546935
+
+    4  O  1  Z   -0.000000  -0.000000  -0.000000   1.000000  -0.000000
+
+    5  H  2  S    0.331335   0.451620  -0.313144   0.000000   0.540516
+
+    6  H  3  S    0.331335  -0.451620  -0.313144  -0.000000   0.540516
+
+
+
+                      6
+
+                    0.1926
+
+                     A   
+
+    1  O  1  S   -0.000000
+
+    2  O  1  X    0.638688
+
+    3  O  1  Y    0.000000
+
+    4  O  1  Z   -0.000000
+
+    5  H  2  S   -0.544095
+
+    6  H  3  S    0.544095
+
+******************************************
+
+******************************************
+COORDINATES OF ATOMS (in Bohr) is within 126 - 128 th lines
+ O           8.0     0.0000000000       -0.0022037984        0.0000000000
+
+ H           1.0     1.4304099450       -1.0919284622        0.0000000000
+
+ H           1.0    -1.4304099450       -1.0919284622        0.0000000000
+
+And the number of atoms is  3
+******************************************
+
+******************************************
+GRADIENT (in Hartree/Bohr) is within 382 - 384 th lines
+    1 O                0.000000000       0.004980347       0.000000000
+
+    2 H               -0.003278001      -0.002490173       0.000000000
+
+    3 H                0.003278001      -0.002490173       0.000000000
+
+******************************************
+
+******************************************
+according to the 322 th column,
+ FINAL R-PM3 ENERGY IS      -11.9398498565 AFTER  10 ITERATIONS
+
+total energy =  -11.9398498565
+******************************************
+
+*********************************************
+detect program ends
+*********************************************
+
+l_atoms= ['O', 'H', 'H']
+l_charges= [8.0, 1.0, 1.0]
+coor_atoms= [[0.0, -0.0022037984, 0.0], [1.430409945, -1.0919284622, 0.0], [-1.430409945, -1.0919284622, 0.0]]
+gradient= [[0.0, 0.004980347, 0.0], [-0.003278001, -0.002490173, 0.0], [0.003278001, -0.002490173, 0.0]]
+E Matrix is
+
+        -1.3536              0              0              0              0              0
+              0        -0.6425              0              0              0              0
+              0              0        -0.5378              0              0              0
+              0              0              0        -0.4532              0              0
+              0              0              0              0         0.1511              0
+              0              0              0              0              0         0.1926
+C Matrix is
+
+       0.876847              0       0.338517              0      -0.341388             -0
+              0       0.769466             -0              0             -0       0.638688
+       -0.10758              0       0.830234              0       0.546935              0
+             -0             -0             -0              1             -0             -0
+       0.331335        0.45162      -0.313144              0       0.540516      -0.544095
+       0.331335       -0.45162      -0.313144             -0       0.540516       0.544095
+expo_s= [[37.2102162, 2.2595307, 0.8674671], [2.0865392, 0.3800657, 0.1028606], [2.0865392, 0.3800657, 0.1028606]]
+expo_p= [[5.2481516, 1.3469212, 0.4572992], [], []]
+expo_d= [[], [], []]
+coef_s= [[-0.05994474934, 0.5960385398, 0.4581786291], [0.1543289673, 0.5353281423, 0.4446345422], [0.1543289673, 0.5353281423, 0.4446345422]]
+coef_p= [[0.1623948553, 0.5661708862, 0.4223071752], [], []]
+coef_d= [[], [], []]
+********************************************
+extract program ends
+********************************************
+
+nGTO= 3
+orb_name= [['s', 'px', 'py', 'pz'], ['s'], ['s']]

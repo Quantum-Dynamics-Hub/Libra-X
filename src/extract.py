@@ -14,8 +14,8 @@
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information
 # written in gamess output file.
 #
-# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-#        : main.py/main/initial_gamess_exe/unpack_file
+# Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
+#        : main.py/main/unpack_file
 
 #************************************************************
 # This program extracting parameters from gamess output file.
@@ -26,10 +26,8 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-cwd = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code"
-#print "Using the Libra installation at", cwd
-sys.path.insert(1,cwd+"/_build/src/mmath")
-sys.path.insert(1,cwd+"/_build/src/qchem")
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
@@ -41,8 +39,8 @@ def atomic_basis_set(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/initial_gamess_exe/unpack_file/extract
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/unpack_file/extract
 
     #  atomic species
     ab_start = params["ab_start"]
@@ -159,8 +157,8 @@ def molecular_orbitals(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the molecular orbitals info. as "E" and "C" of params.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/initial_gamess_exe/unpack_file/extract
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/unpack_file/extract
 
     mo_start = params["mo_start"]
     mo_end = params["mo_end"]
@@ -216,8 +214,8 @@ def coordinates_of_atoms(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the coordinates of atoms info. as "l_atoms" and "coor_atoms" of params.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/initial_gamess_exe/unpack_file/extract
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/unpack_file/extract
 
     coor_start = params["coor_start"]
     coor_end = params["coor_end"]
@@ -252,8 +250,8 @@ def gradient(l_gam,params):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the gradients as "gradient" of params.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/initial_gamess_exe/unpack_file/extract
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
+    #        : main.py/main/unpack_file/extract
 
 
     grad_start = params["grad_start"]
@@ -279,8 +277,8 @@ def extract(l_gam,params):
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, in the form of dictionary
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-    #        : main.py/main/initial_gamess_exe/unpack_file
+    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
+    #        : main.py/main/unpack_file
 
     coordinates_of_atoms(l_gam,params)
 

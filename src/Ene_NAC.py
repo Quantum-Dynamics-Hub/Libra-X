@@ -11,13 +11,15 @@
 ## \file Ene_NAC.py
 # This module defines the functions that calculate time-averaged energy and
 # the Non-Adiabatic couplings (NACs) and return them.
-#
-# Used in: main.py/main/nve/nve_MD/gamess_to_libra
+
+
 
 import os
 import sys
 import math
 
+sys.path.insert(1,os.environ["libra_mmath_path"])
+sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
@@ -29,12 +31,13 @@ def NAC(P12,P21,dt_nuc):
     # \param[in] dt_nuc : time step width of nuclear motion
     # This function returns Non-Adiabatic Couplings(NACs)
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/Ene_NAC
+    # Used in: main.py/main/nve/gamess_to_libra
 
     Norb = P12.num_of_rows
     D = MATRIX(Norb,Norb)
 
     D = 0.50/dt_nuc * ( P12 - P21 )
+
     return D
 
 def average_E(E1,E2):
@@ -43,24 +46,12 @@ def average_E(E1,E2):
     # \param[in] E1, E2 : molecular energies at different time step.
     # This function returns the time-averaged molecular energies.
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/Ene_NAC
+    # Used in: main.py/main/nve/gamess_to_libra
+
     Norb = E1.num_of_rows
     E = MATRIX(Norb,Norb)
 
     E = 0.50 * (E1 + E2)
+
     return E
 
-def Ene_NAC(E1,E2,P12,P21,dt_nuc):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] E1, E2 : molecular energies at different time step.
-    # \param[in] P12, P21 : overlap matrix of molecular orbitals at different time step.
-    # \param[in] dt_nuc : time step width of nuclear motion
-    # This function returns the time-averaged molecular energies and Non-Adiabatic Couplings(NACs).
-    #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra
-
-    E = average_E(E1,E2)
-    D = NAC(P12,P21,dt_nuc)
-
-    return E, D
