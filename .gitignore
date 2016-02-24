@@ -5,3 +5,4 @@ im_*
 slurm*
 *.out
 *.xyz
+.nfs*
