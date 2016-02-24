@@ -55,3 +55,40 @@ def average_E(E1,E2):
 
     return E
 
+def vibronic_hamiltonian(params,E_mol,D):
+
+    states = params["states"]
+    Hvib = CMATRIX(len(states),len(states))
+
+    # Excitation energy
+    for i in range(0,len(states)):
+
+        ene = 0.0
+        for ii in states[i][1]:
+            ene += E_mol.get(abs(ii)-1,abs(ii)-1)
+
+        Hvib.set(i,i,ene,0.0)
+    #print "Ex_ene="
+    #Hvib.show_matrix()
+
+    # NACs
+    for i in range(0,len(states)):
+        for j in range(0,len(states)):
+            dif_count = 0
+            if not i == j:
+                for k in range(0,len(states[i][1])):
+                    if not states[i][1][k] == states[j][1][k]:
+                        dif_i = abs(states[i][1][k])
+                        dif_j = abs(states[j][1][k])
+                        dif_count += 1
+                if dif_count == 1:
+                    Hvib.set(i,j,0.0,-D.get(dif_i-1,dif_j-1))
+
+    #Hvib.set(3,5,0.0,0.01)
+    #Hvib.set(5,3,0.0,0.01)
+    #print "D="
+    #D.show_matrix()
+    print "Hvib ="
+    Hvib.show_matrix()
+
+    return Hvib

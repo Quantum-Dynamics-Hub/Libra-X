@@ -95,14 +95,14 @@ def gamess_to_libra(params, ao, E, C, ite):
     #print "P21 is";    P21.show_matrix()
 
     # calculate time-averaged molecular energies and Non-Adiabatic Couplings(NACs)
-    E = average_E(E,E2)
+    E_mol = average_E(E,E2)
     D = NAC(P12,P21,params["dt_nucl"])
 
     ene_filename = params["res"] + "re_Ham_" + str(ite)
     nac_filename = params["res"] + "im_Ham_" + str(ite)
     
-    E.show_matrix(ene_filename)
-    D.show_matrix(nac_filename)
+    #E_mol.show_matrix(ene_filename)
+    #D.show_matrix(nac_filename)
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
@@ -110,4 +110,4 @@ def gamess_to_libra(params, ao, E, C, ite):
     E = MATRIX(E2)
     C = MATRIX(C2)
 
-    return Grad, data
+    return Grad, data, E_mol, D
