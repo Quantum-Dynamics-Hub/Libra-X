@@ -74,7 +74,7 @@ iconds = [0]
 
 params["iconds"] = iconds
 for ic in (0,len(iconds)):
-    params["prop_ele_file"+str(ic)] = params["res"]+"prop_ele"+str(ic)+".d" 
+    params["prop_ele_file"+str(ic)] = params["res"]+"prop_ele"+str(ic)+".xyz" 
  
 # Set active space and the basis states
 params["active_space"] = range(Nmin,Nmax+1)
