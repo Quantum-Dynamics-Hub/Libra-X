@@ -17,6 +17,7 @@
 
 from create_gamess_input import *
 from gamess_to_libra import *
+from vibronic_hamiltonian import *
 
 import os
 import sys
@@ -91,7 +92,7 @@ def run_MD(syst,ao,E,C,data,params):
     namdtime = params["namdtime"]
 
     elesteps = int(dt_nucl/dt_ele) # the number of electronic timesteps per nuclear timestep
-    print "elesteps=",elesteps
+    #print "elesteps=",elesteps
 
     fprop_ele = []
     for ic in range(0,len(iconds)):
@@ -184,7 +185,6 @@ def init_system(data, g):
     # This function returns System object which will be used in classical MD.
     #
     # Used in:  main.py/main
-
 
     # Create Universe and populate it
     U = Universe();   Load_PT(U, "elements.txt", 0)

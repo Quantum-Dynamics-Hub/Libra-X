@@ -14,7 +14,7 @@ libra_gamess_int_path = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_i
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
-from lazy import *
+from lazy import * # This module is originally PYXAID code from  https://sourceforge.net/p/pyxaid/code/ci/master/tree/
 
 ########## Setup all manual parameters here ####################
 

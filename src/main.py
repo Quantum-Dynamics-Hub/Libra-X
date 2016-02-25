@@ -39,6 +39,7 @@ def main(params):
     # This function prepares initial parameters from GAMESS output file
     # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
     # iteratively.
+    # Parallelly, it executes TD-SE calculation for simulating excited eletronic dynamics.
     #
     # Used in:  main.py
 
@@ -56,7 +57,7 @@ def main(params):
 
     print data
 
-    ################## Step 2: Initialize molecular system and run MD ####
+    ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
     print "Initializing system..."
     syst = init_system(data, Grad)

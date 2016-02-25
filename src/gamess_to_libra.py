@@ -101,8 +101,8 @@ def gamess_to_libra(params, ao, E, C, ite):
     ene_filename = params["res"] + "re_Ham_" + str(ite)
     nac_filename = params["res"] + "im_Ham_" + str(ite)
     
-    #E_mol.show_matrix(ene_filename)
-    #D.show_matrix(nac_filename)
+    E_mol.show_matrix(ene_filename)
+    D.show_matrix(nac_filename)
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
