@@ -68,8 +68,7 @@ ex_indx = 1 + (J-LUMO)*(HOMO+1 - Nmin) + (I-Nmin)
 params["ex_indx"] = ex_indx
  
 # Each entry of the list below is an initial condition. It is also a list
-# but containing only 2 elements - first is the time step at which we start
-# the dynamics, the second is the index of the excited state configuration
+# containing the time step at which we start the dynamics
 iconds = [0]
 
 params["iconds"] = iconds
@@ -79,7 +78,7 @@ for ic in (0,len(iconds)):
 # Set active space and the basis states
 params["active_space"] = range(Nmin,Nmax+1)
  
-# Generate basis states
+# Generate basis states : call the functions in lazy.py module
 GS = ground_state(Nmin,HOMO)  # ground state
 SE = single_excitations(Nmin,Nmax,HOMO,1)  # single excitations
  
@@ -97,7 +96,7 @@ print params
 
 ################################################################
 
-from path_libra_lib import * # import module pathing the libra libralies 
+from path_libra_lib import * # import path_libra_lib module 
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 import main        # import main module of the libra-Gamess-interface code
