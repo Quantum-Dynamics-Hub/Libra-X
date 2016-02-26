@@ -17,6 +17,7 @@
 
 from create_gamess_input import *
 from gamess_to_libra import *
+from vibronic_hamiltonian import *
 
 import os
 import sys
@@ -81,10 +82,25 @@ def run_MD(syst,ao,E,C,data,params):
     ft = open(params["traj_file"],"w")
     ft.close()
     
-    dt = params["dt_nucl"]
+    dt_nucl = params["dt_nucl"]
+    dt_ele = params["dt_ele"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
+    ex_num = params["ex_num"]
+    ex_indx = params["ex_indx"]
+    iconds = params["iconds"]
+    namdtime = params["namdtime"]
 
+    elesteps = int(dt_nucl/dt_ele) # the number of electronic timesteps per nuclear timestep
+    #print "elesteps=",elesteps
+
+    fprop_ele = []
+    for ic in range(0,len(iconds)):
+        tmp = "prop_ele_file" + str(ic)
+        ftmp = open(params[tmp],"w")
+        fprop_ele.append(ftmp)
+        fprop_ele[ic].close()
+    print "fprop_ele is length of",len(fprop_ele)
 
     # Create a variable that will contain propagated nuclear DOFs
     mol = Nuclear(3*syst.Number_of_atoms)
@@ -101,6 +117,12 @@ def run_MD(syst,ao,E,C,data,params):
         print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
         print "********************************************************"
 
+    # Create variables that will contain propagated electron DOFs 
+    # The number of variables is detemined by the number of initial conditions. 
+    el = []
+    for ic in range(0,len(iconds)):
+        eltmp = Electronic(ex_num,ex_indx)
+        el.append(eltmp)
 
     # Run actual calculations
     for i in xrange(Nsnaps):
@@ -111,31 +133,49 @@ def run_MD(syst,ao,E,C,data,params):
         for j in xrange(Nsteps):
 
             ij = i*Nsteps + j
-            mol.propagate_p(0.5*dt)
-            mol.propagate_q(dt) 
+            mol.propagate_p(0.5*dt_nucl)
+            mol.propagate_q(dt_nucl) 
           
             # ======= Compute forces and energies using GAMESS ============
             write_gms_inp(data, params, mol)
             exe_gamess(params)         
 
 #            ao, E, C, Grad, data = unpack_file(params["gms_out"])            
-            Grad, data = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
+            Grad, data, E_mol, D = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
 
             epot = data["tot_ene"]         # total energy from GAMESS
+
             for k in xrange(syst.Number_of_atoms):
                 mol.f[3*k]   = -Grad[k][0]
                 mol.f[3*k+1] = -Grad[k][1]
                 mol.f[3*k+2] = -Grad[k][2]
 
-            mol.propagate_p(0.5*dt)
+            mol.propagate_p(0.5*dt_nucl)
 
             ekin = compute_kinetic_energy(mol)
-       
-            t = dt*ij # simulation time in a.u.
+
+            t = dt_nucl*ij # simulation time in a.u.
+
+            Hvib = vibronic_hamiltonian(params,E_mol,D)
+
+            # propagate electronic DOF
+            for k in range(0,len(iconds)):
+                if iconds[k] <= t and t<= (iconds[k] + namdtime):
+                    #print "t=",t,"is okay"
+                    for time in range(0,elesteps):
+                        propagate_electronic(dt_ele, el[k], Hvib)
+
         fe = open(params["ene_file"],"a")
         fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
         fe.close()
 
+        for k in range(0,len(iconds)):
+            if iconds[k] <= t and t<= (iconds[k] + namdtime):
+
+                tmp = "prop_ele_file" + str(k)
+                fprop_ele[k] = open(params[tmp],"a")
+                fprop_ele[k].write("t= %4.2f  %8.5e\n" % (t, el[k].rho(ex_indx,ex_indx).real ) )
+                fprop_ele[k].close()
 
 def init_system(data, g):
     ##
@@ -145,7 +185,6 @@ def init_system(data, g):
     # This function returns System object which will be used in classical MD.
     #
     # Used in:  main.py/main
-
 
     # Create Universe and populate it
     U = Universe();   Load_PT(U, "elements.txt", 0)

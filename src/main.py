@@ -30,7 +30,7 @@ sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 from gamess_to_libra import *
 from nve import *
 from create_gamess_input import *
-
+from extern_ham import *
 
 def main(params):
     ##
@@ -39,6 +39,7 @@ def main(params):
     # This function prepares initial parameters from GAMESS output file
     # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
     # iteratively.
+    # Parallelly, it executes TD-SE calculation for simulating excited eletronic dynamics.
     #
     # Used in:  main.py
 
@@ -54,9 +55,9 @@ def main(params):
 
     ao, E, C, Grad, data = unpack_file(params["gms_out"])
 
-    #print data
+    print data
 
-    ################## Step 2: Initialize molecular system and run MD ###########################
+    ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
     print "Initializing system..."
     syst = init_system(data, Grad)
