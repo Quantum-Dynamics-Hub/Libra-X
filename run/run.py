@@ -1,3 +1,7 @@
+# ******************************************************
+# To confirm input parameters, see "run.manual".
+# ******************************************************
+
 import os
 import sys
 import math
@@ -39,7 +43,8 @@ params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface
 
 params["traj_file"] = params["res"]+"md.xyz"
 params["ene_file"] = params["res"]+"ene.xyz"
-
+params["prop_ele_file"] = params["res"]+"prop_ele" # .xyz isn't written
+ 
 # ***************************************************************
 # Excited electronic states
 # Define states:
@@ -52,7 +57,7 @@ params["ene_file"] = params["res"]+"ene.xyz"
  
  
 # Excitations from HOMO to [LUMO,... Nmax]
-Nmin = 1
+Nmin = 3
 HOMO = 4
 LUMO = HOMO+1
 Nmax = 6
@@ -64,16 +69,16 @@ J = 5
 # This is how I,J are mapped to index of the corresponding basis state
 # see module lazy.py for more details. This is not the most general way
 # of such mapping though.
-ex_indx = 1 + (J-LUMO)*(HOMO+1 - Nmin) + (I-Nmin)
-params["ex_indx"] = ex_indx
+
+params["ex_indx"] = 1 + (J-LUMO)*(HOMO+1 - Nmin) + (I-Nmin)
  
 # Each entry of the list below is an initial condition. It is also a list
 # containing the time step at which we start the dynamics
-iconds = [0]
+params["iconds"] = [0]
 
-params["iconds"] = iconds
-for ic in (0,len(iconds)):
-    params["prop_ele_file"+str(ic)] = params["res"]+"prop_ele"+str(ic)+".xyz" 
+#params["iconds"] = iconds
+#for ic in (0,len(iconds)):
+#    params["prop_ele_file"+str(ic)] = params["res"]+"prop_ele"+str(ic)+".xyz" 
  
 # Set active space and the basis states
 params["active_space"] = range(Nmin,Nmax+1)
@@ -90,7 +95,7 @@ params["states"].append(GS)
 for se in SE:
     params["states"].append(se)
 
-params["ex_num"] = len(params["states"])
+#params["ex_num"] = len(params["states"])
 
 print params
 

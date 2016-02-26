@@ -63,10 +63,10 @@ def run_MD(syst,ao,E,C,data,params):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] syst   System object that includes atomic system information.
-    # \param[in] ao     Atomic orbital basis
-    # \param[in] E      Molecular orbital energies
-    # \param[in] C      MO-LCAO coefficients
-    # \param[in] data   Data extracted from GAMESS output file, in the dictionary form.
+    # \param[in,out] ao     Atomic orbital basis
+    # \param[in,out] E      Molecular orbital energies
+    # \param[in,out] C      MO-LCAO coefficients
+    # \param[in,out] data   Data extracted from GAMESS output file, in the dictionary form.
     # \param[in] params Input data containing all manual settings and some extracted data.
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively.
@@ -86,7 +86,7 @@ def run_MD(syst,ao,E,C,data,params):
     dt_ele = params["dt_ele"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
-    ex_num = params["ex_num"]
+    ex_num = len(params["states"])
     ex_indx = params["ex_indx"]
     iconds = params["iconds"]
     namdtime = params["namdtime"]
@@ -94,13 +94,9 @@ def run_MD(syst,ao,E,C,data,params):
     elesteps = int(dt_nucl/dt_ele) # the number of electronic timesteps per nuclear timestep
     #print "elesteps=",elesteps
 
-    fprop_ele = []
     for ic in range(0,len(iconds)):
-        tmp = "prop_ele_file" + str(ic)
-        ftmp = open(params[tmp],"w")
-        fprop_ele.append(ftmp)
-        fprop_ele[ic].close()
-    print "fprop_ele is length of",len(fprop_ele)
+        fprop_ele = open(params["prop_ele_file"] + str(ic) + ".xyz" ,"w")
+        fprop_ele.close()
 
     # Create a variable that will contain propagated nuclear DOFs
     mol = Nuclear(3*syst.Number_of_atoms)
@@ -172,10 +168,9 @@ def run_MD(syst,ao,E,C,data,params):
         for k in range(0,len(iconds)):
             if iconds[k] <= t and t<= (iconds[k] + namdtime):
 
-                tmp = "prop_ele_file" + str(k)
-                fprop_ele[k] = open(params[tmp],"a")
-                fprop_ele[k].write("t= %4.2f  %8.5e\n" % (t, el[k].rho(ex_indx,ex_indx).real ) )
-                fprop_ele[k].close()
+                fprop_ele = open(params["prop_ele_file"] + str(k) + ".xyz","a")
+                fprop_ele.write("t= %4.2f  %8.5e\n" % (t, el[k].rho(ex_indx,ex_indx).real ) )
+                fprop_ele.close()
 
 def init_system(data, g):
     ##
