@@ -129,6 +129,14 @@ def run_MD(syst,ao,E,C,data,params):
         for j in xrange(Nsteps):
 
             ij = i*Nsteps + j
+
+            # propagate electronic DOF
+            for k in range(0,len(iconds)):
+                if iconds[k] < t and t <= (iconds[k] + namdtime):
+
+                    for time in range(0,elesteps):
+                        propagate_electronic(0.5*dt_ele, el[k], Hvib)
+
             mol.propagate_p(0.5*dt_nucl)
             mol.propagate_q(dt_nucl) 
           
@@ -156,7 +164,7 @@ def run_MD(syst,ao,E,C,data,params):
 
             # propagate electronic DOF
             for k in range(0,len(iconds)):
-                if iconds[k] <= t and t<= (iconds[k] + namdtime):
+                if iconds[k] < t and t <= (iconds[k] + namdtime):
                     #print "t=",t,"is okay"
                     for time in range(0,elesteps):
                         propagate_electronic(dt_ele, el[k], Hvib)
