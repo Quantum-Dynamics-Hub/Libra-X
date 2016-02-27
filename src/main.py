@@ -62,5 +62,13 @@ def main(params):
     print "Initializing system..."
     syst = init_system(data, Grad)
 
+    print "Initializing electronic variables"    
+    el = []
+    nstates = len(params["excitations"])
+    for i_ex in xrange(0,nstates):  # loop over all initial excitations
+        el_tmp = Electronic(nstates,i_ex)
+        el.append(el_tmp)
+
+
     print "Starting MD..."
     run_MD(syst,ao,E,C,data,params)

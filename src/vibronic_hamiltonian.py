@@ -30,9 +30,9 @@ def vibronic_hamiltonian(params,E_mol,D):
     #
     # Used in: main.py/main/run_MD
 
-    states = params["states"]
-    Hvib = CMATRIX(len(states),len(states))
-    nac = MATRIX(len(states),len(states))
+    nstates = params["excitations"]
+    Hvib = CMATRIX(nstates,nstates)
+    nac = MATRIX(nstates,nstates)
 
     # Excitation energy : sum of the molecular orbital energies occupied by electrons.
     # E_I = sum_Ii e_Ii

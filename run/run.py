@@ -26,10 +26,9 @@ params["gms_out"] = "H2O.out"  # output file
 params["nproc"] = 1            # the number of processors
 params["basis_option"] = 2 # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["dt_nucl"] = 20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["dt_ele"] = 1.0  # time step for electronic integration
+params["el_mts"] = 1  # electronic time steps per one nuclear time step
 params["Nsnaps"] = 1  # the number of MD rounds
 params["Nsteps"] = 1  # the number of MD steps per snap
-params["namdtime"] = 20  # Trajectory time, a.u. (<= dt_nucl * Nsnaps * Nsteps)
 
 # For Kosuke
 params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/res/" # the directory where the energies and NACs files will be printed out
@@ -39,60 +38,20 @@ params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface
 
 params["traj_file"] = params["res"]+"md.xyz"
 params["ene_file"] = params["res"]+"ene.xyz"
+params["se_pop_prefix"] = "out/"  # where the results of the TD-SE calculations will be printed out 
+
+
 
 # ***************************************************************
 # Excited electronic states
-# Define states:
-# Example of indexing convention with Nmin = 5, HOMO = 5, Nmax = 8
-# the orbitals indices are consistent with GAMESS indexing, which starts from 1
-# [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] - all computed orbitals
-# [ 1, 2, 3, 4, 5]                     - occupied orbitals
-#                 [6, 7, 8, 9, 10, 11] - unoccupied orbitals
-#              [5, 6, 7, 8]            - active space
- 
- 
-# Excitations from HOMO to [LUMO,... Nmax]
-Nmin = 1
-HOMO = 4
-LUMO = HOMO+1
-Nmax = 6
- 
-# Initial condition excitation: I->J
-I = 3
-J = 5
 
-# This is how I,J are mapped to index of the corresponding basis state
-# see module lazy.py for more details. This is not the most general way
-# of such mapping though.
-ex_indx = 1 + (J-LUMO)*(HOMO+1 - Nmin) + (I-Nmin)
-params["ex_indx"] = ex_indx
- 
-# Each entry of the list below is an initial condition. It is also a list
-# containing the time step at which we start the dynamics
-iconds = [0]
+params["excitations"] = []
 
-params["iconds"] = iconds
-for ic in (0,len(iconds)):
-    params["prop_ele_file"+str(ic)] = params["res"]+"prop_ele"+str(ic)+".xyz" 
- 
-# Set active space and the basis states
-params["active_space"] = range(Nmin,Nmax+1)
- 
-# Generate basis states : call the functions in lazy.py module
-GS = ground_state(Nmin,HOMO)  # ground state
-SE = single_excitations(Nmin,Nmax,HOMO,1)  # single excitations
- 
-# Now combine the ground and singly excited states in one list
-# In our convention, the GS configuration must be the first state in the
-# list of the basis states.
-params["states"] = []
-params["states"].append(GS)
-for se in SE:
-    params["states"].append(se)
+# Generate a list of "excitation" objects
+params["excitation"].append(excitation(0,1,0,1))  # ground state
+params["excitation"].append(excitation(0,1,1,1))  # S1: HOMO alp -> LUMO alp
 
-params["ex_num"] = len(params["states"])
 
-print params
 
 ################################################################
 
