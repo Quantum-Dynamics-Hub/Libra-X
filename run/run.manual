@@ -1,0 +1,34 @@
+This manual script shows the meanings of  key parameters in "run.py" script.
+
+Format:
+
+column    column meaning               comment
+ 1         key name                  
+ 2         type of value expected      type of value expected (string/integer/float, etc, and perhaps some limitation on the possible values (e.g. all positive))
+ 3         default value (if any)                
+ 4         explanation                 mean what? how to use? etc....
+
+//----------------------------------------------------------------------------------------------------------------------------
+  column:     1                         2           3           4         
+//----------------------------------------------------------------------------------------------------------------------------
+
+	      active_space              integer                 a list of molecular orbitals taken in the TD-SE calculation
+	      basis_option              integer                 choose ab initio or semi-empirical calculation  : Option  1 = ab initio, 2 = semi-empirical
+	      dt_ele                    float                   time step for electron dynamics (a.u.)
+	      dt_nucl                   float                   time step for nuclear dynamics  (a.u.)
+	      ene_file                  string                  contains kinetic energy, potential energy, and total energy of the atoms for each MD time
+	      ex_indx                   integer                 the initial excitation index : this should be determined by I, J, Nmin, HOMO, and LUMO, automatically.
+	      iconds                    integer                 a list of the times when TD-SE calculation starts
+	      nproc                     integer                 number of processors
+              gms_inp0                  string                  initial gamess input file
+	      gms_inp                   string                  gamess input file while a job works
+	      gms_out                   string                  gamess output file
+	      libra_bin_path            string                  the path to the source directory in libra.
+	      libra_gamess_int_path     string                  the path to the source directory in libra-gamess_interface. 
+	      namdtime                  integer                 trajectory time for electron dynamics
+	      Nsnaps                    integer                 the number of MD rounds
+	      Nsteps                    integer                 the number of MD steps per round
+	      prop_ele_file             string                  contains the population of the excited states for each MD time
+	      res                       string                  the directory where vibronic hamiltonian matrices are output.
+	      states                    integer                 lists of molecular orbitals occupied by electrons.
+	      traj_file                 string                  contains atomic position in Cartesian for each MD time

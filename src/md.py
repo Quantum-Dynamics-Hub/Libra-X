@@ -77,6 +77,7 @@ def run_MD(syst,el,ao,E,C,data,params):
     # \param[in,out] C    MO-LCAO coefficients
     # \param[in,out] data Data extracted from GAMESS output file, in the dictionary form.
     # \param[in,out] params Input data containing all manual settings and some extracted data.
+
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively.
     #
@@ -101,6 +102,8 @@ def run_MD(syst,el,ao,E,C,data,params):
     dt_elec = dt_nucl/float(el_mts)
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
+
+    # where is this parameter defined??
     print_coherences = params["print_coherences"]
 
 
@@ -120,14 +123,6 @@ def run_MD(syst,el,ao,E,C,data,params):
             print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
             print "********************************************************"
 
-    # Create variables that will contain propagated electron DOFs 
-    # The number of variables is detemined by the number of initial conditions. 
-#    el = []
-#    for ic in range(0,len(iconds)):
-#        eltmp = Electronic(ex_num,ex_indx)
-#        el.append(eltmp)
-
-
     # Run actual calculations
     for i in xrange(Nsnaps):
 
@@ -143,6 +138,7 @@ def run_MD(syst,el,ao,E,C,data,params):
                 propagate_electronic(0.5*dt_elec, el[k], Hvib)
 
             # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
+
             mol.propagate_p(0.5*dt_nucl)
             mol.propagate_q(dt_nucl) 
           
@@ -172,7 +168,6 @@ def run_MD(syst,el,ao,E,C,data,params):
             ekin = compute_kinetic_energy(mol)
             t = dt_nucl*ij # simulation time in a.u.
 
-
         ################### Printing results ############################
 
         fe = open(params["ene_file"],"a")
@@ -200,8 +195,6 @@ def run_MD(syst,el,ao,E,C,data,params):
 
             fel.write(line)
             fel.close()
-
-
 
 def init_system(data, g):
     ##

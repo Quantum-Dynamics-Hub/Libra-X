@@ -1,3 +1,7 @@
+# ******************************************************
+# To confirm input parameters, see "run.manual".
+# ******************************************************
+
 import os
 import sys
 import math
@@ -48,10 +52,10 @@ params["se_pop_prefix"] = "out/"  # where the results of the TD-SE calculations 
 params["excitations"] = []
 
 # Generate a list of "excitation" objects
-params["excitation"].append(excitation(0,1,0,1))  # ground state
-params["excitation"].append(excitation(0,1,1,1))  # S1: HOMO alp -> LUMO alp
+params["excitations"].append(excitation(0,1,0,1))  # ground state
+params["excitations"].append(excitation(0,1,1,1))  # S1: HOMO alp -> LUMO alp
 
-
+print params
 
 ################################################################
 

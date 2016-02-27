@@ -34,6 +34,14 @@ def vibronic_hamiltonian(params,E_mol,D):
     Hvib = CMATRIX(nstates,nstates)
     nac = MATRIX(nstates,nstates)
 
+    #states = params["states"]
+    #act = params["active_space"]
+    #Nmin = act[0]
+    #Nmax = act[-1]
+    #Hvib = CMATRIX(len(states),len(states))
+    #nac = MATRIX(len(states),len(states))
+    #>>>>>>> devel
+
     # Excitation energy : sum of the molecular orbital energies occupied by electrons.
     # E_I = sum_Ii e_Ii
     # ex) GS = [1,-1,2,-2,3,-3] -> E_GS = 2 * (e1 + e2 + e3)
@@ -45,7 +53,7 @@ def vibronic_hamiltonian(params,E_mol,D):
 
         ene = 0.0
         for ii in states[i][1]:
-            ene += E_mol.get(abs(ii)-1,abs(ii)-1)
+            ene += E_mol.get(abs(ii)-Nmin,abs(ii)-Nmin)
 
         Hvib.set(i,i,ene,0.0)
     #print "Ex_ene="
@@ -74,15 +82,15 @@ def vibronic_hamiltonian(params,E_mol,D):
                         dif_i.append(states[i][1][k])
                         dif_j.append(states[j][1][k])
                 if len(dif_i) == 1: # difference of the orbital occupied by excited electron 
-                    Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-1,abs(dif_j[0])-1))
-                    nac.set(i,j,-D.get(abs(dif_i[0])-1,abs(dif_j[0])-1))
+                    Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[0])-Nmin))
+                    nac.set(i,j,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[0])-Nmin))
                 elif len(dif_i) == 2: # difference of the orbital occupied by left hole
                     if dif_i[0] == dif_j[1]:
-                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[1])-1,abs(dif_j[0])-1))
-                        nac.set(i,j,-D.get(abs(dif_i[1])-1,abs(dif_j[0])-1))
+                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[1])-Nmin,abs(dif_j[0])-Nmin))
+                        nac.set(i,j,-D.get(abs(dif_i[1])-Nmin,abs(dif_j[0])-Nmin))
                     elif dif_i[1] == dif_j[0]:
-                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-1,abs(dif_j[1])-1))
-                        nac.set(i,j,-D.get(abs(dif_i[0])-1,abs(dif_j[1])-1))
+                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[1])-Nmin))
+                        nac.set(i,j,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[1])-Nmin))
 
     #Hvib.set(3,5,0.0,0.01)
     #Hvib.set(5,3,0.0,0.01)

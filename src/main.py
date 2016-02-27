@@ -30,7 +30,7 @@ sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 from gamess_to_libra import *
 from nve import *
 from create_gamess_input import *
-from extern_ham import *
+
 
 def main(params):
     ##
