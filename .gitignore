@@ -1,8 +1,7 @@
 *.*~
 *.pyc
-re_*
-im_*
 slurm*
 *.out
-*.xyz
 .nfs*
+run/out/*
+run/res/*

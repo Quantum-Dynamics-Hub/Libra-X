@@ -28,7 +28,7 @@ sys.path.insert(1,os.environ["libra_chemobjects_path"])
 sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 
 from gamess_to_libra import *
-from nve import *
+from md import *
 from create_gamess_input import *
 
 
@@ -69,6 +69,5 @@ def main(params):
         el_tmp = Electronic(nstates,i_ex)
         el.append(el_tmp)
 
-
     print "Starting MD..."
-    run_MD(syst,ao,E,C,data,params)
+    run_MD(syst,el,ao,E,C,data,params)

@@ -15,10 +15,13 @@ import os
 import sys
 import math
 
-sys.path.insert(1,os.environ["libra_mmath_path"])
 sys.path.insert(1,os.environ["libra_qchem_path"])
-from libmmath import *
+sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
+sys.path.insert(1,os.environ["libra_mmath_path"])
+
 from libqchem import *
+from libcontrol_parameters import *
+from libmmath import *
 
 def vibronic_hamiltonian(params,E_mol,D):
     ##
@@ -30,17 +33,14 @@ def vibronic_hamiltonian(params,E_mol,D):
     #
     # Used in: main.py/main/run_MD
 
-    nstates = params["excitations"]
+    HOMO = params["HOMO"]
+    states = params["excitations"]
+    nstates = len(states)
     Hvib = CMATRIX(nstates,nstates)
     nac = MATRIX(nstates,nstates)
 
-    #states = params["states"]
-    #act = params["active_space"]
-    #Nmin = act[0]
-    #Nmax = act[-1]
-    #Hvib = CMATRIX(len(states),len(states))
-    #nac = MATRIX(len(states),len(states))
-    #>>>>>>> devel
+    Nmin = states[1].from_orbit[0] + HOMO - 1
+    Nmax = states[-1].to_orbit[0] + HOMO -1
 
     # Excitation energy : sum of the molecular orbital energies occupied by electrons.
     # E_I = sum_Ii e_Ii
@@ -49,13 +49,19 @@ def vibronic_hamiltonian(params,E_mol,D):
     #     SE1 = [1,-1,4,-2,3,-3] -> E_SE1 = E_GS + e4 - e2 
     #     etc ........
 
-    for i in range(0,len(states)):
+    # GS energy
+    E0 = 0.0
+    for i in range(Nmin,HOMO+1):
+        E0 += 2 * E_mol.get(i-Nmin,i-Nmin)
 
-        ene = 0.0
-        for ii in states[i][1]:
-            ene += E_mol.get(abs(ii)-Nmin,abs(ii)-Nmin)
+    # EX energy
+    for i in range(1,nstates):
 
-        Hvib.set(i,i,ene,0.0)
+        h_indx = states[i].from_orbit[0] + HOMO - 1
+        e_indx = states[i].to_orbit[0] + HOMO - 1
+        EX_ene = E0 + E_mol.get(e_indx-Nmin,e_indx-Nmin) - E_mol.get(h_indx-Nmin,h_indx-Nmin)
+
+        Hvib.set(i,i,EX_ene,0.0)
     #print "Ex_ene="
     #Hvib.show_matrix()
 
@@ -72,28 +78,31 @@ def vibronic_hamiltonian(params,E_mol,D):
     #  D_(SE0,SE3) = d_(4,5)
     #  etc.......
 
-    for i in range(0,len(states)):
-        for j in range(0,len(states)):
-            if not i == j:
-                dif_i = []
-                dif_j = []
-                for k in range(0,len(states[i][1])):
-                    if not states[i][1][k] == states[j][1][k]:
-                        dif_i.append(states[i][1][k])
-                        dif_j.append(states[j][1][k])
-                if len(dif_i) == 1: # difference of the orbital occupied by excited electron 
-                    Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[0])-Nmin))
-                    nac.set(i,j,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[0])-Nmin))
-                elif len(dif_i) == 2: # difference of the orbital occupied by left hole
-                    if dif_i[0] == dif_j[1]:
-                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[1])-Nmin,abs(dif_j[0])-Nmin))
-                        nac.set(i,j,-D.get(abs(dif_i[1])-Nmin,abs(dif_j[0])-Nmin))
-                    elif dif_i[1] == dif_j[0]:
-                        Hvib.set(i,j,0.0,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[1])-Nmin))
-                        nac.set(i,j,-D.get(abs(dif_i[0])-Nmin,abs(dif_j[1])-Nmin))
+    for i in range(1,nstates):
+        h_indx_i = states[i].from_orbit[0] + HOMO - 1
+        e_indx_i = states[i].to_orbit[0] + HOMO - 1
 
-    #Hvib.set(3,5,0.0,0.01)
-    #Hvib.set(5,3,0.0,0.01)
+        # EX -> GS
+        Hvib.set(i,0,0.0,-D.get(e_indx_i-Nmin,h_indx_i-Nmin))
+        nac.set(i,0,-D.get(e_indx_i-Nmin,h_indx_i-Nmin))
+        # GS -> EX
+        Hvib.set(0,i,0.0,-D.get(h_indx_i-Nmin,e_indx_i-Nmin))
+        nac.set(0,i,-D.get(h_indx_i-Nmin,e_indx_i-Nmin))
+
+        for j in range(1,nstates):
+            if not i == j:
+                h_indx_j = states[j].from_orbit[0] + HOMO - 1
+                e_indx_j = states[j].to_orbit[0] + HOMO - 1
+
+                # EX -> EX
+                if not e_indx_i == e_indx_j and h_indx_i == h_indx_j: # difference of the orbital occupied by excited electron 
+                    Hvib.set(i,j,0.0,-D.get(e_indx_i-Nmin,e_indx_j-Nmin))
+                    nac.set(i,j,-D.get(e_indx_i-Nmin,e_indx_j-Nmin))
+                if e_indx_i == e_indx_j and not h_indx_i == h_indx_j: # difference of the orbital occupied by left hole
+                    Hvib.set(i,j,0.0,-D.get(h_indx_j-Nmin,h_indx_i-Nmin))
+                    nac.set(i,j,-D.get(h_indx_j-Nmin,h_indx_i-Nmin))
+
+
     print "D="
     D.show_matrix()
     print "nac(Im(Hvib))="

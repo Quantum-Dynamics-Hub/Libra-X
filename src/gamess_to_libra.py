@@ -84,8 +84,6 @@ def gamess_to_libra(params, ao, E, C, ite):
     # 2-nd file - time "t+dt"  new
     ao2, E2, C2, Grad, data = unpack_file(params["gms_out"])
 
-    E2 = reduce_matrix(E2,params["active_space"])
-
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
 
@@ -103,8 +101,8 @@ def gamess_to_libra(params, ao, E, C, ite):
     D = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
-    E_mol = reduce_matrix(E_mol,params["active_space"])
-    D = reduce_matrix(D,params["active_space"])
+    E_mol = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
+    D = reduce_matrix(D,params["excitations"],params["HOMO"])
 
     ene_filename = params["res"] + "re_Ham_" + str(ite)
     nac_filename = params["res"] + "im_Ham_" + str(ite)

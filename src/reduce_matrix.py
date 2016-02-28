@@ -16,21 +16,27 @@ import os
 import sys
 import math
 
+sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
 sys.path.insert(1,os.environ["libra_mmath_path"])
+
+from libcontrol_parameters import *
 from libmmath import *
 
-def reduce_matrix(M_ori,active_space):
+def reduce_matrix(M_ori,excitations,HOMO):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in,out]        M_ori   original matrix
-    # \param[in]     active_space   the molecular orbitals taken in TD-SE calculation.
+    # \param[in]     excitations    contains the wavefunctions for excited states
+    # \param
     # This function returns the reduced matrix "M_red".
     #
     # Used in: main.py/main/run_MD/gamess_to_libra
 
     # alined to python index
-    Nmin = active_space[0] - 1  
-    Nmax = active_space[-1] - 1  
+    #print "from orbit",excitations[0].from_orbit[0]
+    #print "to_orbit",excitations[-1].to_orbit[0]
+    Nmin = excitations[1].from_orbit[0] + HOMO - 1  
+    Nmax = excitations[-1].to_orbit[0] + HOMO - 1  
     
     M_red = MATRIX(Nmax-Nmin+1,Nmax-Nmin+1)
     for i in range(Nmin,Nmax+1):
