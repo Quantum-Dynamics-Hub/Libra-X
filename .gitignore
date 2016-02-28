@@ -3,5 +3,7 @@
 slurm*
 *.out
 .nfs*
-run/out/*
-run/res/*
+se_pop*
+re_*
+im_*
+*.xyz
