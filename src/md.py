@@ -13,8 +13,6 @@
 # This module implements the functions which execute classical MD.
 #
 
-
-
 from create_gamess_input import *
 from gamess_to_libra import *
 from vibronic_hamiltonian import *
@@ -70,13 +68,14 @@ def run_MD(syst,el,ao,E,C,data,params):
     # we really don't need to recompute electronic structure for each one, which can be used to 
     # accelerate the computations. Now, if you want to go beyond CPA - just use only one object in
     # the el list and run several copies of the run_MD function to average over initial conditions.
-    # Also note that even under the CPA, we need need to run this function several times - to sample
+    # Also note that even under the CPA, we need to run this function several times - to sample
     # over initial nuclear distribution
-    # \param[in,out] a    Atomic orbital basis
+    # \param[in,out] ao   Atomic orbital basis
     # \param[in,out] E    Molecular orbital energies
     # \param[in,out] C    MO-LCAO coefficients
     # \param[in,out] data Data extracted from GAMESS output file, in the dictionary form.
     # \param[in,out] params Input data containing all manual settings and some extracted data.
+
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively.
     #
@@ -101,8 +100,15 @@ def run_MD(syst,el,ao,E,C,data,params):
     dt_elec = dt_nucl/float(el_mts)
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
+
+    nstates = len(params["excitations"])
+
     print_coherences = params["print_coherences"]
 
+    for k in xrange(nstates):
+        tmp = params["se_pop_prefix"] + "se_pop_" + str(k)
+        fel = open(tmp,"w")
+        fel.close()
 
     # Create a variable that will contain propagated nuclear DOFs
     mol = Nuclear(3*syst.Number_of_atoms)
@@ -120,14 +126,6 @@ def run_MD(syst,el,ao,E,C,data,params):
             print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
             print "********************************************************"
 
-    # Create variables that will contain propagated electron DOFs 
-    # The number of variables is detemined by the number of initial conditions. 
-#    el = []
-#    for ic in range(0,len(iconds)):
-#        eltmp = Electronic(ex_num,ex_indx)
-#        el.append(eltmp)
-
-
     # Run actual calculations
     for i in xrange(Nsnaps):
 
@@ -138,11 +136,14 @@ def run_MD(syst,el,ao,E,C,data,params):
 
             ij = i*Nsteps + j
 
-            # Electronic propagation: half-step
-            for k in xrange(el_mts):
-                propagate_electronic(0.5*dt_elec, el[k], Hvib)
+            if ij > 0: # pass this function at t=0
+                # Electronic propagation: half-step
+                for k in xrange(el_mts):
+                    for i_ex in range(0,nstates):  # loop over all initial excitations
+                        propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
             # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
+
             mol.propagate_p(0.5*dt_nucl)
             mol.propagate_q(dt_nucl) 
           
@@ -153,7 +154,7 @@ def run_MD(syst,el,ao,E,C,data,params):
             Grad, data, E_mol, D = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
             Hvib = vibronic_hamiltonian(params,E_mol,D)
 
-            epot = data["tot_ene"]         # total energy from GAMESS
+            epot = data["tot_ene"]         # total energy from GAMESS which is the potential energy acting on nuclei
 
             for k in xrange(syst.Number_of_atoms):
                 mol.f[3*k]   = -Grad[k][0]
@@ -166,12 +167,12 @@ def run_MD(syst,el,ao,E,C,data,params):
 
             # Electronic propagation: half-step
             for k in xrange(el_mts):
-                propagate_electronic(0.5*dt_elec, el[k], Hvib)
+                for i_ex in range(0,nstates):  # loop over all initial excitations
+                    propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
 
             ekin = compute_kinetic_energy(mol)
             t = dt_nucl*ij # simulation time in a.u.
-
 
         ################### Printing results ############################
 
@@ -179,29 +180,28 @@ def run_MD(syst,el,ao,E,C,data,params):
         fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
         fe.close()
         
-        for k in xrange(len(el)):
+        for k in xrange(nstates):
             tmp = params["se_pop_prefix"] + "se_pop_" + str(k)
             fel = open(tmp,"a")
 
             # Print time
-            line = "t= %8.5f " % t
+            line = "t= %8.5f \n" % t
 
             # Print populations
-            for st in xrange(el[k].nstates):
-                line = line + "%8.5f " % el[k].rho(st,st).real
+            for st in xrange(nstates):
+                line = line + "%8.5f" % el[k].rho(st,st).real
 
+            line = line + "\n"
             if print_coherences == 1:
                 # Print coherences
-                for st in xrange(el[k].nstates):
+                for st in xrange(nstates):
                     for st1 in xrange(st):
-                        line = line + "%8.5f %8.5f" % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
+                        line = line + "( %8.5f %8.5f )" % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
              
             line = line + "\n"
 
             fel.write(line)
             fel.close()
-
-
 
 def init_system(data, g):
     ##

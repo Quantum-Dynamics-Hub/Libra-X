@@ -22,6 +22,7 @@ from extract import *
 from ao_basis import *
 from overlap import *
 from Ene_NAC import *
+from reduce_matrix import *
 
 import os
 import sys
@@ -94,9 +95,14 @@ def gamess_to_libra(params, ao, E, C, ite):
     #print "P12 is";    P12.show_matrix()
     #print "P21 is";    P21.show_matrix()
 
+
     # calculate time-averaged molecular energies and Non-Adiabatic Couplings(NACs)
     E_mol = average_E(E,E2)
     D = NAC(P12,P21,params["dt_nucl"])
+
+    # reduce the matrix size
+    E_mol = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
+    D = reduce_matrix(D,params["excitations"],params["HOMO"])
 
     ene_filename = params["res"] + "re_Ham_" + str(ite)
     nac_filename = params["res"] + "im_Ham_" + str(ite)

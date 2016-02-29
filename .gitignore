@@ -1,8 +1,9 @@
 *.*~
 *.pyc
-re_*
-im_*
 slurm*
 *.out
-*.xyz
 .nfs*
+se_pop*
+re_*
+im_*
+*.xyz

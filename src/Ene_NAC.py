@@ -23,7 +23,7 @@ from libmmath import *
 from libqchem import *
 
 
-def NAC(P12,P21,dt_nuc):
+def NAC(P12,P21,dt_nucl):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] P12, P21 : overlap matrix of molecular orbitals at different time step.
@@ -35,7 +35,7 @@ def NAC(P12,P21,dt_nuc):
     Norb = P12.num_of_rows
     D = MATRIX(Norb,Norb)
 
-    D = 0.50/dt_nuc * ( P12 - P21 )
+    D = 0.50/dt_nucl * ( P12 - P21 )
 
     return D
 
