@@ -33,7 +33,10 @@ params["Nsnaps"] = 5  # the number of MD rounds
 params["Nsteps"] = 1  # the number of MD steps per snap
 
 # For Kosuke
-params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/res/" # the directory where the energies and NACs files will be printed out
+params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/res/" # directory where the energies and trajectories files will be printed out
+params["mo_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/mo_ham/" # directory where MO basis vibronic hamiltonians will be printed out  
+params["sd_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/sd_ham/" # directory where SD basis vibronic hamiltonians will be printed out
+
 
 # For Alexey
 #params["res"] = "/user/alexeyak/Programming/libra-gamess_interface/run/res/"
@@ -47,7 +50,7 @@ params["print_coherences"] = 1 # a flag to compute and print electronic coherenc
 # ***************************************************************
 # Excited electronic states
 
-Nmin = 3   # lowest molecular orbital taken for creating excited states
+Nmin = 1   # lowest molecular orbital taken for creating excited states
 HOMO = 4   # Highest Occupied Molecular Orbital : LUMO = HOMO + 1
 Nmax = 6   # highest molecular orbital taken for creating excited states
 spin = 0   # a flag to consider spin : option 0 -> no, 1 -> yes

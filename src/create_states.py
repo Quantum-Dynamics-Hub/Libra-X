@@ -59,16 +59,24 @@ def create_states(Nmin,HOMO,Nmax,spin,flip):
     # e.g. (0,1,0,1) means ground state (no excitation)
     #      (0,1,1,1)       alpha electron in HOMO is excited to LUMO without spin flip
     #      (0,1,1,-1)      alpha electron in HOMO is excited to LUMO with spin flip (in this case, spin-orbital coupling should be included)
-
+    
+    print "GS: HOMO-0,alpha -> HOMO-0,alpha"
     excitations.append(excitation(0,1,0,1)) # Add a Ground State
 
-    count=1
     if flip == 0: # Excited States without spin flip
         for sp in sp_st:
-            for om in range(Nmin,HOMO+1):
-                for uom in range(LUMO,Nmax+1):
+            if sp == 1:
+                e_spin = "alpha"
+            else:
+                e_spin = "beta"
+            icount = 0
+            for om in range(HOMO,Nmin-1,-1):
+                
+                for uom in range(LUMO,Nmax+1,1):
 
+                    print "SE%i: HOMO-%i,%s -> LUMO+%i,%s" %(icount,abs(om-HOMO),e_spin,uom-HOMO-1,e_spin)
                     excitations.append(excitation(om-HOMO,sp,uom-HOMO,sp))
+                    icount += 1
 
     elif flip == 1 and spin == 1: # Excited states with spin flip
         for sp1 in sp_st:

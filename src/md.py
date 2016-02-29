@@ -151,8 +151,8 @@ def run_MD(syst,el,ao,E,C,data,params):
             write_gms_inp(data, params, mol)
             exe_gamess(params)         
 
-            Grad, data, E_mol, D = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
-            Hvib = vibronic_hamiltonian(params,E_mol,D)
+            Grad, data, E_mol, D_mol = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
+            Hvib = vibronic_hamiltonian(params,E_mol,D_mol,ij) # create vibronic hamiltonian
 
             epot = data["tot_ene"]         # total energy from GAMESS which is the potential energy acting on nuclei
 
