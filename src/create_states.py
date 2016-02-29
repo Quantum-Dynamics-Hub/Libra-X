@@ -54,7 +54,7 @@ def create_states(Nmin,HOMO,Nmax,spin,flip):
 
     # note "excitation" object.
     # "excitation" has 4 index : (from orbital, from spin, to orbital, to spin)
-    # \orbital index  0 -> HOMO, 1 -> LUMO, 1 -> LUMO+1, -1 -> HOMO-1, etc....
+    # \orbital index  0 -> HOMO, 1 -> LUMO, 2 -> LUMO+1, -1 -> HOMO-1, etc....
     # \spin index 1 -> alpha -1 -> beta
     # e.g. (0,1,0,1) means ground state (no excitation)
     #      (0,1,1,1)       alpha electron in HOMO is excited to LUMO without spin flip
