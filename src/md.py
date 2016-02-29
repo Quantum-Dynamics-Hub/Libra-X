@@ -185,18 +185,17 @@ def run_MD(syst,el,ao,E,C,data,params):
             fel = open(tmp,"a")
 
             # Print time
-            line = "t= %8.5f \n" % t
+            line = "t= %8.5f " % t
 
             # Print populations
             for st in xrange(nstates):
-                line = line + "%8.5f" % el[k].rho(st,st).real
+                line = line + " %8.5f " % el[k].rho(st,st).real
 
-            line = line + "\n"
             if print_coherences == 1:
                 # Print coherences
                 for st in xrange(nstates):
                     for st1 in xrange(st):
-                        line = line + "( %8.5f %8.5f )" % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
+                        line = line + " %8.5f %8.5f " % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
              
             line = line + "\n"
 
