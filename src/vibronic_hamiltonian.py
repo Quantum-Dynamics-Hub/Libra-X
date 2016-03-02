@@ -128,4 +128,4 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     E_SD.show_matrix(ene_filename)
     D_SD.show_matrix(nac_filename)
 
-    return Hvib
+    return Hvib, D_SD
