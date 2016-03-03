@@ -96,19 +96,19 @@ def gamess_to_libra(params, ao, E, C, ite):
     #print "P21 is";    P21.show_matrix()
 
 
-    # calculate time-averaged molecular energies and Non-Adiabatic Couplings(NACs)
+    # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_mol = average_E(E,E2)
-    D = NAC(P12,P21,params["dt_nucl"])
+    D_mol = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
-    E_mol = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
-    D = reduce_matrix(D,params["excitations"],params["HOMO"])
+    E_mol_red = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
+    D_mol_red = reduce_matrix(D_mol,params["excitations"],params["HOMO"])
 
-    ene_filename = params["res"] + "re_Ham_" + str(ite)
-    nac_filename = params["res"] + "im_Ham_" + str(ite)
+    ene_filename = params["mo_ham"] + "re_Ham_" + str(ite)
+    nac_filename = params["mo_ham"] + "im_Ham_" + str(ite)
     
-    E_mol.show_matrix(ene_filename)
-    D.show_matrix(nac_filename)
+    #E_mol.show_matrix(ene_filename)
+    #D_mol.show_matrix(nac_filename)
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
@@ -116,4 +116,4 @@ def gamess_to_libra(params, ao, E, C, ite):
     E = MATRIX(E2)
     C = MATRIX(C2)
 
-    return Grad, data, E_mol, D
+    return Grad, data, E_mol, D_mol, E_mol_red, D_mol_red

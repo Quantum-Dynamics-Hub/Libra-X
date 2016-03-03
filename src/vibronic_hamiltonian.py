@@ -23,12 +23,13 @@ from libqchem import *
 from libcontrol_parameters import *
 from libmmath import *
 
-def vibronic_hamiltonian(params,E_mol,D):
+def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params :  contains input parameters , in the directory form
-    # \param[in] E_mol : time-averaged molecular energies
-    # \param[in] D : Non-Adiabatic couplings
+    # \param[in] params  contains input parameters , in the directory form
+    # \param[in] E_mol   time-averaged molecular energies on MO basis
+    # \param[in] D_mol   Non-Adiabatic couplings on MO basis
+    # \param[in] ite     The number of iteration 
     # This function returns the vibronic hamiltonian "Hvib".
     #
     # Used in: main.py/main/run_MD
@@ -37,31 +38,28 @@ def vibronic_hamiltonian(params,E_mol,D):
     states = params["excitations"]
     nstates = len(states)
     Hvib = CMATRIX(nstates,nstates)
-    nac = MATRIX(nstates,nstates)
+    E_SD = MATRIX(nstates,nstates)
+    D_SD = MATRIX(nstates,nstates)
 
-    Nmin = states[1].from_orbit[0] + HOMO - 1
+    Nmin = states[-1].from_orbit[0] + HOMO - 1
     Nmax = states[-1].to_orbit[0] + HOMO -1
 
-    # Excitation energy : sum of the molecular orbital energies occupied by electrons.
-    # E_I = sum_Ii e_Ii
-    # ex) GS = [1,-1,2,-2,3,-3] -> E_GS = 2 * (e1 + e2 + e3)
-    #     SE0 = [4,-1,2,-2,3,-3] -> E_SE0 = E_GS + e4 - e1
-    #     SE1 = [1,-1,4,-2,3,-3] -> E_SE1 = E_GS + e4 - e2 
+    # Excitation energy : 
+    # ex) GS = (0,1,0,1) -> E_GS = 0
+    #     SE0 = (0,1,1,1) -> E_SE0 = E(LUMO) - E(HOMO)
+    #     SE1 = (0,1,2,1) -> E_SE1 = E(LUMO+1) -E(HOMO) 
     #     etc ........
-
-    # GS energy
-    E0 = 0.0
-    for i in range(Nmin,HOMO+1):
-        E0 += 2 * E_mol.get(i-Nmin,i-Nmin)
 
     # EX energy
     for i in range(1,nstates):
 
         h_indx = states[i].from_orbit[0] + HOMO - 1
         e_indx = states[i].to_orbit[0] + HOMO - 1
-        EX_ene = E0 + E_mol.get(e_indx-Nmin,e_indx-Nmin) - E_mol.get(h_indx-Nmin,h_indx-Nmin)
+        EX_ene = E_mol.get(e_indx-Nmin,e_indx-Nmin) - E_mol.get(h_indx-Nmin,h_indx-Nmin)
 
         Hvib.set(i,i,EX_ene,0.0)
+        E_SD.set(i,i,EX_ene)
+
     #print "Ex_ene="
     #Hvib.show_matrix()
 
@@ -78,16 +76,25 @@ def vibronic_hamiltonian(params,E_mol,D):
     #  D_(SE0,SE3) = d_(4,5)
     #  etc.......
 
+    if 1==1: # for debug mode
+        print "(e_indx,h_indx) : e_indx is MO index of excited electron and h_indx is that of left hole"
+
     for i in range(1,nstates):
         h_indx_i = states[i].from_orbit[0] + HOMO - 1
         e_indx_i = states[i].to_orbit[0] + HOMO - 1
 
         # EX -> GS
-        Hvib.set(i,0,0.0,-D.get(e_indx_i-Nmin,h_indx_i-Nmin))
-        nac.set(i,0,-D.get(e_indx_i-Nmin,h_indx_i-Nmin))
+        Hvib.set(i,0,0.0,-D_mol.get(e_indx_i-Nmin,h_indx_i-Nmin))
+        D_SD.set(i,0,-D_mol.get(e_indx_i-Nmin,h_indx_i-Nmin))
         # GS -> EX
-        Hvib.set(0,i,0.0,-D.get(h_indx_i-Nmin,e_indx_i-Nmin))
-        nac.set(0,i,-D.get(h_indx_i-Nmin,e_indx_i-Nmin))
+        Hvib.set(0,i,0.0,-D_mol.get(h_indx_i-Nmin,e_indx_i-Nmin))
+        D_SD.set(0,i,-D_mol.get(h_indx_i-Nmin,e_indx_i-Nmin))
+
+        # for debug mode
+        if 1==1 : # for debug mode
+            print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=0 ((0,0) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,e_indx_i,h_indx_i)
+            print "Imaginary part of Hvib(i=0 ((0,0) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,h_indx_i,e_indx_i)
+        
 
         for j in range(1,nstates):
             if not i == j:
@@ -96,18 +103,29 @@ def vibronic_hamiltonian(params,E_mol,D):
 
                 # EX -> EX
                 if not e_indx_i == e_indx_j and h_indx_i == h_indx_j: # difference of the orbital occupied by excited electron 
-                    Hvib.set(i,j,0.0,-D.get(e_indx_i-Nmin,e_indx_j-Nmin))
-                    nac.set(i,j,-D.get(e_indx_i-Nmin,e_indx_j-Nmin))
+                    
+                    Hvib.set(i,j,0.0,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
+                    D_SD.set(i,j,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
+                    if 1==1 : # for debug mode
+                        print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,e_indx_i,e_indx_j)
                 if e_indx_i == e_indx_j and not h_indx_i == h_indx_j: # difference of the orbital occupied by left hole
-                    Hvib.set(i,j,0.0,-D.get(h_indx_j-Nmin,h_indx_i-Nmin))
-                    nac.set(i,j,-D.get(h_indx_j-Nmin,h_indx_i-Nmin))
+                    
+                    Hvib.set(i,j,0.0,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
+                    D_SD.set(i,j,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
+                    if 1==1 : # for debug mode
+                        print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,h_indx_j,h_indx_i)
 
-
-    print "D="
-    D.show_matrix()
+    print "D_mol="
+    D_mol.show_matrix()
     print "nac(Im(Hvib))="
-    nac.show_matrix()
+    D_SD.show_matrix()
     print "Hvib ="
     Hvib.show_matrix()
 
-    return Hvib
+    ene_filename = params["sd_ham"] + "re_Ham_" + str(ite)
+    nac_filename = params["sd_ham"] + "im_Ham_" + str(ite)
+
+    E_SD.show_matrix(ene_filename)
+    D_SD.show_matrix(nac_filename)
+
+    return Hvib, D_SD

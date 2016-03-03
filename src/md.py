@@ -75,6 +75,7 @@ def run_MD(syst,el,ao,E,C,data,params):
     # \param[in,out] C    MO-LCAO coefficients
     # \param[in,out] data Data extracted from GAMESS output file, in the dictionary form.
     # \param[in,out] params Input data containing all manual settings and some extracted data.
+    # \param[out] test_data  the output data for debugging, in the form of dictionary
 
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively.
@@ -151,8 +152,8 @@ def run_MD(syst,el,ao,E,C,data,params):
             write_gms_inp(data, params, mol)
             exe_gamess(params)         
 
-            Grad, data, E_mol, D = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
-            Hvib = vibronic_hamiltonian(params,E_mol,D)
+            Grad, data, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, ij) # this will update AO and gradients
+            Hvib, D_SD = vibronic_hamiltonian(params,E_mol_red,D_mol_red,ij) # create vibronic hamiltonian
 
             epot = data["tot_ene"]         # total energy from GAMESS which is the potential energy acting on nuclei
 
@@ -201,6 +202,15 @@ def run_MD(syst,el,ao,E,C,data,params):
 
             fel.write(line)
             fel.close()
+
+
+    # input test_data for debugging
+    test_data = {}
+    test_data["D_mol"] = D_mol
+    test_data["D_mol_red"] = D_mol_red
+    test_data["D_SD"] = D_SD
+
+    return test_data
 
 def init_system(data, g):
     ##

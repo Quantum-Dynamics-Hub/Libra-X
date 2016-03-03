@@ -35,7 +35,7 @@ def reduce_matrix(M_ori,excitations,HOMO):
     # alined to python index
     #print "from orbit",excitations[0].from_orbit[0]
     #print "to_orbit",excitations[-1].to_orbit[0]
-    Nmin = excitations[1].from_orbit[0] + HOMO - 1  
+    Nmin = excitations[-1].from_orbit[0] + HOMO - 1  
     Nmax = excitations[-1].to_orbit[0] + HOMO - 1  
     
     M_red = MATRIX(Nmax-Nmin+1,Nmax-Nmin+1)

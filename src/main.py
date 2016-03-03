@@ -35,7 +35,9 @@ from create_gamess_input import *
 def main(params):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params : the input data from "submit_templ.slm", in the form of dictionary
+    # \param[in] params  the input data from "submit_templ.slm", in the form of dictionary
+    # \param[out] test_data  the output data for debugging, in the form of dictionary
+    # \param[out] data  the data extracted from gamess output file, in the form of dictionary
     # This function prepares initial parameters from GAMESS output file
     # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
     # iteratively.
@@ -70,4 +72,6 @@ def main(params):
         el.append(el_tmp)
 
     print "Starting MD..."
-    run_MD(syst,el,ao,E,C,data,params)
+    test_data = run_MD(syst,el,ao,E,C,data,params)
+
+    return data, test_data
