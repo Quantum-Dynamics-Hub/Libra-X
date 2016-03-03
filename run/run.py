@@ -7,13 +7,13 @@ import sys
 import math
 
 # For Kosuke
-libra_bin_path = "/projects/academic/alexeyak/kosukesa/libracode-code/_build/src"
-libra_gamess_int_path = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/src"
+#libra_bin_path = "/projects/academic/alexeyak/kosukesa/libracode-code/_build/src"
+#libra_gamess_int_path = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/src"
 
 
 # For Alexey
-#libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" # set the path name to the source files in libracode
-#libra_gamess_int_path = "/user/alexeyak/Programming/libra-gamess_interface/src"
+libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" # set the path name to the source files in libracode
+libra_gamess_int_path = "/user/alexeyak/Programming/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
@@ -29,17 +29,19 @@ params["nproc"] = 1            # the number of processors
 params["basis_option"] = 2 # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["dt_nucl"] = 20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["el_mts"] = 1  # electronic time steps per one nuclear time step
-params["Nsnaps"] = 1  # the number of MD rounds
+params["Nsnaps"] = 5  # the number of MD rounds
 params["Nsteps"] = 1  # the number of MD steps per snap
 
 # For Kosuke
-params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/res/" # directory where the energies and trajectories files will be printed out
-params["mo_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/mo_ham/" # directory where MO basis vibronic hamiltonians will be printed out  
-params["sd_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/sd_ham/" # directory where SD basis vibronic hamiltonians will be printed out
-
+#params["res"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/res/" # directory where the energies and trajectories files will be printed out
+#params["mo_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/mo_ham/" # directory where MO basis vibronic hamiltonians will be printed out  
+#params["sd_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/sd_ham/" # directory where SD basis vibronic hamiltonians will be printed out
 
 # For Alexey
-#params["res"] = "/user/alexeyak/Programming/libra-gamess_interface/run/res/"
+params["res"] = "/user/alexeyak/Programming/libra-gamess_interface/run/res/"
+params["mo_ham"] = "/user/alexeyak/Programming/libra-gamess_interface/run/mo_ham/" # directory where MO basis vibronic hamiltonians will be printed out
+params["sd_ham"] = "/user/alexeyak/Programming/libra-gamess_interface/run/sd_ham/" # directory where SD basis vibronic hamiltonians will be printed out
+
 
 params["traj_file"] = params["res"]+"md.xyz"
 params["ene_file"] = params["res"]+"ene.dat"
@@ -71,7 +73,6 @@ params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip)
 
 import main        # import main module of the libra-Gamess-interface code
 
-test_data = []
 
-main.main(params,test_data)  # run actual calculations
+main.main(params)  # run actual calculations
 
