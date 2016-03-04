@@ -48,13 +48,14 @@ def AO_overlap(ao_i, ao_j):
 
     return S
 
-def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
+def MO_overlap(S,ao_i, ao_j, Ci, Cj, basis_option):
     ##
     # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] S : overlap matrix of atomic orbitals
     # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
     # \param[in] Ci, Cj : molecular coefficients at different time step.
     # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
-    # This function returns overlap matrix of atomic orbitals with different time step
+    # This function returns overlap matrix of molecular orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/overlap
@@ -63,7 +64,7 @@ def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
     P = MATRIX(Norb, Norb)
 
     if basis_option == 1: # ab initio calculation
-        S = AO_overlap(ao_i, ao_j)
+#        S = AO_overlap(ao_i, ao_j)
         P = Ci.T() * S * Cj
     elif basis_option == 2: # semi empirical calculation
         P = Ci.T() * Cj
@@ -77,8 +78,8 @@ def MO_overlap(ao_i, ao_j, Ci, Cj, basis_option):
 def overlap(ao1,ao2,C1,C2,basis_sets):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
-    # \param[in] Ci, Cj : molecular coefficients at different time step.
+    # \param[in] ao1, ao2 : atomic orbital basis at different time step.
+    # \param[in] C1, C2 : molecular coefficients at different time step.
     # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
@@ -92,9 +93,9 @@ def overlap(ao1,ao2,C1,C2,basis_sets):
     S12 = AO_overlap(ao1,ao2)
     S21 = AO_overlap(ao2,ao1)
 
-    P11 = MO_overlap(ao1,ao1,C1,C1,basis_sets)
-    P22 = MO_overlap(ao2,ao2,C2,C2,basis_sets)
-    P12 = MO_overlap(ao1,ao2,C1,C2,basis_sets)
-    P21 = MO_overlap(ao2,ao1,C2,C1,basis_sets)
+    P11 = MO_overlap(S11,ao1,ao1,C1,C1,basis_sets)
+    P22 = MO_overlap(S22,ao2,ao2,C2,C2,basis_sets)
+    P12 = MO_overlap(S12,ao1,ao2,C1,C2,basis_sets)
+    P21 = MO_overlap(S21,ao2,ao1,C2,C1,basis_sets)
     
     return P11, P22, P12, P21
