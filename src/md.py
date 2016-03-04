@@ -89,6 +89,9 @@ def run_MD(syst,el,ao,E,C,data,params):
     fe.close()
     ft = open(params["traj_file"],"w")
     ft.close()
+    fm = open(params["mu_file"],"w")
+    fm.close()
+
     
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
@@ -177,11 +180,23 @@ def run_MD(syst,el,ao,E,C,data,params):
 
         ################### Printing results ############################
 
+        # Energy
         fe = open(params["ene_file"],"a")
         fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
         fe.close()
         
-        for k in xrange(nstates):
+        # Dipole moment components
+        fm = open(params["mu_file"],"a")
+        line = "t= %8.5f " % t
+        for k in xrange(len(ao)):
+            line = line + " %8.5f %8.5f %8.5f " % (data["mu_x"].get(k,k),data["mu_y"].get(k,k),data["mu_z"].get(k,k))
+        line = line + "\n"
+        fm.write(line)
+        fm.close()
+
+
+        # Populations
+        for k in xrange(nstates):            
             tmp = params["se_pop_prefix"] + "se_pop_" + str(k)
             fel = open(tmp,"a")
 
