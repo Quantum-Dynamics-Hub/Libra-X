@@ -88,41 +88,40 @@ def gamess_to_libra(params, ao, E, C, ite):
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
 
-    # calculate dipole moment matrix of molecular orbitals
-    v = VECTOR(1.0,1.0,1.0) # test vector
-    g = PrimitiveG(1,0,0, 0.0, v) # test primitive Gaussian
-    
-    M11, M22, M12, M21 = moment(ao,ao2,C,C2,g)
-    
-    print "M11 is";    M11.show_matrix()
-    print "M22 is";    M22.show_matrix()
+    # calculate transition dipole moment matrices in the MO basis:
+    # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
+    # this is done for the "current" state only    
+    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,C2)
+    data["mu_x"] = mu_x
+    data["mu_y"] = mu_y
+    data["mu_z"] = mu_z
 
-    print "M12 and M21 matrixes show dipole moment matrix "
-    print "M12 is";    M12.show_matrix()
-    print "M21 is";    M21.show_matrix()
-
-    #print "P11 and P22 matrixes should show orthogonality"
-    #print "P11 is";    P11.show_matrix()
-    #print "P22 is";    P22.show_matrix()
-
-    #print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
-    #print "P12 is";    P12.show_matrix()
-    #print "P21 is";    P21.show_matrix()
+    if params["debug_mu_output"]==1:
+        print "mu_x:";    mu_x.show_matrix()
+        print "mu_y:";    mu_y.show_matrix()
+        print "mu_z:";    mu_z.show_matrix()
+ 
+    if params["debug_densmat_output"]==1:
+        print "P11 and P22 matrixes should show orthogonality"
+        print "P11 is";    P11.show_matrix()
+        print "P22 is";    P22.show_matrix()
+        print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+        print "P12 is";    P12.show_matrix()
+        print "P21 is";    P21.show_matrix()
 
 
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
-
     # reduce the matrix size
     E_mol_red = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
     D_mol_red = reduce_matrix(D_mol,params["excitations"],params["HOMO"])
 
-    ene_filename = params["mo_ham"] + "re_Ham_" + str(ite)
-    nac_filename = params["mo_ham"] + "im_Ham_" + str(ite)
-
-    #E_mol.show_matrix(ene_filename)
-    #D_mol.show_matrix(nac_filename)
+    if params["print_mo_ham"]==1:
+        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + str(ite))
+        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + str(ite))
+        E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + str(ite))
+        D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + str(ite))
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
