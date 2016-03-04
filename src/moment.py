@@ -27,65 +27,32 @@ sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
-def AO_moment(ao_i, ao_j,g):
+
+
+def transition_dipole_moments(ao,C):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
-    # \param[in] g : PrimitiveG object at given space
-    # This function returns dipole moment matrix of atomic orbitals with different time step
-    # like <AO(t)| r |AO(t+dt)>.
-    #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/moment
-
-    Norb = len(ao_i)
-    D = MATRIX(Norb,Norb)
-
-    
-    # overlap matrix of D
-    for i in range(0,Norb): # all orbitals
-        for j in range(0,Norb):
-            D.set(i,j,gaussian_moment(ao_i[i],g,ao_j[j]))
-
-    return D
-
-def MO_moment(D,ao_i,ao_j,Ci,Cj):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] D : dipole moment matrix of atomic orbitals
-    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
-    # \param[in] Ci, Cj : molecular coefficients at different time step.
-    # This function returns overlap matrix of molecular orbitals with different time step
-    # like <MO(t)| r |MO(t+dt)>.
-    #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/overlap
-
-    Norb = len(ao_i)
-    DM = MATRIX(Norb, Norb)
-
-    #S = AO_overlap(ao_i, ao_j)
-    DM = Ci.T() * D * Cj
-
-    return DM
-
-
-def moment(ao1,ao2,C1,C2,g):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] ao_i, ao_j : atomic orbital basis at different time step.
-    # \param[in] Ci, Cj : molecular coefficients at different time step.
-    # \param[in] g : PrimitiveG vector at given space
+    # \param[in] ao : atomic orbital basis
+    # \param[in] C  : MO-LCAO coefficients
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra
 
-    # define PrimitiveG object to calculate dipole moment
-    D11 = AO_moment(ao1,ao1,g)
-    D22 = AO_moment(ao2,ao2,g)
-    D12 = AO_moment(ao1,ao2,g)
-    D21 = AO_moment(ao2,ao1,g)
+    v = VECTOR(0.0,0.0,0.0) # 
+    gx = PrimitiveG(1,0,0, 0.0, v) # = x
+    gy = PrimitiveG(0,1,0, 0.0, v) # = y
+    gz = PrimitiveG(0,0,1, 0.0, v) # = z
+    g = [gx,gy,gz]
 
-    M11 = MO_moment(D11,ao1,ao1,C1,C1)
-    M22 = MO_moment(D22,ao2,ao2,C2,C2)
-    M12 = MO_moment(D12,ao1,ao2,C1,C2)
-    M21 = MO_moment(D21,ao2,ao1,C2,C1)
+    Norb = len(ao)
+    mu = [MATRIX(Norb, Norb)]*3
+    d = MATRIX(Norb,Norb)
+
+    for k in xrange(3): # all components
+
+        # moment matrices in the AO basis
+        for i in xrange(Norb): # all orbitals
+            for j in xrange(Norb):
+                d.set(i,j,gaussian_moment(ao[i], g[k], ao[j]) )
+        mu[k] = C.T() * d * C
     
-    return M11, M22, M12, M21
+    return mu[0], mu[1], mu[2]
