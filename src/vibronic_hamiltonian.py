@@ -76,7 +76,7 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     #  D_(SE0,SE3) = d_(4,5)
     #  etc.......
 
-    if 1==1: # for debug mode
+    if 0==1: # for debug mode
         print "(e_indx,h_indx) : e_indx is MO index of excited electron and h_indx is that of left hole"
 
     for i in range(1,nstates):
@@ -91,7 +91,7 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
         D_SD.set(0,i,-D_mol.get(h_indx_i-Nmin,e_indx_i-Nmin))
 
         # for debug mode
-        if 1==1 : # for debug mode
+        if 0==1 : # for debug mode
             print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=0 ((0,0) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,e_indx_i,h_indx_i)
             print "Imaginary part of Hvib(i=0 ((0,0) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,h_indx_i,e_indx_i)
         
@@ -106,21 +106,21 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
                     
                     Hvib.set(i,j,0.0,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
                     D_SD.set(i,j,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
-                    if 1==1 : # for debug mode
+                    if 0==1 : # for debug mode
                         print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,e_indx_i,e_indx_j)
                 if e_indx_i == e_indx_j and not h_indx_i == h_indx_j: # difference of the orbital occupied by left hole
                     
                     Hvib.set(i,j,0.0,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
                     D_SD.set(i,j,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
-                    if 1==1 : # for debug mode
+                    if 0==1 : # for debug mode
                         print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,h_indx_j,h_indx_i)
 
     print "D_mol="
     D_mol.show_matrix()
     print "nac(Im(Hvib))="
     D_SD.show_matrix()
-    print "Hvib ="
-    Hvib.show_matrix()
+    #print "Hvib ="
+    #Hvib.show_matrix()
 
     ene_filename = params["sd_ham"] + "re_Ham_" + str(ite)
     nac_filename = params["sd_ham"] + "im_Ham_" + str(ite)

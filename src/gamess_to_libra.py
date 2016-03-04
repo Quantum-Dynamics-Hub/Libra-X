@@ -23,6 +23,7 @@ from ao_basis import *
 from overlap import *
 from Ene_NAC import *
 from reduce_matrix import *
+from moment import *
 
 import os
 import sys
@@ -87,6 +88,19 @@ def gamess_to_libra(params, ao, E, C, ite):
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
 
+    # calculate dipole moment matrix of molecular orbitals
+    v = VECTOR(1.0,1.0,1.0) # test vector
+    g = PrimitiveG(1,0,0, 0.0, v) # test primitive Gaussian
+    
+    M11, M22, M12, M21 = moment(ao,ao2,C,C2,g)
+    
+    print "M11 is";    M11.show_matrix()
+    print "M22 is";    M22.show_matrix()
+
+    print "M12 and M21 matrixes show dipole moment matrix "
+    print "M12 is";    M12.show_matrix()
+    print "M21 is";    M21.show_matrix()
+
     #print "P11 and P22 matrixes should show orthogonality"
     #print "P11 is";    P11.show_matrix()
     #print "P22 is";    P22.show_matrix()
@@ -106,7 +120,7 @@ def gamess_to_libra(params, ao, E, C, ite):
 
     ene_filename = params["mo_ham"] + "re_Ham_" + str(ite)
     nac_filename = params["mo_ham"] + "im_Ham_" + str(ite)
-    
+
     #E_mol.show_matrix(ene_filename)
     #D_mol.show_matrix(nac_filename)
 
