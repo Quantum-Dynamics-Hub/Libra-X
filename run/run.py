@@ -28,7 +28,7 @@ params["nproc"] = 1            # the number of processors
 params["basis_option"] = 2 # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["dt_nucl"] = 20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["el_mts"] = 1  # electronic time steps per one nuclear time step
-params["Nsnaps"] = 1 # the number of MD rounds
+params["Nsnaps"] = 5  # the number of MD rounds
 params["Nsteps"] = 1  # the number of MD steps per snap
 
 # For Kosuke
@@ -41,17 +41,24 @@ params["sd_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interf
 #params["mo_ham"] = "/user/alexeyak/Programming/libra-gamess_interface/run/mo_ham/" # directory where MO basis vibronic hamiltonians will be printed out
 #params["sd_ham"] = "/user/alexeyak/Programming/libra-gamess_interface/run/sd_ham/" # directory where SD basis vibronic hamiltonians will be printed out
 
-
 params["traj_file"] = params["res"]+"md.xyz"
 params["ene_file"] = params["res"]+"ene.dat"
 params["mu_file"] = params["res"]+"mu.dat"
 params["se_pop_prefix"] = "out/"  # where the results of the TD-SE calculations will be printed out 
 
-params["print_coherences"] = 1 # a flag to compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["debug_mu_output"] = 1 # print the debug info into standard output: transition dipole moment matrices
-params["debug_densmat_output"] = 0 # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
-params["print_mo_ham"] = 1 # print full and reduced size MO basis vibronic Hamiltonian
+params["print_coherences"] = 0 # a flag to compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
+params["debug_mu_output"] = 0 # print the debug info into standard output: transition dipole moment matrices
+params["print_sd_ham"] = 0 # print SD basis vibronic Hamiltonian
+params["debug_densmat_output"] = 1 # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
+params["print_mo_ham"] = 0 # print full and reduced size MO basis vibronic Hamiltonian
 params["debug_gms_unpack"] = 0 # print unpacked data from GAMESS
+
+# Thermostat parameters
+params["nu_therm"] = 0.001
+params["NHC_size"] = 5
+params["Temperature"] = 300.0
+params["thermostat_type"] = "Nose-Hoover"
+
 
 # ***************************************************************
 # Excited electronic states
