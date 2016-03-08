@@ -81,10 +81,9 @@ def input_AO_name(params):
                     orb_name1.append("pz")
         orb_name.append(orb_name1)
 
-    print "nGTO=",scount
     params["nGTO"] = scount
-    print "orb_name=",orb_name
     params["orb_name"] = orb_name
+
 
 def construct_ao_basis(params):
     ##
@@ -171,10 +170,11 @@ def construct_ao_basis(params):
     
     return ao_basis
 
-def ao_basis(params):
+def ao_basis(params,flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params : The list which contains extracted data from the file.
+    # \param[in] flag : a flag for debugging detect module    
     # This function returns the list of atomic orbital basis as "ao".
     #
     # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
@@ -184,6 +184,10 @@ def ao_basis(params):
     
     ao = construct_ao_basis(params)
 
-    #params["ao"] = ao
+    if flag == 1:
+
+        print "nGTO=",params["nGTO"]
+        print "orb_name=",params["orb_name"]
+
 
     return ao

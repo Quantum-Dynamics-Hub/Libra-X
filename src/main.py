@@ -55,9 +55,7 @@ def main(params):
 
     exe_gamess(params)
 
-    ao, E, C, Grad, data = unpack_file(params["gms_out"])
-
-    print data
+    ao, E, C, Grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])
 
     ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
