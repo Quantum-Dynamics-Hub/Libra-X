@@ -40,6 +40,7 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     Hvib = CMATRIX(nstates,nstates)
     E_SD = MATRIX(nstates,nstates)
     D_SD = MATRIX(nstates,nstates)
+    flag = params["print_sd_ham"]
 
     Nmin = states[-1].from_orbit[0] + HOMO - 1
     Nmax = states[-1].to_orbit[0] + HOMO -1
@@ -114,18 +115,19 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
                     D_SD.set(i,j,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
                     if 0==1 : # for debug mode
                         print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,h_indx_j,h_indx_i)
-
-    print "D_mol="
-    D_mol.show_matrix()
-    print "nac(Im(Hvib))="
-    D_SD.show_matrix()
+                        
+    #print "D_mol="
+    #D_mol.show_matrix()
+    #print "nac(Im(Hvib))="
+    #D_SD.show_matrix()
     #print "Hvib ="
     #Hvib.show_matrix()
 
-    ene_filename = params["sd_ham"] + "re_Ham_" + str(ite)
-    nac_filename = params["sd_ham"] + "im_Ham_" + str(ite)
+    if flag == 1:
+        ene_filename = params["sd_ham"] + "re_Ham_" + str(ite)
+        nac_filename = params["sd_ham"] + "im_Ham_" + str(ite)
 
-    E_SD.show_matrix(ene_filename)
-    D_SD.show_matrix(nac_filename)
+        E_SD.show_matrix(ene_filename)
+        D_SD.show_matrix(nac_filename)
 
     return Hvib, D_SD
