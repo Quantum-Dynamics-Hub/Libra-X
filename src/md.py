@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file nve.py
+## \file md.py
 # This module implements the functions which execute classical MD.
 #
 
