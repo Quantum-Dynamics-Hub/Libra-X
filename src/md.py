@@ -132,14 +132,20 @@ def run_MD(syst,el,ao,E,C,data,params):
     if MD_type == 1: # NVT-MD
         print " Initializing thermostats"
 
-        THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
-                            "thermostat_type":params["thermostat_type"]})
+        THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
 
         THERM.set_Nf_t(3*syst.Number_of_atoms)
         THERM.set_Nf_r(0)
-        THERM.init_nhc();
+        THERM.init_nhc()
 
-    # Run actual calculations
+    # Initialize forces and Hamiltonians
+    #write_gms_inp(data, params, mol)
+    #exe_gamess(params)
+    #Grad, data, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, 0) # this will update AO and gradients
+    #Hvib, D_SD = vibronic_hamiltonian(params,E_mol_red,D_mol_red,0) # create vibronic hamiltonian
+
+
+    #=============== Propagation =======================
     for i in xrange(Nsnaps):
 
         syst.set_atomic_q(mol.q)
@@ -155,14 +161,12 @@ def run_MD(syst,el,ao,E,C,data,params):
                     for i_ex in range(0,nstates):  # loop over all initial excitations
                         propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
+            # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
+
             if MD_type == 1: # NVT-MD
                 # velocity scaling
-                for k in xrange(syst.Number_of_atoms):
-                    mol.p[3*k]   =   mol.p[3*k] * THERM.vel_scale(0.5*dt_nucl)
-                    mol.p[3*k+1] = mol.p[3*k+1] * THERM.vel_scale(0.5*dt_nucl)
-                    mol.p[3*k+2] = mol.p[3*k+2] * THERM.vel_scale(0.5*dt_nucl)
-
-            # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
+                for k in xrange(3*syst.Number_of_atoms):
+                    mol.p[k] = mol.p[k] * THERM.vel_scale(0.5*dt_nucl)
 
             mol.propagate_p(0.5*dt_nucl)
             mol.propagate_q(dt_nucl)
@@ -182,18 +186,17 @@ def run_MD(syst,el,ao,E,C,data,params):
                 mol.f[3*k+2] = -Grad[k][2]
 
             #========== Propagate thermostat ==================
+            ekin = compute_kinetic_energy(mol)
+
             if MD_type == 1:
-                ekin = compute_kinetic_energy(mol)
                 THERM.propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
 
             mol.propagate_p(0.5*dt_nucl)
 
             if MD_type == 1: # NVT-MD
                 # velocity scaling
-                for k in xrange(syst.Number_of_atoms):
-                    mol.p[3*k]   =   mol.p[3*k] * THERM.vel_scale(0.5*dt_nucl)
-                    mol.p[3*k+1] = mol.p[3*k+1] * THERM.vel_scale(0.5*dt_nucl)
-                    mol.p[3*k+2] = mol.p[3*k+2] * THERM.vel_scale(0.5*dt_nucl)
+                for k in xrange(3*syst.Number_of_atoms):
+                    mol.p[k] = mol.p[k] * THERM.vel_scale(0.5*dt_nucl)
 
             # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
@@ -202,13 +205,17 @@ def run_MD(syst,el,ao,E,C,data,params):
                 for i_ex in range(0,nstates):  # loop over all initial excitations
                     propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
-            # input energies
+
+            # Compute energies
             ekin = compute_kinetic_energy(mol)
             etot = ekin + epot
+
+            ebath = 0.0
             if MD_type == 1:
                 ebath = THERM.energy()
-                eext = etot + ebath
-                Curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
+
+            eext = etot + ebath
+            curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
 
             t = dt_nucl*ij # simulation time in a.u.
 
@@ -216,12 +223,8 @@ def run_MD(syst,el,ao,E,C,data,params):
 
         # Energy
         fe = open(params["ene_file"],"a")
-        if MD_type == 0:# NVE
-            print "i=",i
-            fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, etot)) 
-        if MD_type == 1:# NVT
-            print "i=",i
-            fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f Curr_T= %8.5f\n" % (i, ekin, epot, etot, eext,Curr_T))
+        print "i=",i
+        fe.write("i= %5i ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (i, ekin, epot, etot, eext,curr_T))
         fe.close()
         
         # Dipole moment components
