@@ -135,13 +135,6 @@ def atomic_basis_set(l_gam,params):
         coef_p.append(coef_ptmp)
         coef_d.append(coef_dtmp)
 
-    print "expo_s=",expo_s
-    print "expo_p=",expo_p
-    print "expo_d=",expo_d
-    print "coef_s=",coef_s
-    print "coef_p=",coef_p
-    print "coef_d=",coef_d
-
     params["expo_s"] = expo_s
     params["expo_p"] = expo_p
     params["expo_d"] = expo_d
@@ -201,8 +194,7 @@ def molecular_orbitals(l_gam,params):
         E.set(i,i,mol_ene[i])
         for j in range(0,Ngbf):
             C.set(i,j,mol_coef[i][j])
-    print "E Matrix is";    E.show_matrix()
-    print "C Matrix is";    C.show_matrix()
+
     params["E"] = E
     params["C"] = C
     
@@ -238,9 +230,6 @@ def coordinates_of_atoms(l_gam,params):
     params["l_atoms"] = l_atoms
     params["l_charges"] = l_charges
     params["coor_atoms"] = coor_atoms
-    print "l_atoms=", params["l_atoms"]
-    print "l_charges=", params["l_charges"]
-    print "coor_atoms=", params["coor_atoms"]
 
 
 def gradient(l_gam,params):
@@ -266,14 +255,14 @@ def gradient(l_gam,params):
         gradient.append(grad_tmp)
 
     params["gradient"] = gradient
-    print "gradient=",params["gradient"]
 
 
-def extract(l_gam,params):
+def extract(l_gam,params,flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
     # \param[in] params : The list which contains extracted data from l_gam file.
+    # \param[in] flag : a flag for debugging detect module
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, in the form of dictionary
     #
@@ -288,6 +277,22 @@ def extract(l_gam,params):
 
     atomic_basis_set(l_gam,params)
     
+    if flag == 1:
+        print "expo_s=",params["expo_s"]
+        print "expo_p=",params["expo_p"]
+        print "expo_d=",params["expo_d"]
+        print "coef_s=",params["coef_s"]
+        print "coef_p=",params["coef_p"]
+        print "coef_d=",params["coef_d"]
+
+        print "E Matrix is";    params["E"].show_matrix()
+        print "C Matrix is";    params["C"].show_matrix()
+
+        print "l_atoms=", params["l_atoms"]
+        print "l_charges=", params["l_charges"]
+        print "coor_atoms=", params["coor_atoms"]
+
+        print "gradient=",params["gradient"]
 
     print "********************************************"
     print "extract program ends"

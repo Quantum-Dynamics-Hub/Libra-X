@@ -184,12 +184,13 @@ def show_outputs(l_gam,params):
     print
 
 
-def detect(l_gam,params):
+def detect(l_gam,params,flag):
     ## This module detects the columns which includes the information
     #  of atomic basis sets, molecular energies , molecular orbitals,
     #  and gradients.
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
     # \param[in] params : The list which includes extracted data from l_gam file.
+    # \param[in] flag : a flag for debugging detect module
     # This function returns the data extracted from the file, in the form of dictionary
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
@@ -197,7 +198,8 @@ def detect(l_gam,params):
 
     detect_columns(l_gam,params)
 
-    show_outputs(l_gam,params)
+    if flag == 1:
+        show_outputs(l_gam,params)
 
     print "*********************************************"
     print "detect program ends"

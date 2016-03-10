@@ -4,7 +4,7 @@ slurm*
 *.out
 .nfs*
 se_pop*
-re_*
-im_*
 *.xyz
 *.dat
+*_Ham_*
+*wrk.inp

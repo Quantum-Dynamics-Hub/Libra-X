@@ -55,9 +55,7 @@ def main(params):
 
     exe_gamess(params)
 
-    ao, E, C, Grad, data = unpack_file(params["gms_out"])
-
-    print data
+    ao, E, C, Grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])
 
     ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
@@ -71,7 +69,16 @@ def main(params):
         el_tmp = Electronic(nstates,i_ex)
         el.append(el_tmp)
 
+    #print " Initializing thermostats"
+
+    #THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
+    #                    "thermostat_type":params["thermostat_type"]})
+
+    #THERM.set_Nf_t(1); THERM.set_Nf_r(0); THERM.init_nhc();
+
     print "Starting MD..."
+    #test_data = run_MD(syst,el,ao,E,C,data,params)
+
     test_data = run_MD(syst,el,ao,E,C,data,params)
 
     return data, test_data

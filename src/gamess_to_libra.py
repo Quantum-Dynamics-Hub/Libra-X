@@ -37,10 +37,11 @@ sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
-def unpack_file(filename):
+def unpack_file(filename,flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] filename  GAMESS output file name
+    # \param[in] flag      a flag for debugging unpack_file module
     # This function returns the data extracted from the file, in the form of dictionary :
     # atomic basis sets, molecular energies, molecular coefficients, gradients, respectively.
     #
@@ -54,13 +55,13 @@ def unpack_file(filename):
     data = {}
 
     # detect the columns showing parameters
-    detect(l_gam,data)    
+    detect(l_gam,data,flag)    
 
     # extract the parameters from the columns detected
-    extract(l_gam,data)
+    extract(l_gam,data,flag)
 
     # Construct the AO basis
-    data["ao_basis"] = ao_basis(data) 
+    data["ao_basis"] = ao_basis(data,flag) 
 
     return data["ao_basis"], data["E"], data["C"], data["gradient"], data
 
@@ -83,7 +84,7 @@ def gamess_to_libra(params, ao, E, C, ite):
     # Used in: main.py/nve_MD/
 
     # 2-nd file - time "t+dt"  new
-    ao2, E2, C2, Grad, data = unpack_file(params["gms_out"])
+    ao2, E2, C2, Grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])
 
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
