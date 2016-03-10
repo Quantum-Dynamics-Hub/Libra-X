@@ -29,7 +29,6 @@ sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 
 from gamess_to_libra import *
 from md import *
-from md1 import *
 from create_gamess_input import *
 
 
@@ -70,16 +69,16 @@ def main(params):
         el_tmp = Electronic(nstates,i_ex)
         el.append(el_tmp)
 
-    print " Initializing thermostats"
+    #print " Initializing thermostats"
 
-    THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
-                        "thermostat_type":params["thermostat_type"]})
+    #THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
+    #                    "thermostat_type":params["thermostat_type"]})
 
-    THERM.set_Nf_t(1); THERM.set_Nf_r(0); THERM.init_nhc();
+    #THERM.set_Nf_t(1); THERM.set_Nf_r(0); THERM.init_nhc();
 
     print "Starting MD..."
     #test_data = run_MD(syst,el,ao,E,C,data,params)
 
-    test_data = run_MD1(THERM,syst,el,ao,E,C,data,params)
+    test_data = run_MD(syst,el,ao,E,C,data,params)
 
     return data, test_data

@@ -1,5 +1,5 @@
 #*********************************************************************************
-#* Copyright (C) 2015 Alexey V. Akimov
+#* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
 #*
 #* This file is distributed under the terms of the GNU General Public License
 #* as published by the Free Software Foundation, either version 2 of
@@ -10,7 +10,8 @@
 #*********************************************************************************/
 
 ## \file md.py
-# This module implements the functions which execute classical MD.
+# This module implements the functions which execute classical MD coupled to 
+# Nose-Hoover thermostat.
 #
 
 from create_gamess_input import *
@@ -26,13 +27,11 @@ sys.path.insert(1,os.environ["libra_mmath_path"])
 sys.path.insert(1,os.environ["libra_chemobjects_path"])
 sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 sys.path.insert(1,os.environ["libra_dyn_path"])
-#sys.path.insert(1,cwd+"/../../_build/src/hamiltonian/hamiltonian_atomistic")
 
 from libmmath import *
 from libchemobjects import *
 from libhamiltonian import *
 from libdyn import *
-#from libhamiltonian_atomistic import *
 from LoadPT import * # Load_PT
 
 ##############################################################
@@ -55,7 +54,6 @@ def exe_gamess(params):
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
-
 
 def run_MD(syst,el,ao,E,C,data,params):
     ##
@@ -104,10 +102,11 @@ def run_MD(syst,el,ao,E,C,data,params):
     dt_elec = dt_nucl/float(el_mts)
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
-
     nstates = len(params["excitations"])
-
     print_coherences = params["print_coherences"]
+    MD_type = params["MD_type"]
+
+    kB = 3.1668 * 10e-6 # Boltzmann constant in a.u.
 
     for k in xrange(nstates):
         tmp = params["se_pop_prefix"] + "se_pop_" + str(k)
@@ -130,6 +129,16 @@ def run_MD(syst,el,ao,E,C,data,params):
             print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
             print "********************************************************"
 
+    if MD_type == 1: # NVT-MD
+        print " Initializing thermostats"
+
+        THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
+                            "thermostat_type":params["thermostat_type"]})
+
+        THERM.set_Nf_t(3*syst.Number_of_atoms)
+        THERM.set_Nf_r(0)
+        THERM.init_nhc();
+
     # Run actual calculations
     for i in xrange(Nsnaps):
 
@@ -146,10 +155,17 @@ def run_MD(syst,el,ao,E,C,data,params):
                     for i_ex in range(0,nstates):  # loop over all initial excitations
                         propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
+            if MD_type == 1: # NVT-MD
+                # velocity scaling
+                for k in xrange(syst.Number_of_atoms):
+                    mol.p[3*k]   =   mol.p[3*k] * THERM.vel_scale(0.5*dt_nucl)
+                    mol.p[3*k+1] = mol.p[3*k+1] * THERM.vel_scale(0.5*dt_nucl)
+                    mol.p[3*k+2] = mol.p[3*k+2] * THERM.vel_scale(0.5*dt_nucl)
+
             # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
 
             mol.propagate_p(0.5*dt_nucl)
-            mol.propagate_q(dt_nucl) 
+            mol.propagate_q(dt_nucl)
           
             # ======= Compute forces and energies using GAMESS ============
             write_gms_inp(data, params, mol)
@@ -165,7 +181,19 @@ def run_MD(syst,el,ao,E,C,data,params):
                 mol.f[3*k+1] = -Grad[k][1]
                 mol.f[3*k+2] = -Grad[k][2]
 
+            #========== Propagate thermostat ==================
+            if MD_type == 1:
+                ekin = compute_kinetic_energy(mol)
+                THERM.propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
+
             mol.propagate_p(0.5*dt_nucl)
+
+            if MD_type == 1: # NVT-MD
+                # velocity scaling
+                for k in xrange(syst.Number_of_atoms):
+                    mol.p[3*k]   =   mol.p[3*k] * THERM.vel_scale(0.5*dt_nucl)
+                    mol.p[3*k+1] = mol.p[3*k+1] * THERM.vel_scale(0.5*dt_nucl)
+                    mol.p[3*k+2] = mol.p[3*k+2] * THERM.vel_scale(0.5*dt_nucl)
 
             # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
@@ -174,15 +202,26 @@ def run_MD(syst,el,ao,E,C,data,params):
                 for i_ex in range(0,nstates):  # loop over all initial excitations
                     propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
-
+            # input energies
             ekin = compute_kinetic_energy(mol)
+            etot = ekin + epot
+            if MD_type == 1:
+                ebath = THERM.energy()
+                eext = etot + ebath
+                Curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
+
             t = dt_nucl*ij # simulation time in a.u.
 
-        ################### Printing results ############################
+            ################### Printing results ############################
 
         # Energy
         fe = open(params["ene_file"],"a")
-        fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, ekin+epot)) 
+        if MD_type == 0:# NVE
+            print "i=",i
+            fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f\n" % (i, ekin, epot, etot)) 
+        if MD_type == 1:# NVT
+            print "i=",i
+            fe.write("i= %3i ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f Curr_T= %8.5f\n" % (i, ekin, epot, etot, eext,Curr_T))
         fe.close()
         
         # Dipole moment components
