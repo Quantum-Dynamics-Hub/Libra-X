@@ -54,7 +54,7 @@ params["debug_densmat_output"] = 0 # print the debug info into standard output: 
 params["print_mo_ham"] = 0 # print full and reduced size MO basis vibronic Hamiltonian
 params["debug_gms_unpack"] = 0 # print unpacked data from GAMESS
 
-params["MD_type"] = 1       # option 0 -> NVE, 1 -> NVT
+params["MD_type"] = 0       # option 0 -> NVE, 1 -> NVT
 
 # Thermostat parameters for NVT MD (if MD_type=1)
 params["nu_therm"] = 0.01
