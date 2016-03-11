@@ -106,7 +106,7 @@ def run_MD(syst,el,ao,E,C,data,params):
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
 
-    kB = 3.1668 * 10e-6 # Boltzmann constant in a.u.
+    kB = 3.1668e-6 # Boltzmann constant in a.u.
 
     for k in xrange(nstates):
         tmp = params["se_pop_prefix"] + "se_pop_" + str(k)
@@ -205,19 +205,18 @@ def run_MD(syst,el,ao,E,C,data,params):
                 for i_ex in range(0,nstates):  # loop over all initial excitations
                     propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
-
-            # Compute energies
-            ekin = compute_kinetic_energy(mol)
-            etot = ekin + epot
-
-            ebath = 0.0
-            if MD_type == 1:
-                ebath = THERM.energy()
-
-            eext = etot + ebath
-            curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
-
             t = dt_nucl*ij # simulation time in a.u.
+
+        # Compute energies
+        ekin = compute_kinetic_energy(mol)
+        etot = ekin + epot
+
+        ebath = 0.0
+        if MD_type == 1:
+            ebath = THERM.energy()
+
+        eext = etot + ebath
+        curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
 
             ################### Printing results ############################
 
@@ -269,11 +268,12 @@ def run_MD(syst,el,ao,E,C,data,params):
 
     return test_data
 
-def init_system(data, g):
+def init_system(data, g, T):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] data   The list of variables, containing atomic element names and coordinates
     # \param[in] g      The list of gradients on all atoms
+    # \param[in] T      target temperature
     # This function returns System object which will be used in classical MD.
     #
     # Used in:  main.py/main
@@ -303,6 +303,9 @@ def init_system(data, g):
     syst.show_atoms()
     print "Number of atoms in the system = ", syst.Number_of_atoms
 
+    # initialize system to be in T(K)
+    syst.init_atom_velocities(T)
+    
     return syst
 
 
