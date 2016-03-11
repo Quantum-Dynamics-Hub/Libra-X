@@ -60,7 +60,7 @@ def main(params):
     ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
     print "Initializing system..."
-    syst = init_system(data, Grad)
+    syst = init_system(data, Grad,params["Temperature"])
 
     print "Initializing electronic variables"    
     el = []
