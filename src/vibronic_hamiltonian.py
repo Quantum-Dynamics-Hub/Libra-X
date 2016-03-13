@@ -124,10 +124,11 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     #Hvib.show_matrix()
 
     if flag == 1:
-        ene_filename = params["sd_ham"] + "re_Ham_" + str(ite)
-        nac_filename = params["sd_ham"] + "im_Ham_" + str(ite)
+        for ic in xrange(params["nconfig"]):
+            ene_filename = params["sd_ham"] + "re_Ham_" + str(ic) + "_" + str(ite)
+            nac_filename = params["sd_ham"] + "im_Ham_" + str(ic) + "_" + str(ite)
 
-        E_SD.show_matrix(ene_filename)
-        D_SD.show_matrix(nac_filename)
+            E_SD.show_matrix(ene_filename)
+            D_SD.show_matrix(nac_filename)
 
     return Hvib, D_SD

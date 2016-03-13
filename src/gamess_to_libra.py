@@ -119,10 +119,11 @@ def gamess_to_libra(params, ao, E, C, ite):
     D_mol_red = reduce_matrix(D_mol,params["excitations"],params["HOMO"])
 
     if params["print_mo_ham"]==1:
-        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + str(ite))
-        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + str(ite))
-        E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + str(ite))
-        D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + str(ite))
+        for ic in xrange(params["nconfig"]):
+            E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + str(ic) + "_"+ str(ite))
+            D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + str(ic) + "_"+ str(ite))
+            E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + str(ic) + "_"+ str(ite))
+            D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + str(ic) + "_"+ str(ite))
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):

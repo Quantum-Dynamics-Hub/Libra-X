@@ -60,25 +60,19 @@ def main(params):
     ################## Step 2: Initialize molecular system and run MD with TD-SE ####
 
     print "Initializing system..."
-    syst = init_system(data, Grad,params["Temperature"])
-
-    print "Initializing electronic variables"    
-    el = []
-    nstates = len(params["excitations"])
-    for i_ex in xrange(0,nstates):  # loop over all initial excitations
-        el_tmp = Electronic(nstates,i_ex)
-        el.append(el_tmp)
-
-    #print " Initializing thermostats"
-
-    #THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
-    #                    "thermostat_type":params["thermostat_type"]})
-
-    #THERM.set_Nf_t(1); THERM.set_Nf_r(0); THERM.init_nhc();
+    syst = []
+    # store several initial nuclei systems with different momenta
+    for i in xrange(params["nconfig"]):
+        syst.append(init_system(data, Grad,params["Temperature"]))
+    
+    #print "Initializing electronic variables"    
+    #el = []
+    #nstates = len(params["excitations"])
+    #for i_ex in xrange(nstates):  # loop over all initial excitations
+    #    eltmp = Electronic(nstates,i_ex)
+    #    el.append(eltmp)
 
     print "Starting MD..."
-    #test_data = run_MD(syst,el,ao,E,C,data,params)
-
-    test_data = run_MD(syst,el,ao,E,C,data,params)
+    test_data = run_MD(syst,ao,E,C,data,params)
 
     return data, test_data
