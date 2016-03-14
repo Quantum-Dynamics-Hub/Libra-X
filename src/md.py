@@ -81,7 +81,7 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
     # Used in:  main.py/main
 
     nconfig = params["nconfig"]
-    #Ntraj = params["Ntraj"]
+    ntraj = params["ntraj"]
 
     # Open and close energy and trajectory files - this will effectively 
     # make them empty (to remove older info, in case we restart calculations)
@@ -107,10 +107,12 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
     nstates = len(params["excitations"])
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
+    SH_type = params["SH_type"]
     do_rescaling = params["do_rescaling"]
+    do_reverse = params["do_reverse"]
     use_boltz_factor = params["use_boltz_factor"]
 
-    kB = 3.1668e-6 # Boltzmann constant in a.u.
+    kB = 3.166811429e-6 # Boltzmann constant in a.u.
 
     # initialize se_pop files
     for iconfig in xrange(nconfig):
@@ -119,28 +121,45 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
             fel = open(tmp,"w")
             fel.close()
 
-    # define external Hamiltonian to calculate SH populations
-    #if SH_type > 0 and SH_type < 4: # FSSH=1 GSSH=2 MSSH=3
+    if SH_type > 0 and SH_type < 4: # FSSH=1 GSSH=2 MSSH=3
 
-    #    ham_ex = Hamiltonian_Extern(nstates,3*syst.Number_of_atoms)  # (electronic DOF,nuclear DOF)
-    #    ham_ex.set_rep(1)  # adiabatic
-    #    ham_ex.set_adiabatic_opt(0)  # use the externally-computed adiabatic electronic Hamiltonian and derivatives
-    #    ham_ex.set_vibronic_opt(0)  # use the externally-computed vibronic Hamiltonian and derivatives
+        # initialize se_pop files
+        for iconfig in xrange(nconfig):
+            for k in xrange(nstates):
+                tmp = params["sh_pop_prefix"] + "sh_pop_" + str(iconfig) + "_" + str(k)
+                fel = open(tmp,"w")
+                fel.close()
+
+        # external Hamiltonian to calculate SH populations
+        syst = SYST[0] # extract syst
+        ham_ex = Hamiltonian_Extern(nstates,3*syst.Number_of_atoms)  # (electronic DOF,nuclear DOF)
+        ham_ex.set_rep(1)  # adiabatic
+        ham_ex.set_adiabatic_opt(0)  # use the externally-computed adiabatic electronic Hamiltonian and derivatives
+        ham_ex.set_vibronic_opt(0)  # use the externally-computed vibronic Hamiltonian and derivatives
         
-    # Actual matrices
-    #    ham_adi = MATRIX(nstates,nstates);  ham_ex.bind_ham_adi(ham_adi); # bind adiabatic hamiltonian
-    #    d1ham_adi = MATRIXList()
-    #    for i in xrange(3*syst.Number_of_atoms):
-    #        tmp = MATRIX(nstates,nstates)
-    #        d1ham_adi.append(tmp)
-    #    ham_ex.bind_d1ham_adi(d1ham_adi) # bind adiabatic hamiltonian derivative 
-    #    ham_vib = CMATRIX(nstates,nstates);  ham_ex.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
+        # bind actual matrices to external hamiltonian : ham_ex
+        ham_adi = MATRIX(nstates,nstates);  ham_ex.bind_ham_adi(ham_adi); # bind adiabatic hamiltonian
+        d1ham_adi = MATRIXList()
+        for i in xrange(3*syst.Number_of_atoms):
+            tmp = MATRIX(nstates,nstates)
+            d1ham_adi.append(tmp)
+        ham_ex.bind_d1ham_adi(d1ham_adi) # bind derivative of adiabatic hamiltonian
+        ham_vib = CMATRIX(nstates,nstates);  ham_ex.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
+
+        # initial SH states
+        sh_states0 = []
+        for k in xrange(nstates):
+            for itraj in xrange(ntraj):
+                sh_states0.append(k)
+
+        # "Random" object
+        rnd = Random()
 
     #=============== Propagation =======================
 
     for iconfig in xrange(nconfig): # select initial nuclei configuration
 
-        # initialize Nuclear object
+        print "Initializing nuclear variables"
         syst = SYST[iconfig]
         mol = Nuclear(3*syst.Number_of_atoms)
         syst.extract_atomic_q(mol.q)
@@ -161,6 +180,9 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
         for i_ex in xrange(nstates):  # loop over all initial excitations
             eltmp = Electronic(nstates,i_ex)
             el.append(eltmp)
+
+        print "Initializing SH states"
+        sh_states = sh_states0
 
         # initialize Thermostat object
         if MD_type == 1: # NVT-MD
@@ -248,18 +270,45 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
                 t = dt_nucl*ij # simulation time in a.u.
 
                 # >>>>>>>>>>>>>> SH propagation starts <<<<<<<<<<<<<<<<
-                #if SH_type > 0 and SH_type < 4: # FSSH=1 GSSH=2 MSSH=3
-                #    # update matrices
-                #    for i in xrange(nstates):
-                #        ham_adi.set(i,i, Hvib.get(i,i).real)
-                #        for j in xrange(nstates):
-                #            ham_vib.set(i,j, Hvib.get(i,j))
-                #for i in xrange(3*syst.Number_of_atoms):
-                #        for j in xrange(nstates):
-                #            d1ham_adi[k].set(j,j,mol.f[k])
-                # select SH methods
-                #if SH_type == 1:
+                if SH_type > 0 and SH_type < 4: 
 
+                    # update matrices
+                    for l in xrange(nstates):
+                        ham_adi.set(l,l, Hvib.get(l,l).real)
+                        for m in xrange(nstates):
+                            ham_vib.set(l,m, Hvib.get(l,m))
+
+                    for l in xrange(3*syst.Number_of_atoms):
+                        for m in xrange(nstates):
+                            d1ham_adi[l].set(m,m,mol.f[l])
+
+                    if params["debug_ham_ex"] == 1:
+                        print "ham_adi =",ham_adi.show_matrix()
+                        print "ham_vib =",ham_vib.show_matrix()
+                        print "Hvib =",Hvib.show_matrix()
+                        print "ham_ex.Hvib(0,0)= " , ham_ex.Hvib(0,0)
+                        print "ham_ex.Hvib(0,1)= " , ham_ex.Hvib(0,1)
+                        print "d1ham_adi[0] =",d1ham_adi[0].show_matrix()
+                        print "mol.f[0] = %8.5f"% mol.f[0]
+
+                    # select SH methods
+                    for k in xrange(nstates):
+                        g = MATRIX(nstates,nstates) # initialize a matrix of hopping probability
+                        if SH_type == 1: # FSSH
+                            compute_hopping_probabilities_fssh(mol, el[k], ham_ex, g, dt_nucl, use_boltz_factor, params["Temperature"])
+                        if SH_type == 2: # GSSH
+                            compute_hopping_probabilities_gssh(mol, el[k], ham_ex, g, dt_nucl, use_boltz_factor, params["Temperature"])
+                        if SH_type == 3: # MSSH
+                            compute_hopping_probabilities_mssh(mol, el[k], ham_ex, g, dt_nucl, use_boltz_factor, params["Temperature"])
+
+                        # Hopping current states
+                        for itraj in xrange(ntraj):
+                            ksi = rnd.uniform(0.0,1.0) # generate random number for every trajectory
+                            sh_states[k*ntraj+itraj]= hop(sh_states[k*ntraj+itraj], mol, ham_ex, ksi, g, do_rescaling, 1, do_reverse)
+
+                        if params["debug_SH_calculations"] == 1:
+                            print "%i state g matrix ="% k ;print g.show_matrix();
+                            print "%i sh_states=" %k; print sh_states[k*ntraj:(k+1)*ntraj]
 
             # >>>>>>>>>>>>>> Compute energies <<<<<<<<<<<<<<<<<<<<<<<<<
             ekin = compute_kinetic_energy(mol)
@@ -272,11 +321,18 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
             eext = etot + ebath
             curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
 
+            # >>>>>>>>>>>>>> Compute SH populations <<<<<<<<<<<<<<<<<<<<
+
+            sh_pops = []
+            for k in xrange(nstates):
+                sh_tmp = sh_states[k*ntraj:(k+1)*ntraj]
+                for s in xrange(nstates):
+                    sh_pops.append(sh_tmp.count(s)/ntraj)
+
             ################### Printing results ############################
 
             # Energy
             fe = open(ene_file,"a")
-            print "i=",i
             fe.write("i= %5i ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (i, ekin, epot, etot, eext,curr_T))
             fe.close()
         
@@ -292,28 +348,37 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
             # Populations
             for k in xrange(nstates):            
                 tmp = params["se_pop_prefix"] + "se_pop_" + str(iconfig) +"_"+ str(k)
-                fel = open(tmp,"a")
+                fel_se = open(tmp,"a")
+
+                tmp = params["sh_pop_prefix"] + "sh_pop_" + str(iconfig) +"_"+ str(k)
+                fel_sh = open(tmp,"a")
 
                 # Print time
-                line = "t= %8.5f " % t
+                line_se = "t= %8.5f " % t
+                line_sh = "t= %8.5f " % t
 
                 # Print populations
                 for st in xrange(nstates):
-                    line = line + " %8.5f " % el[k].rho(st,st).real
+                    line_se = line_se + " %8.5f " % el[k].rho(st,st).real
+                    line_sh = line_sh + " %8.5f " % sh_pops[k*nstates+st]
 
                 if print_coherences == 1:
                     # Print coherences
                     for st in xrange(nstates):
                         for st1 in xrange(st):
-                            line = line + " %8.5f %8.5f " % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
+                            line_se = line_se + " %8.5f %8.5f " % (el[k].rho(st,st1).real, el[k].rho(st,st1).imag)
              
-                line = line + "\n"
+                line_se = line_se + "\n"
+                line_sh = line_sh + "\n"
 
-                fel.write(line)
-                fel.close()
+                fel_se.write(line_se)
+                fel_se.close()
+                fel_sh.write(line_sh)
+                fel_sh.close()
 
+            print "********* No.%i snap ends" % i
 
-        print "**************** configuration No.%i finished**************" % iconfig
+        print "**************** Initial Nuclei Configuration No.%i finished**************" % iconfig
 
     # input test_data for debugging
     test_data = {}

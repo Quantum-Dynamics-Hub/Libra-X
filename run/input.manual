@@ -12,11 +12,14 @@ column    column meaning               comment
 //----------------------------------------------------------------------------------------------------------------------------
 
 	      basis_option              integer                 choose ab initio or semi-empirical calculation  : Option  1 = ab initio, 2 = semi-empirical
-	      debug_densmat_output      string                  a flag to print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
+	      debug_densmat_output      string                  a flag to print the debug info into standard output: density matrices, 
+ 	                                                        also including for the wavefunctions at different time steps
 	      debug_gms_unpack          integer                 a flag to print unpacked data from GAMESS
               debug_mu_output           integer                 a flag to print the debug info into standard output: transition dipole moment matrices
 	      do_rescaling              integer                 The flag to turn on/off CPA: 0 - no velocity rescaling (CPA, no back-reaction)
-	      do_reverse                integer                 The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta(velocities)are inverted.
+	      do_reverse                integer                 The option that determines what to do if the hop was rejected because of the energy conservation
+	                                                       	(frustrated hop): do_reverse = 0 - nuclear momenta(velocities) stay unchanged;
+							        do_reverse = 1 - nuclear momenta(velocities)are inverted.
 	      dt_nucl                   float                   time step for nuclear dynamics  (a.u.)
 	      el_mts                    integer                 electronic time steps per one nuclear time step
 	      ene_file                  string                  contains kinetic energy, potential energy, and total energy of the atoms for each MD time
@@ -50,4 +53,4 @@ column    column meaning               comment
 	      Temperature               float                   target temperature for NVT-MD
 	      thermostat_type           string                  option: "Nose-Hoover" or "Nose-Poincare"
 	      traj_file                 string                  contains atomic position in Cartesian for each MD time
-	      use_boltz_factor          integer                 use_boltz_factor A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme
+	      use_boltz_factor          integer                 A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme
