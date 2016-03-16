@@ -10,8 +10,8 @@
 #*********************************************************************************/
 
 ## \file md.py
-# This module implements the functions which execute classical MD coupled to 
-# Nose-Hoover thermostat.
+# This module implements the functions which execute GAMESS, execute classical MD coupled to 
+# Nose-Hoover thermostat, execute TD-SE and SH calculations, and set initial system.
 #
 
 from create_gamess_input import *
@@ -76,31 +76,13 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
     # \param[out] test_data  the output data for debugging, in the form of dictionary
 
     # This function executes classical MD in Libra and electronic structure calculation
-    # in GAMESS iteratively.
+    # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
+    # It outputs MD trajectories, Energy evolutions, and SE and SH populations.
     #
     # Used in:  main.py/main
 
-    nconfig = params["nconfig"]
-    ntraj = params["ntraj"]
-
-    # Open and close energy and trajectory files - this will effectively 
-    # make them empty (to remove older info, in case we restart calculations)
-    for i in xrange(nconfig):
-        fe = open(params["ene_file"]+str(i)+".dat","w")
-        fe.close()
-        ft = open(params["traj_file"]+str(i)+".xyz","w")
-        ft.close()
-        fm = open(params["mu_file"]+str(i)+".dat","w")
-        fm.close()
-
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
-    if el_mts<1:
-        print "Error in run_MD: el_mts must be positive integer"
-        print "Value given = ", el_mts
-        print "Exiting..."
-        sys.exit(0)
-
     dt_elec = dt_nucl/float(el_mts)
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
@@ -108,25 +90,59 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
     SH_type = params["SH_type"]
-    do_rescaling = params["do_rescaling"]
     do_reverse = params["do_reverse"]
+    nconfig = params["nconfig"]
+    ntraj = params["ntraj"]
+    do_rescaling = params["do_rescaling"]
     use_boltz_factor = params["use_boltz_factor"]
 
     kB = 3.166811429e-6 # Boltzmann constant in a.u.
 
+    # Open and close energy and trajectory files - this will effectively 
+    # make them empty (to remove older info, in case we restart calculations)
+
+    # MF results file (depending on only initial nuclei trajectories)
+    for i in xrange(nconfig):        
+        fe = open(params["ene_file"]+"%i_MF.dat"% i,"w")
+        fe.close()
+        ft = open(params["traj_file"]+"%i_MF.xyz"% i,"w")
+        ft.close()
+        fm = open(params["mu_file"]+"%i_MF.dat"% i,"w")
+        fm.close()
+
+    # SH results file (depending on only initial nuclei trajectories)
+    if do_rescaling == 1 and use_boltz_factor == 0 and SH_type > 0 and SH_type < 4 :
+
+        for i in xrange(nconfig):
+            for j in xrange(nstates):
+                for k in xrange(ntraj):
+
+                    fe = open(params["ene_file"]+"%i_%i_%i_SH.dat"%(i,j,k),"w")
+                    fe.close()
+                    ft = open(params["traj_file"]+"%i_%i_%i_SH.xyz"%(i,j,k),"w")
+                    ft.close()
+                    fm = open(params["mu_file"]+"%i_%i_%i_SH.dat"%(i,j,k),"w")
+                    fm.close()
+
+    if el_mts < 1:
+        print "Error in run_MD: el_mts must be positive integer"
+        print "Value given = ", el_mts
+        print "Exiting..."
+        sys.exit(0)
+
     # initialize se_pop files
     for iconfig in xrange(nconfig):
         for k in xrange(nstates):
-            tmp = params["se_pop_prefix"] + "se_pop_" + str(iconfig) + "_" + str(k)
+            tmp = params["se_pop_prefix"] + "se_pop_%i_%i"%(iconfig, k)
             fel = open(tmp,"w")
             fel.close()
 
     if SH_type > 0 and SH_type < 4: # FSSH=1 GSSH=2 MSSH=3
 
-        # initialize se_pop files
+        # initialize sh_pop files
         for iconfig in xrange(nconfig):
             for k in xrange(nstates):
-                tmp = params["sh_pop_prefix"] + "sh_pop_" + str(iconfig) + "_" + str(k)
+                tmp = params["sh_pop_prefix"] + "sh_pop_%i_%i"%(iconfig, k)
                 fel = open(tmp,"w")
                 fel.close()
 
@@ -137,7 +153,7 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
         ham_ex.set_adiabatic_opt(0)  # use the externally-computed adiabatic electronic Hamiltonian and derivatives
         ham_ex.set_vibronic_opt(0)  # use the externally-computed vibronic Hamiltonian and derivatives
         
-        # bind actual matrices to external hamiltonian : ham_ex
+        # bind actual matrices to external hamiltonian
         ham_adi = MATRIX(nstates,nstates);  ham_ex.bind_ham_adi(ham_adi); # bind adiabatic hamiltonian
         d1ham_adi = MATRIXList()
         for i in xrange(3*syst.Number_of_atoms):
@@ -155,72 +171,100 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
         # "Random" object
         rnd = Random()
 
-    #=============== Propagation =======================
-
+    print "set initial nuclear variables for each nuclei configuration"
+    MOL0 = []
     for iconfig in xrange(nconfig): # select initial nuclei configuration
-
-        print "Initializing nuclear variables"
         syst = SYST[iconfig]
         mol = Nuclear(3*syst.Number_of_atoms)
         syst.extract_atomic_q(mol.q)
         syst.extract_atomic_p(mol.p)
         syst.extract_atomic_f(mol.f)
         syst.extract_atomic_mass(mol.mass)
+        MOL0.append(mol0)
 
         if 0==1:
-            for i in xrange(syst.Number_of_atoms):
-                print "mass m=",mol.mass[3*i], mol.mass[3*i+1], mol.mass[3*i+2]
-                print "coordinates q = ", mol.q[3*i], mol.q[3*i+1], mol.q[3*i+2]
-                print "momenta p= ", mol.p[3*i], mol.p[3*i+1], mol.p[3*i+2]
-                print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
-                print "********************************************************"
+            print "mass m=",mol.mass[3*i], mol.mass[3*i+1], mol.mass[3*i+2]
+            print "coordinates q = ", mol.q[3*i], mol.q[3*i+1], mol.q[3*i+2]
+            print "momenta p= ", mol.p[3*i], mol.p[3*i+1], mol.p[3*i+2]
+            print "forces f= ",  mol.f[3*i], mol.f[3*i+1], mol.f[3*i+2]
+            print "********************************************************"
 
-        print "Initializing electronic variables"
-        el = []
-        for i_ex in xrange(nstates):  # loop over all initial excitations
-            eltmp = Electronic(nstates,i_ex)
-            el.append(eltmp)
+    print "set initial electronic variables for each excited state configuration"
+    el0 = []
+    for i_ex in xrange(nstates):  # loop over all initial excitations
+        eltmp = Electronic(nstates,i_ex)
+        el0.append(eltmp)
 
-        print "Initializing SH states"
-        sh_states = sh_states0
+    #=============== Propagation =======================
 
-        # initialize Thermostat object
-        if MD_type == 1: # NVT-MD
-            print " Initialize thermostats......"
-            therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
-            therm.set_Nf_t(3*SYST[0].Number_of_atoms)
-            therm.set_Nf_r(0)
-            therm.init_nhc()
+    sh_nstates = 1
+    sh_ntraj = 1
+    if do_rescaling == 1 and use_boltz_factor == 0 : # each MD for each SH trajectory
+        sh_nstates = nstates
+        sh_ntraj = ntraj
 
-        # set initial datas from GAMESS output 
-        ao = []
-        for i in range(0,len(ao0)):
-            ao.append(AO(ao0[i]))
+    for iconfig in xrange(nconfig): # select initial nuclei configuration
 
-        E = MATRIX(E0)
-        C = MATRIX(C0)
-        data = data0
+        for for i_ex in xrange(sh_nstates):
 
-        # set filename for each trajectories
+            print "Initializing SH states"
+            sh_states = sh_states0
 
-        traj_file = params["traj_file"]+str(iconfig)+".xyz"
-        ene_file = params["ene_file"]+str(iconfig)+".dat"
-        mu_file = params["mu_file"]+str(iconfig)+".dat"
+            for itra in xrange(sh_ntraj): # select a trajectory of excited states propagation
 
-        for i in xrange(Nsnaps):
+                print "Initializing nuclear variables"
+                mol = Nuclear(3*syst.Number_of_atoms)
+                for at in xrange(3*syst.Number_of_atoms):
+                    mol.q[at] = MOL0[iconfig].q[at]
+                    mol.p[at] = MOL0[iconfig].p[at]
+                    mol.f[at] = MOL0[iconfig].f[at]
+                    mol.mass[at] = MOL0[iconfig].mass[at]
 
-            syst.set_atomic_q(mol.q)
-            syst.print_xyz(traj_file,i)
+                print "Initializing electronic variables"
+                el = []
+                for i_ex in xrange(nstates):  # loop over all initial excitations
+                    eltmp = Electronic(nstates,i_ex)
+                    eltmp.q = el0[i_ex].q
+                    eltmp.p = el0[i_ex].p
+                    el.append(eltmp)
 
-            for j in xrange(Nsteps):
+                # initialize Thermostat object
+                if MD_type == 1: # NVT-MD
+                    print " Initialize thermostats......"
+                    therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
+                    therm.set_Nf_t(3*SYST[0].Number_of_atoms)
+                    therm.set_Nf_r(0)
+                    therm.init_nhc()
 
-                ij = i*Nsteps + j
+                # set initial datas from GAMESS output 
+                ao = []
+                for i in range(0,len(ao0)):
+                    ao.append(AO(ao0[i]))
 
-                if ij > 0: # pass this function at t=0
-                    # Electronic propagation: half-step
-                    for k in xrange(el_mts):
-                        for i_ex in range(0,nstates):  # loop over all initial excitations
-                            propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
+                E = MATRIX(E0)
+                C = MATRIX(C0)
+                data = data0
+
+                # set filename for each trajectories
+
+                traj_file = params["traj_file"]+"%i_MF.xyz"% i
+                ene_file = params["ene_file"]+"%i_MF.dat"% i
+                mu_file = params["mu_file"]+"%i_MF.dat"% i
+
+                for i in xrange(Nsnaps):
+
+                    syst.set_atomic_q(mol.q)
+                    syst.print_xyz(traj_file,i)
+
+                    for j in xrange(Nsteps):
+
+                        ij = i*Nsteps + j
+
+                        if ij > 0: # pass this function at t=0
+                            # Electronic propagation: half-step
+                            for k in xrange(el_mts):
+                                for i_ex in range(0,nstates):  # loop over all initial excitations
+                                    propagate_electronic(0.5*dt_elec, el[i_ex], Hvib)
 
                 # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
 
@@ -327,7 +371,7 @@ def run_MD(SYST,ao0,E0,C0,data0,params):
             for k in xrange(nstates):
                 sh_tmp = sh_states[k*ntraj:(k+1)*ntraj]
                 for s in xrange(nstates):
-                    sh_pops.append(sh_tmp.count(s)/ntraj)
+                    sh_pops.append(float(sh_tmp.count(s))/float(ntraj))
 
             ################### Printing results ############################
 
@@ -393,7 +437,7 @@ def init_system(data, g, T):
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] data   The list of variables, containing atomic element names and coordinates
     # \param[in] g      The list of gradients on all atoms
-    # \param[in] T      target temperature
+    # \param[in] T      target temperature used to initialize momenta of atoms.
     # This function returns System object which will be used in classical MD.
     #
     # Used in:  main.py/main
@@ -423,10 +467,7 @@ def init_system(data, g, T):
     syst.show_atoms()
     print "Number of atoms in the system = ", syst.Number_of_atoms
 
-    # initialize system to be in T(K)
+    # initialize momenta of the system where the temperature is T(K). 
     syst.init_atom_velocities(T)
     
     return syst
-
-
-

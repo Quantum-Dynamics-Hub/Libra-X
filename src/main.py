@@ -10,9 +10,10 @@
 #*********************************************************************************/
 
 ## \file main.py
-# This module defines the function which communicates the GAMESS output data
-# to Libra and vice versa.
-# It outputs the files needed for excited electron dynamics simulation.
+# This module sets initial parameters from GAMESS output, creates initial system, 
+# and executes runMD script.
+# 
+# It returns the data from runMD for debugging the code.
 
 import os
 import sys
@@ -41,7 +42,7 @@ def main(params):
     # This function prepares initial parameters from GAMESS output file
     # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
     # iteratively.
-    # Parallelly, it executes TD-SE calculation for simulating excited eletronic dynamics.
+    # Parallelly, it executes TD-SE and SH calculation for simulating excited eletronic dynamics.
     #
     # Used in:  main.py
 
@@ -57,7 +58,7 @@ def main(params):
 
     ao, E, C, Grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])
 
-    ################## Step 2: Initialize molecular system and run MD with TD-SE ####
+    ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
     print "Initializing system..."
     syst = []

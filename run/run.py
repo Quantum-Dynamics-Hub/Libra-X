@@ -36,18 +36,17 @@ params["nproc"] = 1            # the number of processors
 params["basis_option"] = 2 # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["dt_nucl"] = 20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["el_mts"] = 1  # electronic time steps per one nuclear time step
-params["Nsnaps"] = 2  # the number of MD rounds
+params["Nsnaps"] = 10  # the number of MD rounds
 params["Nsteps"] = 1  # the number of MD steps per snap
 params["nconfig"] = 1 # the number of initial nuclei configurations
 
 # Surface Hopping
 params["SH_type"] = 1 # Surface Hopping type : option 0 -> no SH, 1 -> FSSH, 2 -> GSSH , 3 -> MSSH
-params["ntraj"] = 5 # number of electronic trajectories
+params["ntraj"] = 20 # number of electronic trajectories
 params["do_rescaling"] = 0 # The flag to turn on/off CPA: 0 - no velocity rescaling (CPA, no back-reaction)
 params["use_boltz_factor"] = 1 # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_reverse"] = 0 # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                          # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta(velocities)are inverted.
-
 
 params["res"] = ""
 params["mo_ham"] = ""
@@ -78,7 +77,7 @@ params["print_sd_ham"] = 0               # print SD basis vibronic Hamiltonian
 params["debug_densmat_output"] = 0       # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["print_mo_ham"] = 0               # print full and reduced size MO basis vibronic Hamiltonian
 params["debug_gms_unpack"] = 0           # print the debug info into standard output:  unpacked data from GAMESS
-params["debug_ham_ex"] = 0               # print the debug info into standard output: external hamiltonian for SH calculation
+params["debug_ham_ex"] = 0               # print the debug info into standard output: external hamiltonian matrices for SH calculation
 params["debug_SH_calculations"] = 1      # print the debug info into standard output: SH probabilities matrices and SH_states
 
 params["MD_type"] = 1       # option 0 -> NVE, 1 -> NVT
