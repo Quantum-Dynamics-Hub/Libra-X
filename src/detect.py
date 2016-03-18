@@ -132,54 +132,54 @@ def show_outputs(l_gam,params):
     #        : main.py/main/unpack_file/detect
 
     print "******************************************"
-    print "according to the",params["lele"]+1,"th column,"
+    print "according to the %i th column,"% params["lele"]+1
     print l_gam[params["lele"]]
-    print "Nele = ",params["Nele"]
+    print "Nele = %i" % params["Nele"]
     print "*******************************************"
     print "******************************************"
-    print "according to the",params["locc_alp"]+1,"th column,"
+    print "according to the %i th column," % params["locc_alp"]+1
     print l_gam[params["locc_alp"]]
-    print "Nocc_alp = ",params["Nocc_alp"]
-    print "according to the",params["locc_bet"]+1,"th column,"
+    print "Nocc_alp = %i" % params["Nocc_alp"]
+    print "according to the %i th column," % params["locc_bet"]+1 
     print l_gam[params["locc_bet"]]
-    print "Nocc_bet = ",params["Nocc_bet"]
+    print "Nocc_bet = %i" % params["Nocc_bet"]
     print "*******************************************"
     print
     print "******************************************"
-    print "according to the",params["lgbf"]+1,"th column,"
+    print "according to the %i th column," % params["lgbf"]+1
     print l_gam[params["lgbf"]]
-    print "Ngbf = ",params["Ngbf"]
+    print "Ngbf = %i" % params["Ngbf"]
     print "*******************************************"
     print
     print "******************************************"
-    print "ATOMIC BASIS SET is within",params["ab_start"]+1,"-",params["ab_end"]+1,"th lines."
+    print "ATOMIC BASIS SET is within %i - %i th lines." % (params["ab_start"]+1, params["ab_end"]+1)
     for l in range(params["ab_start"],params["ab_end"]+1):
         print l_gam[l]
     print "******************************************"
     print
     print "******************************************"
-    print "MOLECULAR ORBITALS is within",params["mo_start"]+1,"-",params["mo_end"]+1,"th lines"
+    print "MOLECULAR ORBITALS is within %i - %i th lines." % (params["mo_start"]+1,params["mo_end"]+1)
     for l in range(params["mo_start"],params["mo_end"]+1):
         print l_gam[l]
     print "******************************************"
     print
     print "******************************************"
-    print "COORDINATES OF ATOMS (in Bohr) is within",params["coor_start"]+1,"-",params["coor_end"]+1,"th lines"
+    print "COORDINATES OF ATOMS (in Bohr) is within %i - %i th lines." %(params["coor_start"]+1,params["coor_end"]+1)
     for l in range(params["coor_start"],params["coor_end"]+1):
         print l_gam[l]
     print "And the number of atoms is ",params["Natoms"]
     print "******************************************"
     print
     print "******************************************"
-    print "GRADIENT (in Hartree/Bohr) is within",params["grad_start"]+1,"-",params["grad_end"]+1,"th lines"
+    print "GRADIENT (in Hartree/Bohr) is within %i - %i th lines." %(params["grad_start"]+1,params["grad_end"]+1)
     for l in range(params["grad_start"],params["grad_end"]+1):
         print l_gam[l]
     print "******************************************"
     print
     print "******************************************"
-    print "according to the",params["ltot_ene"]+1,"th column,"
+    print "according to the %i th column," % params["ltot_ene"]+1
     print l_gam[params["ltot_ene"]]
-    print "total energy = ",params["tot_ene"]
+    print "total energy = %i" % params["tot_ene"]
     print "******************************************"
     print
 
@@ -201,7 +201,7 @@ def detect(l_gam,params,flag):
     if flag == 1:
         show_outputs(l_gam,params)
 
-    print "*********************************************"
-    print "detect program ends"
-    print "*********************************************"
-    print 
+    #print "*********************************************"
+    #print "detect program ends"
+    #print "*********************************************"
+    #print 

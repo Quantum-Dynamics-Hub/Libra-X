@@ -64,7 +64,7 @@ def main(params):
     syst = []
     # store several initial nuclei systems with different momenta
     for i in xrange(params["nconfig"]):
-        syst.append(init_system(data, Grad,params["Temperature"]))
+        syst.append(init_system(data, Grad,params["Temperature"],params["MD_type"]))
     
     #print "Initializing electronic variables"    
     #el = []
