@@ -294,8 +294,8 @@ def extract(l_gam,params,flag):
 
         print "gradient=",params["gradient"]
 
-    print "********************************************"
-    print "extract program ends"
-    print "********************************************"
-    print 
+    #print "********************************************"
+    #print "extract program ends"
+    #print "********************************************"
+    #print 
 

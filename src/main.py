@@ -10,9 +10,10 @@
 #*********************************************************************************/
 
 ## \file main.py
-# This module defines the function which communicates the GAMESS output data
-# to Libra and vice versa.
-# It outputs the files needed for excited electron dynamics simulation.
+# This module sets initial parameters from GAMESS output, creates initial system, 
+# and executes runMD script.
+# 
+# It returns the data from runMD for debugging the code.
 
 import os
 import sys
@@ -41,7 +42,7 @@ def main(params):
     # This function prepares initial parameters from GAMESS output file
     # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
     # iteratively.
-    # Parallelly, it executes TD-SE calculation for simulating excited eletronic dynamics.
+    # Parallelly, it executes TD-SE and SH calculation for simulating excited eletronic dynamics.
     #
     # Used in:  main.py
 
@@ -57,28 +58,22 @@ def main(params):
 
     ao, E, C, Grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])
 
-    ################## Step 2: Initialize molecular system and run MD with TD-SE ####
+    ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
     print "Initializing system..."
-    syst = init_system(data, Grad,params["Temperature"])
-
-    print "Initializing electronic variables"    
-    el = []
-    nstates = len(params["excitations"])
-    for i_ex in xrange(0,nstates):  # loop over all initial excitations
-        el_tmp = Electronic(nstates,i_ex)
-        el.append(el_tmp)
-
-    #print " Initializing thermostats"
-
-    #THERM = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"],\
-    #                    "thermostat_type":params["thermostat_type"]})
-
-    #THERM.set_Nf_t(1); THERM.set_Nf_r(0); THERM.init_nhc();
+    syst = []
+    # store several initial nuclei systems with different momenta
+    for i in xrange(params["nconfig"]):
+        syst.append(init_system(data, Grad,params["Temperature"],params["MD_type"]))
+    
+    #print "Initializing electronic variables"    
+    #el = []
+    #nstates = len(params["excitations"])
+    #for i_ex in xrange(nstates):  # loop over all initial excitations
+    #    eltmp = Electronic(nstates,i_ex)
+    #    el.append(eltmp)
 
     print "Starting MD..."
-    #test_data = run_MD(syst,el,ao,E,C,data,params)
-
-    test_data = run_MD(syst,el,ao,E,C,data,params)
+    test_data = run_MD(syst,ao,E,C,data,params)
 
     return data, test_data

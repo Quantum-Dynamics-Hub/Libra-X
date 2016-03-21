@@ -3,7 +3,7 @@
 slurm*
 *.out
 .nfs*
-se_pop*
+*_pop*
 *.xyz
 *.dat
 *_Ham_*
