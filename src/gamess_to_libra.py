@@ -22,7 +22,7 @@ from extract import *
 from ao_basis import *
 from overlap import *
 from Ene_NAC import *
-from reduce_matrix import *
+#from reduce_matrix import *
 from moment import *
 
 import os
@@ -32,10 +32,14 @@ import math
 # First, we add the location of the library to test to the PYTHON path
 sys.path.insert(1,os.environ["libra_mmath_path"])
 sys.path.insert(1,os.environ["libra_qchem_path"])
+sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
+
 
 #print "\nTest 1: Importing the library and its content"
 from libmmath import *
 from libqchem import *
+from libcontrol_parameters import *
+
 
 def unpack_file(filename,flag):
     ##
@@ -66,14 +70,57 @@ def unpack_file(filename,flag):
     return data["ao_basis"], data["E"], data["C"], data["gradient"], data
 
 
-def gamess_to_libra(params, ao, E, C, ite):
+
+def reduce_matrix(M,min_shift,max_shift,HOMO_indx):
+    ##
+    # Extracts a sub-matrix M_sub of the original matrix M. The size of the extracted matrix is
+    # controlled by the input parameters
+    # \param[in] M The original input matrix
+    # \param[in] min_shift - is the index defining the minimal orbital in the active space
+    # to consider. This means that the lowest 1-electron state will be HOMO_indx + min_shift.
+    # \param[in] max_shift - is the index defining the maximal orbital in the active space
+    # to consider. This means that the highest 1-electron state will be HOMO_indx + max_shift.
+    # \param[in] HOMO_indx - the index of the HOMO orbital (indexing starts from 0)
+    # Example: if we have C2H4 system - 12 valence electrons, so 6 orbitals are occupied:
+    # occ = [0,1,2,3,4,5] and lets say 4 more states unoccupied virt = [6,7,8,9] Then if we
+    # use HOMO_indx = 5, min_shift = -2, max_shift = 2 will reduce the active space to the
+    # orbitals [3,4,5,  6,7], where orbitals 3,4,5 are occupied and 6,7 are unoccupied.
+    # So we reduce the initial 10 x 10 matrix to the 5 x 5 matrix
+    # This function returns the reduced matrix "M_red".
+    #
+    # Used in: main.py/main/run_MD/gamess_to_libra
+
+
+    if(HOMO_indx+min_shift<0):
+        print "Error in reduce_matrix: The min_shift/HOMO_index combination result in the out-of-range error for the reduced matrix\nExiting..."
+        sys.exit(0)
+
+    sz = max_shift - min_shift + 1
+    if(sz>M.num_of_cols):
+        print "Error in reduce_matrix: The size of the cropped matrix is larger than the size of the original matrix\nExiting..."
+        sys.exit(0)
+
+    M_red = MATRIX(sz,sz)
+    pop_submatrix(M,M_red,range(HOMO_indx+min_shift,HOMO_indx+max_shift+1))
+
+
+    return M_red
+
+
+
+
+def gamess_to_libra(params, ao, E, C, suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
     # \param[in,out] ao :  atomic orbital basis at "t" old
     # \param[in,out] E  :  molecular energies at "t" old
     # \param[in,out] C  :  molecular coefficients at "t" old
-    # \param[in] ite : The number of iteration
+    # \param[in] suff : The suffix to add to the name of the output files
+    # this suffix is now considered to be of a string type - so you can actually encode both the
+    # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
+    # related information
+    #
     # This function outputs the files for excited electron dynamics
     # in "res" directory.
     # It returns the forces which act on the atoms.
@@ -111,24 +158,36 @@ def gamess_to_libra(params, ao, E, C, ite):
         print "P21 is";    P21.show_matrix()
 
 
+    ### TO DO: In the following section, we need to avoid computing NAC matrices in the full
+    # basis. We will need the information on cropping, in order to avoid computations that 
+    # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
+
     # reduce the matrix size
-    E_mol_red = reduce_matrix(E_mol,params["excitations"],params["HOMO"])
-    D_mol_red = reduce_matrix(D_mol,params["excitations"],params["HOMO"])
+    E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    ### END TO DO
 
     if params["print_mo_ham"]==1:
-        for ic in xrange(params["nconfig"]):
-            E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + str(ic) + "_"+ str(ite))
-            D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + str(ic) + "_"+ str(ite))
-            E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + str(ic) + "_"+ str(ite))
-            D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + str(ic) + "_"+ str(ite))
+        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
+        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+        E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
+        D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
     E = MATRIX(E2)
     C = MATRIX(C2)
+
+    # Returned data:
+    # Grad: Grad[k][i] - i-th projection of the gradient w.r.t. to k-th nucleus (i = 0, 1, 2)
+    # data: a dictionary containing various data, such as transition dipole moments, AOs, etc
+    # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
+    # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
+    # E_mol_red: the matrix of the 1-el orbital energies in the reduced (active) space
+    # D_mol_red: the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
 
     return Grad, data, E_mol, D_mol, E_mol_red, D_mol_red

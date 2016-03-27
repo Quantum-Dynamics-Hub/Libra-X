@@ -23,27 +23,31 @@ from libqchem import *
 from libcontrol_parameters import *
 from libmmath import *
 
-def vibronic_hamiltonian(params,E_mol,D_mol,ite):
+def vibronic_hamiltonian(params,E_mol_red,D_mol_red,suffix):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params  contains input parameters , in the directory form
-    # \param[in] E_mol   time-averaged molecular energies on MO basis
-    # \param[in] D_mol   Non-Adiabatic couplings on MO basis
-    # \param[in] ite     The number of iteration 
-    # This function returns the vibronic hamiltonian "Hvib".
+    # This function transforms the 1-electron orbital energies matrix and the matrix of 
+    # nonadiabatic couplings into the matrix of excitation energies and corresponding couplings
+    # between the considered excited Slater determinants (SD). In doing this, it will return 
+    # the vibronic and electronic (in SD basis) Hamiltonians.
+    # 
+    # \param[in] params  contains the dictionary of the input parameters
+    # \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space
+    # \param[in] D_mol_red   the matrix of the NACs computed with the 1-electon MOs, in reduced space
+    # \param[in] suffix the suffix to add to the file names for the files created in this function
+    #
+    # This function returns the electronic and vibronic Hamiltonians, H_el, and Hvib
     #
     # Used in: main.py/main/run_MD
 
     HOMO = params["HOMO"]
-    states = params["excitations"]
-    nstates = len(states)
-    Hvib = CMATRIX(nstates,nstates)
-    E_SD = MATRIX(nstates,nstates)
-    D_SD = MATRIX(nstates,nstates)
-    flag = params["print_sd_ham"]
+    min_shift = params["min_shift"]
+    max_shift = params["max_shift"]
 
-    Nmin = states[-1].from_orbit[0] + HOMO - 1
-    Nmax = states[-1].to_orbit[0] + HOMO -1
+    states = params["excitations"]
+    nstates = len(states)  
+    H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
+    D_el = MATRIX(nstates,nstates)  # nonadiabatic couplings
+    flag = params["print_sd_ham"]
 
     # Excitation energy : 
     # ex) GS = (0,1,0,1) -> E_GS = 0
@@ -51,84 +55,62 @@ def vibronic_hamiltonian(params,E_mol,D_mol,ite):
     #     SE1 = (0,1,2,1) -> E_SE1 = E(LUMO+1) -E(HOMO) 
     #     etc ........
 
-    # EX energy
-    for i in range(1,nstates):
+    # E.g. 
+    # HOMO = 5, min_shift = -2
+    # [0,1,2,3,4,5,  6,7,8,9]
+    #     [0,1,2,3,  4,5]
+    #
 
-        h_indx = states[i].from_orbit[0] + HOMO - 1
-        e_indx = states[i].to_orbit[0] + HOMO - 1
-        EX_ene = E_mol.get(e_indx-Nmin,e_indx-Nmin) - E_mol.get(h_indx-Nmin,h_indx-Nmin)
+    #============ EX energies ================
+    for i in xrange(nstates):
 
-        Hvib.set(i,i,EX_ene,0.0)
-        E_SD.set(i,i,EX_ene)
+        h_indx = states[i].from_orbit[0] + min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
+        e_indx = states[i].to_orbit[0] + min_shift  # --- same, only for the electron orbital
 
-    #print "Ex_ene="
-    #Hvib.show_matrix()
+        EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx)
+       
+        H_el.set(i,i,EX_ene)
 
-    # NACs : a value exists when 2 excitonic wavefunctions differ only one electron position.
-    # D_(I,J) = d_(i,j)
-    # ex)  GS = [1,-1,2,-2,3,-3] 
-    #     SE0 = [4,-1,2,-2,3,-3]    SE3 = [5,-1,2,-2,3,-3]
-    #     SE1 = [1,-1,4,-2,3,-3]    SE4 = [1,-1,5,-2,3,-3]
-    #     SE2 = [1,-1,2,-2,4,-3]    SE5 = [1,-1,2,-2,5,-3]
-    #   D_(GS,SE0) = d_(1,4)
-    #   D_(GS,SE1) = d_(2,4)
-    #  D_(SE0,SE1) = d_(2,1) 
-    #  D_(SE0,SE2) = d_(3,1) 
-    #  D_(SE0,SE3) = d_(4,5)
-    #  etc.......
 
-    if 0==1: # for debug mode
-        print "(e_indx,h_indx) : e_indx is MO index of excited electron and h_indx is that of left hole"
+    #============== Couplings =================
 
-    for i in range(1,nstates):
-        h_indx_i = states[i].from_orbit[0] + HOMO - 1
-        e_indx_i = states[i].to_orbit[0] + HOMO - 1
+    for I in range(0,nstates):
+        h_indx_I = states[I].from_orbit[0] + min_shift
+        e_indx_I = states[I].to_orbit[0] + min_shift  
 
-        # EX -> GS
-        Hvib.set(i,0,0.0,-D_mol.get(e_indx_i-Nmin,h_indx_i-Nmin))
-        D_SD.set(i,0,-D_mol.get(e_indx_i-Nmin,h_indx_i-Nmin))
-        # GS -> EX
-        Hvib.set(0,i,0.0,-D_mol.get(h_indx_i-Nmin,e_indx_i-Nmin))
-        D_SD.set(0,i,-D_mol.get(h_indx_i-Nmin,e_indx_i-Nmin))
 
-        # for debug mode
-        if 0==1 : # for debug mode
-            print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=0 ((0,0) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,e_indx_i,h_indx_i)
-            print "Imaginary part of Hvib(i=0 ((0,0) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,h_indx_i,e_indx_i)
-        
+        for J in range(0,nstates):
+            h_indx_J = states[J].from_orbit[0] + min_shift
+            e_indx_J = states[J].to_orbit[0] + min_shift
 
-        for j in range(1,nstates):
-            if not i == j:
-                h_indx_j = states[j].from_orbit[0] + HOMO - 1
-                e_indx_j = states[j].to_orbit[0] + HOMO - 1
+        coupled = 0
+        #====== Check whether the determinants I and J are coupled =======
+        if I!=J: # exclude self-coupling
+            if h_indx_I == h_indx_J:  # same hole position, electronic transitions
+                coupled = 1
+                i = e_indx_I
+                j = e_indx_J
+            elif e_indx_I == e_indx_J: # same electronic position, hole transitions
+                couple = 1
+                i = h_indx_J  ### TO DO: Check the ordering of the indices 
+                j = h_indx_I  ### END TO DO
 
-                # EX -> EX
-                if not e_indx_i == e_indx_j and h_indx_i == h_indx_j: # difference of the orbital occupied by excited electron 
-                    
-                    Hvib.set(i,j,0.0,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
-                    D_SD.set(i,j,-D_mol.get(e_indx_i-Nmin,e_indx_j-Nmin))
-                    if 0==1 : # for debug mode
-                        print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,e_indx_i,e_indx_j)
-                if e_indx_i == e_indx_j and not h_indx_i == h_indx_j: # difference of the orbital occupied by left hole
-                    
-                    Hvib.set(i,j,0.0,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
-                    D_SD.set(i,j,-D_mol.get(h_indx_j-Nmin,h_indx_i-Nmin))
-                    if 0==1 : # for debug mode
-                        print "Imaginary part of Hvib(i=%i ((%i,%i) state) ,j=%i ((%i,%i) state) ) is -D(%i,%i)" %(i,e_indx_i,h_indx_i,j,e_indx_j,h_indx_j,h_indx_j,h_indx_i)
-                        
-    #print "D_mol="
-    #D_mol.show_matrix()
-    #print "nac(Im(Hvib))="
-    #D_SD.show_matrix()
-    #print "Hvib ="
-    #Hvib.show_matrix()
+        if coupled:
+            D_el.set(I,J, -D_mol_red.get(i,j))
+        else:
+            D_el.set(I,J, 0.0)
 
-    if flag == 1:
-        for ic in xrange(params["nconfig"]):
-            ene_filename = params["sd_ham"] + "re_Ham_" + str(ic) + "_" + str(ite)
-            nac_filename = params["sd_ham"] + "im_Ham_" + str(ic) + "_" + str(ite)
+      
+    if params["print_sd_ham"] == 1:
+        H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)
+        D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
 
-            E_SD.show_matrix(ene_filename)
-            D_SD.show_matrix(nac_filename)
 
-    return Hvib, D_SD
+    Hvib = CMATRIX(H_el, D_el) # vibronic Hamiltonian
+
+    # Returned values:
+    # H_el - electronic Hamiltonian - the real diagonal matrix with adiabatic energies of the states
+    #         w.r.t the ground state energy
+    # Hvib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
+    # on the off-diagonals
+    return H_el, Hvib

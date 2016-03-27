@@ -6,7 +6,8 @@ import os
 import sys
 import math
 
-user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+user = 0 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -29,33 +30,44 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 params = {}
 
-params["gms_inp0"] = "23waters.inp"    # initial input file of GAMESS
-params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
-params["gms_out"] = "23waters.out"     # output file of GAMESS
-params["nproc"] = 2                    # the number of processors
+if test==0:
+    params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
+    params["gms_inp"] = "H2O_wrk.inp" # working input file of GAMESS
+    params["gms_out"] = "H2O.out"     # output file of GAMESS
+
+elif test==1:
+    params["gms_inp0"] = "23waters.inp"    # initial input file of GAMESS
+    params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
+    params["gms_out"] = "23waters.out"     # output file of GAMESS
+
+params["nproc"] = 1                    # the number of processors
 params["basis_option"] = 2             # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["dt_nucl"] = 20.0               # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["Nsnaps"] = 2                   # the number of MD rounds
-params["Nsteps"] = 1                   # the number of MD steps per snap
-params["nconfig"] = 2                  # the number of initial nuclei configurations
+params["Nsnaps"] = 20                   # the number of MD rounds
+params["Nsteps"] = 2                   # the number of MD steps per snap
+params["nconfig"] = 2                  # the number of initial nuclear/velocity configurations
 
 # Thermostat parameters for NVT MD (if MD_type=1)
-params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
+params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
+params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
 
-# Excited electronic states
-# caution: start from 1, not 0.
-Nmin = 92   # lowest molecular orbital taken for creating excited states
-HOMO = 92   # Highest Occupied Molecular Orbital : LUMO = HOMO + 1
-Nmax = 93   # highest molecular orbital taken for creating excited states
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
 
-params["HOMO"] = HOMO
+# Excited electronic states
+# caution: start from 1, not 0
+if test==0:
+    params["HOMO"] = 4 
+elif test==1:
+    params["HOMO"] = 92
+
+params["min_shift"] = -2  # HOMO-2, HOMO-1, HOMO
+params["max_shift"] = 2  # LUMO, LUMO+1
 
 # Surface Hopping
 params["SH_type"] = 1 # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
@@ -65,7 +77,7 @@ params["ntraj"] = 2   # number of excited states trajectories
 #            velocity rescaling, then params["use_boltz_factor"] = 0 and params["do_rescaling"] = 1 (This calculation will be expensive) 
 
 params["use_boltz_factor"] = 0 # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 1     # The flag to turn on/off CPA: 0 - no velocity rescaling (CPA, no back-reaction)
+params["do_rescaling"] = 1     # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 0       # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
@@ -86,10 +98,10 @@ elif user==1:
     params["sd_ham"] = "/projects/academic/alexeyak/kosukesa/dev/libra-gamess_interface/run/sd_ham/"
 
 # output file
-params["traj_file"] = params["res"]+"md" # containing MD trajectories
-params["ene_file"] = params["res"]+"ene" # containing kinetic, potential, system, and thermostat-coupled system energies 
-params["mu_file"] = params["res"]+"mu"   # containing dipole moment matrices
-params["se_pop_prefix"] = "out/"         # where the results of the TD-SE calculations will be printed out 
+params["traj_file_prefix"] = params["res"]+"md_" # containing MD trajectories
+params["ene_file_prefix"] = params["res"]+"ene+" # containing kinetic, potential, system, and thermostat-coupled system energies 
+params["mu_file_prefix"] = params["res"]+"mu_"   # containing dipole moment matrices
+params["se_pop_file_prefix"] = "out/se_pop_"         # where the results of the TD-SE calculations will be printed out
 params["sh_pop_prefix"] = "out/"         # where the results of the SH calculations will be printed out
 
 # flags for debugging
@@ -110,7 +122,9 @@ from path_libra_lib import * # import path_libra_lib module
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 from create_states import *
-params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(0,1,2,1) ] 
+
+# create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
 
