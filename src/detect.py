@@ -11,197 +11,173 @@
 
 ## \file detect.py
 # This module implements the functions that detect columns showing
-# gradients , molecular energies, molecular orbitals, and atomic basis information
-# written in gamess output file.
+# gradients, molecular energies, molecular orbitals, and atomic basis information
+# written in the GAMESS output file.
 #
 # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
 #        : main.py/main/initial_gamess_exe/unpack_file
-
-# **************************************************************
-# This program detects the columns showing parameters.
-# **************************************************************
 
 import os
 import sys
 import math
 
 
-def detect_columns(l_gam,params):
+def detect_columns(inp_lines):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file. 
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the data extracted from the file, in the form of dictionary
+    # Finds the keywords and their patterns and extracts the descriptors info
+    # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
+    # info - The returned dictionary of descriptors of the given input lines.
     #
     # Used in: main.py/main/nve/gamess_to_libra/unpack_file/detect
     #        : main.py/main/unpack_file/detect
 
+    info = {}
+
     i = -1
-    for line in l_gam:
+    for line in inp_lines:
         i += 1
         spline = line.split()
 
         # the number of electrons
         if len(spline) == 5 and spline[2] == "ELECTRONS":
-            params["lele"] = i
-            params["Nele"] = int(spline[4])
+            info["lele"] = i
+            info["Nele"] = int(spline[4])
 
         # the number of occupied orbitals (alpha and beta)
         if len(spline) == 7 and spline[4] == "(ALPHA)":
-            params["locc_alp"] = i
-            params["Nocc_alp"] = int(spline[6])
+            info["locc_alp"] = i
+            info["Nocc_alp"] = int(spline[6])
         if len(spline) == 8 and spline[4] == "(BETA":
-            params["locc_bet"] = i
-            params["Nocc_bet"] = int(spline[7])
+            info["locc_bet"] = i
+            info["Nocc_bet"] = int(spline[7])
 
         # the number of cartesian gaussian basis functions
         if len(spline) == 8 and spline[5] == "FUNCTIONS":
-            params["lgbf"] = i
-            params["Ngbf"] = int(spline[7])
-            #print params["Ngbf"]
+            info["lgbf"] = i
+            info["Ngbf"] = int(spline[7])
 
         # the atomic basis sets
         if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
-            params["ab_start"] = i + 7
+            info["ab_start"] = i + 7
         if len(spline) == 8 and spline[5] == "SHELLS":
-            params["ab_end"] = i - 2
+            info["ab_end"] = i - 2
 
         #***********   single point calculation  ************
 
         # eigenvectors
         if len(spline) > 0 and spline[0] == "EIGENVECTORS":
-            params["mo_start"] = i + 3
+            info["mo_start"] = i + 3
             
-            params["mo_end"] = i + 1 + (params["Ngbf"] + 4) * int(math.ceil(params["Ngbf"]/5.0))
+            info["mo_end"] = i + 1 + (info["Ngbf"] + 4) * int(math.ceil(info["Ngbf"]/5.0))
 
         # the coordinates of the atoms (in Bohr)
         if len(spline) == 4 and spline[2] == "COORDINATES" and spline[3] == "(BOHR)":
-            params["coor_start"] = i + 2
+            info["coor_start"] = i + 2
         if len(spline) == 3 and spline[0] == "INTERNUCLEAR" and spline[1] == "DISTANCES":
-            params["coor_end"] = i -2
-            params["Natoms"] = params["coor_end"] - params["coor_start"] + 1
+            info["coor_end"] = i -2
+            info["Natoms"] = info["coor_end"] - info["coor_start"] + 1
 
         # the gradients(in Hartree/Bohr)
 
         if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
-            params["grad_start"] = i + 4
-            params["grad_end"] = params["grad_start"] + params["Natoms"] -1
+            info["grad_start"] = i + 4
+            info["grad_end"] = info["grad_start"] + info["Natoms"] -1
 
         # total energy
 
         if len(spline) == 8 and spline[0] == "FINAL" and spline[2] == "ENERGY":
-            params["ltot_ene"] = i
-            params["tot_ene"] = float(spline[4])
+            info["ltot_ene"] = i
+            info["tot_ene"] = float(spline[4])
 
-        #***********   optimization   ***********************
+    return info
 
-            # molecular orbitals
-            #if len(spline) == 2 and spline[0] == "MOLECULAR":
-            #    params["mo_start"] = i + 3
-            #if len(spline) > 0 and spline[0] == "PROPERTY":
-            #    params["mo_end"] = i - 3
 
-            # the coordinates of the atoms (in Angstrom)
 
-            #if len(spline) == 6 and spline[0] == "COORDINATES" and spline[2] == "ALL":
-            #    params["coor_start"] = i + 3
-            #    params["coor_end"] = params["coor_start"] + params["Natoms"] -1
-
-            # the gradients
-            #if len(spline) == 2 and spline[0] == "GRADIENT" and spline[1] == "(HARTREE/BOHR)":
-            #    params["grad_start"] = i + 4
-            #    params["grad_end"] = params["grad_start"] + params["Natoms"] -1
-
-            #else :
-            #print "*********************************************************************"
-            #print "********************* CAUTION ***************************************"
-            #print "*********************************************************************"
-            #print "**** run_type has an illegal value in construct ao_basis funtion ****"
-            #print "***                                                               ***"
-            #print "********************************************************************"
-            #sys.exit()
-
-def show_outputs(l_gam,params):
+def show_outputs(inp_lines,info):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which includes extracted data from l_gam file.
-    # This function shows the columns which includes the information.
+    # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
+    # \param[in] info The dictionary of descriptors of the given input lines.
+    # This function shows the positions of the data elements in the analyzed file and 
+    # some other auxiliary information extracted from the file
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/detect
     #        : main.py/main/unpack_file/detect
 
     print "******************************************"
-    print "according to the %i th column,"% params["lele"]+1
-    print l_gam[params["lele"]]
-    print "Nele = %i" % params["Nele"]
+    print "according to the %i th column,"% info["lele"]+1
+    print inp_lines[info["lele"]]
+    print "Nele = %i" % info["Nele"]
     print "*******************************************"
     print "******************************************"
-    print "according to the %i th column," % params["locc_alp"]+1
-    print l_gam[params["locc_alp"]]
-    print "Nocc_alp = %i" % params["Nocc_alp"]
-    print "according to the %i th column," % params["locc_bet"]+1 
-    print l_gam[params["locc_bet"]]
-    print "Nocc_bet = %i" % params["Nocc_bet"]
-    print "*******************************************"
-    print
-    print "******************************************"
-    print "according to the %i th column," % params["lgbf"]+1
-    print l_gam[params["lgbf"]]
-    print "Ngbf = %i" % params["Ngbf"]
+    print "according to the %i th column," % info["locc_alp"]+1
+    print inp_lines[info["locc_alp"]]
+    print "Nocc_alp = %i" % info["Nocc_alp"]
+    print "according to the %i th column," % info["locc_bet"]+1 
+    print inp_lines[info["locc_bet"]]
+    print "Nocc_bet = %i" % info["Nocc_bet"]
     print "*******************************************"
     print
     print "******************************************"
-    print "ATOMIC BASIS SET is within %i - %i th lines." % (params["ab_start"]+1, params["ab_end"]+1)
-    for l in range(params["ab_start"],params["ab_end"]+1):
-        print l_gam[l]
+    print "according to the %i th column," % info["lgbf"]+1
+    print inp_lines[info["lgbf"]]
+    print "Ngbf = %i" % info["Ngbf"]
+    print "*******************************************"
+    print
+    print "******************************************"
+    print "ATOMIC BASIS SET is within %i - %i th lines." % (info["ab_start"]+1, info["ab_end"]+1)
+    for i in range(info["ab_start"],info["ab_end"]+1):
+        print inp_lines[i]
     print "******************************************"
     print
     print "******************************************"
-    print "MOLECULAR ORBITALS is within %i - %i th lines." % (params["mo_start"]+1,params["mo_end"]+1)
-    for l in range(params["mo_start"],params["mo_end"]+1):
-        print l_gam[l]
+    print "MOLECULAR ORBITALS is within %i - %i th lines." % (info["mo_start"]+1,info["mo_end"]+1)
+    for i in range(info["mo_start"],info["mo_end"]+1):
+        print inp_lines[i]
     print "******************************************"
     print
     print "******************************************"
-    print "COORDINATES OF ATOMS (in Bohr) is within %i - %i th lines." %(params["coor_start"]+1,params["coor_end"]+1)
-    for l in range(params["coor_start"],params["coor_end"]+1):
-        print l_gam[l]
-    print "And the number of atoms is ",params["Natoms"]
+    print "COORDINATES OF ATOMS (in Bohr) is within %i - %i th lines." %(info["coor_start"]+1,info["coor_end"]+1)
+    for i in range(info["coor_start"],info["coor_end"]+1):
+        print inp_lines[i]
+    print "And the number of atoms is ",info["Natoms"]
     print "******************************************"
     print
     print "******************************************"
-    print "GRADIENT (in Hartree/Bohr) is within %i - %i th lines." %(params["grad_start"]+1,params["grad_end"]+1)
-    for l in range(params["grad_start"],params["grad_end"]+1):
-        print l_gam[l]
+    print "GRADIENT (in Hartree/Bohr) is within %i - %i th lines." %(info["grad_start"]+1,info["grad_end"]+1)
+    for i in range(info["grad_start"],info["grad_end"]+1):
+        print inp_lines[i]
     print "******************************************"
     print
     print "******************************************"
-    print "according to the %i th column," % params["ltot_ene"]+1
-    print l_gam[params["ltot_ene"]]
-    print "total energy = %i" % params["tot_ene"]
+    print "according to the %i th column," % info["ltot_ene"]+1
+    print inp_lines[info["ltot_ene"]]
+    print "total energy = %i" % info["tot_ene"]
     print "******************************************"
     print
 
 
-def detect(l_gam,params,flag):
-    ## This module detects the columns which includes the information
-    #  of atomic basis sets, molecular energies , molecular orbitals,
-    #  and gradients.
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which includes extracted data from l_gam file.
-    # \param[in] flag : a flag for debugging detect module
-    # This function returns the data extracted from the file, in the form of dictionary
+def detect(inp_lines,flag):
+    ## 
+    # This function detects the positions of the valuable data in a file represented as a  
+    # list of lines. It does not return the data itself, only the descriptors of where to
+    # get the info about: atomic basis sets, molecular energies , molecular orbitals,
+    # atomic gradients, coordinates, and labels.
+    # \param[in] inp_lines The list of lines containing the file to be unpacked
+    # \param[in] flag Debug info printing: 1 - print, otherwise - don't 
+    # info - is the returned dictionary of descriptors of the given input lines
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
     #        : main.py/main/unpack_file
 
-    detect_columns(l_gam,params)
+    info = detect_columns(inp_lines)
 
     if flag == 1:
-        show_outputs(l_gam,params)
+        show_outputs(inp_lines,info)
 
-    #print "*********************************************"
-    #print "detect program ends"
-    #print "*********************************************"
-    #print 
+        print "*********************************************"
+        print "detect program ends"
+        print "*********************************************\n"
+
+    return info
+
+
