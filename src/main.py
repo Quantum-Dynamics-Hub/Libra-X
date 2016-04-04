@@ -63,12 +63,13 @@ def main(params):
 
     exe_gamess(params)
 
-    ao, e, c, grad, data = unpack_file(params["gms_out"],params["debug_gms_unpack"])   
+    label, Q, R, grad, e, c, ao = extract(params["gms_out"],params["debug_gms_unpack"])
+
     ao_list = []
     e_list = []
     c_list = []
     grad_list = []
-    data_list = []
+
     for i in xrange(ntraj):
         ao_tmp = []
         for x in ao:
@@ -76,17 +77,16 @@ def main(params):
         ao_list.append(ao_tmp)
 
         e_list.append(MATRIX(e))
-        c_list.append(MATRIX(c))
-        grad_list.append(copy.deepcopy(grad))
-        data_list.append(copy.deepcopy(data))
+        c_list.append(MATRIX(c))        
 
-#    AO = [ao]*ntraj
-#    E = [e]*ntraj
-#    C = [c]*ntraj
-#    Grad = [grad]*ntraj
-#    data = [dat]*ntraj
+        grd = []
+        for g in grad:
+            grd.append(VECTOR(g))
+        grad_list.append(grd)
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
+
+    #sys.exit(0)
 
     print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
@@ -100,10 +100,13 @@ def main(params):
         for i_ex in xrange(nstates):
             print "Create a copy of a system"
             #syst.append(System(syst_))
-            syst.append(init_system(data_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"]))           
+            syst.append(init_system(label, R, grad_list[i], rnd, params["Temperature"], params["sigma_pos"]))          
             print "Create an electronic object"
             el.append(Electronic(nstates,i_ex))
     
+
+    #sys.exit(0)  #### DEBUG!!!
+
 
     print "Starting MD..."
     cnt = 0
@@ -116,8 +119,8 @@ def main(params):
             params["se_pop_file"] = params["se_pop_file_prefix"]+"_"+str(i)+"_"+str(i_ex)+".txt"
 
             print "run MD"
-            test_data = run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],data_list[cnt],params)
+            run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label, Q)
             print "MD is done"
             cnt = cnt + 1
 
-    return data, test_data
+    #return data, test_data

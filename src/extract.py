@@ -31,8 +31,11 @@ sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
+import detect
+import ao_basis
 
-def atomic_basis_set(l_gam,params):
+
+def extract_ao_basis(inp_str, label, R, flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
@@ -42,22 +45,23 @@ def atomic_basis_set(l_gam,params):
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
     #        : main.py/main/unpack_file/extract
 
-    #  atomic species
-    ab_start = params["ab_start"]
-    ab_end = params["ab_end"]
+    # atomic species
     l_atom_spec = []
     atom_spec = []
-    for i in range(ab_start,ab_end+1):
-        spline = l_gam[i].split()
+    sz = len(inp_str)
+
+    for i in xrange(sz):
+        spline = inp_str[i].split()
         if len(spline) == 1:
             l_atom_spec.append(i)
             atom_spec.append(spline[0])
-    params["atom_spec"] = atom_spec
+
 
     # atomic basis sets
     basis_type = []
     basis_expo = []
     basis_coef = []
+
     for i in range(0,len(atom_spec)):
         stmp = atom_spec[i]
         type_tmp = []
@@ -68,9 +72,10 @@ def atomic_basis_set(l_gam,params):
             tmp_end = l_atom_spec[i+1] - 2
         else:
             tmp_start = l_atom_spec[i] + 2
-            tmp_end = ab_end
+            tmp_end = sz - 1 #ab_end
+
         for j in range(tmp_start,tmp_end+1):
-            spline = l_gam[j].split()
+            spline = inp_str[j].split()
             coef_tmp1 = []
             if len(spline) > 1:
                 type_tmp.append(spline[1])
@@ -85,24 +90,21 @@ def atomic_basis_set(l_gam,params):
         basis_expo.append(expo_tmp)
         basis_coef.append(coef_tmp)
 
-    params["basis_type"] = basis_type
 
-    # ******* put into gaussian basis parameter
-
-    l_atoms = params["l_atoms"]
-    Ngbf = params["Ngbf"]
+    # ******* get the Gaussian primitives parameters *******
     expo_s = []
     expo_p = []
     expo_d = []
-
     coef_s = []
     coef_p = []
     coef_d = []
 
-    for la in l_atoms: # all atoms
+    for la in label: # all atoms
+
         for j in range(0,len(atom_spec)): # specify the kind of the atom
             if la == atom_spec[j]:
                 i = j
+
         expo_stmp = []
         expo_ptmp = []
         expo_dtmp = []
@@ -110,6 +112,7 @@ def atomic_basis_set(l_gam,params):
         coef_stmp = []
         coef_ptmp = []
         coef_dtmp = []
+
         for j in range(0,len(basis_type[i])): # basis number of atoms
             b_tmp = basis_type[i][j]
             if b_tmp == "S":
@@ -126,8 +129,8 @@ def atomic_basis_set(l_gam,params):
                 expo_ptmp.append(basis_expo[i][j])
                 coef_stmp.append(basis_coef[i][j][0])
                 coef_ptmp.append(basis_coef[i][j][1])
-
             # f orbitals are not taken into account, so should add them.
+
         expo_s.append(expo_stmp)
         expo_p.append(expo_ptmp)
         expo_d.append(expo_dtmp)
@@ -135,39 +138,58 @@ def atomic_basis_set(l_gam,params):
         coef_p.append(coef_ptmp)
         coef_d.append(coef_dtmp)
 
-    params["expo_s"] = expo_s
-    params["expo_p"] = expo_p
-    params["expo_d"] = expo_d
-    params["coef_s"] = coef_s
-    params["coef_p"] = coef_p
-    params["coef_d"] = coef_d
+
+    orb_name, scount, pcount, dcount, lcount = ao_basis.input_AO_name(label, atom_spec, basis_type, flag)
+
+    ao_data = {}
+    ao_data["expo_s"] = expo_s
+    ao_data["expo_p"] = expo_p
+    ao_data["expo_d"] = expo_d
+    ao_data["coef_s"] = coef_s
+    ao_data["coef_p"] = coef_p
+    ao_data["coef_d"] = coef_d
+
+    if flag == 1:
+        print "expo_s=",ao_data["expo_s"]
+        print "expo_p=",ao_data["expo_p"]
+        print "expo_d=",ao_data["expo_d"]
+        print "coef_s=",ao_data["coef_s"]
+        print "coef_p=",ao_data["coef_p"]
+        print "coef_d=",ao_data["coef_d"]
 
 
-def molecular_orbitals(l_gam,params):
+    ao = ao_basis.construct_ao_basis(ao_data,label,R,scount,orb_name)
+
+    return ao
+
+
+
+
+def extract_mo(inp_str,Ngbf,flag):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the molecular orbitals info. as "E" and "C" of params.
+    # Extracts MO-LCAO coefficients from the the list of input lines
+    # assumed format is:
+    # ???
+    # \param[in] inp_str  Strings containing the info for all orbitals
+    # E - returned MATRIX object, containing the eigenvalues
+    # C - returned MATRIX object, containing the eigenvectors:
+    # C.get(a,i) - is the coefficient of AO with index a in the MO with index i
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
     #        : main.py/main/unpack_file/extract
 
-    mo_start = params["mo_start"]
-    mo_end = params["mo_end"]
-    Ngbf = params["Ngbf"]
     stat_span = 4 + Ngbf
-    #num_orb_colm = math.ceil(stat_s)
 
     mol_ene = []
     l_tmp = []
     mol_coef = []
+    sz = len(inp_str) 
+ 
+    for i in xrange(sz):
+        spline = inp_str[i].split() 
 
-    for i in range(mo_start,mo_end+1):
-        spline = l_gam[i].split()
-        di = i - mo_start
         # molecular energy
-        if di % stat_span == 1 :
+        if i % stat_span == 1 :
             l_tmp.append(i+2)
             for j in range(0,len(spline)):
                 mol_ene.append(float(spline[j]))
@@ -176,7 +198,7 @@ def molecular_orbitals(l_gam,params):
     for i in l_tmp:
         for j in range(i,i+Ngbf):
             coef_tmp = []
-            spline = l_gam[j].split()
+            spline = inp_str[j].split() #l_gam[j].split()
             if len(mol_coef) < Ngbf:
                 for k in range(4,len(spline)):
                     coef_tmp.append(float(spline[k]))
@@ -185,8 +207,7 @@ def molecular_orbitals(l_gam,params):
                 for k in range(4,len(spline)):
                     mol_coef[j-i].append(float(spline[k]))
 
-    # define MATRIX of E, C
-
+    # create objects of MATRIX type, containing eigenvalues and eigenvectors
     E = MATRIX(Ngbf,Ngbf)
     C = MATRIX(Ngbf,Ngbf)
 
@@ -195,69 +216,91 @@ def molecular_orbitals(l_gam,params):
         for j in range(0,Ngbf):
             C.set(i,j,mol_coef[i][j])
 
-    params["E"] = E
-    params["C"] = C
+    if flag == 1:
+        print "E Matrix is"; E.show_matrix()
+        print "C Matrix is"; C.show_matrix()
+
+
+    return E, C
     
 
-def coordinates_of_atoms(l_gam,params):
+def extract_coordinates(inp_str,flag):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the coordinates of atoms info. as "l_atoms" and "coor_atoms" of params.
+    # Extracts atomic labels, nuclear charges, and coordinates of all atoms
+    # from the the list of input lines
+    # each input line is assumed to have the format:
+    # label  Q  ....  x  y z
+
+    # \param[in] inp_str  Strings containing the info for all atoms
+    # label - returned list of atomic labels (strings)
+    # Q - returned list of nuclear charges (floats)
+    # R - returned list of nuclear coordinates (VECTOR objects)
+
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
     #        : main.py/main/unpack_file/extract
 
-    coor_start = params["coor_start"]
-    coor_end = params["coor_end"]
+    label, Q, R = [], [], []
+    for a in inp_str: 
+        spline = a.split() 
 
-    l_atoms = []
-    l_charges = []
-    coor_atoms = []
-    for i in range(coor_start,coor_end+1):
-        spline = l_gam[i].split()
-        # explicit atoms
-        l_atoms.append(spline[0])
+        # atom labels
+        label.append(spline[0])
+
         # atomic charges
-        l_charges.append(float(spline[1]))
-        # coordinates of atoms
-        coor_tmp = []
-        for j in range(len(spline)-3,len(spline)):
-            coor_tmp.append(float(spline[j]))
-        coor_atoms.append(coor_tmp)
+        Q.append(float(spline[1]))
 
-    params["l_atoms"] = l_atoms
-    params["l_charges"] = l_charges
-    params["coor_atoms"] = coor_atoms
+        # coordinates of atoms: Last 3 elements of the line
+        x = float(spline[len(spline)-3])
+        y = float(spline[len(spline)-2])
+        z = float(spline[len(spline)-1])
+        r = VECTOR(x,y,z)
+        R.append(r)
+
+    if flag == 1:
+        print "label=", label
+        print "charges=", Q
+        print "coor_atoms="
+        for r in R:
+            print R.index(r), r, r.x, r.y, r.z
 
 
-def gradient(l_gam,params):
+    return label, Q, R
+
+
+def extract_gradient(inp_str,flag):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the gradients as "gradient" of params.
+    # Extracts atomic gradients on all atoms from the the list of input lines
+    # each input line is assumed to have the format:
+    #  ....  gx  gy  gz
+    #
+    # \param[in] inp_str  Strings containing the gradient for all atoms
+    # grad - returned list of VECTOR objects
     #
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
     #        : main.py/main/unpack_file/extract
 
+    grad = []
+    for a in inp_str:
+        spline = a.split()  
 
-    grad_start = params["grad_start"]
-    grad_end = params["grad_end"]
+        # Last 3 elements of the line
+        x = float(spline[len(spline)-3])
+        y = float(spline[len(spline)-2])
+        z = float(spline[len(spline)-1])
+        g = VECTOR(x,y,z)
 
-    gradient = []
-    for i in range(grad_start,grad_end+1):
-        spline = l_gam[i].split()
-        grad_tmp = []
-        for j in range(len(spline)-3,len(spline)):
-            grad_tmp.append(float(spline[j]))
-        gradient.append(grad_tmp)
+        grad.append(g)
 
-    params["gradient"] = gradient
+    if flag == 1:
+        print "atomic gradient="
+        for g in grad:
+            print grad.index(g), g, g.x, g.y, g.z
+
+    return grad
 
 
-def extract(l_gam,params,flag):
+def extract(filename,flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
@@ -269,33 +312,24 @@ def extract(l_gam,params,flag):
     # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
     #        : main.py/main/unpack_file
 
-    coordinates_of_atoms(l_gam,params)
+    f = open(filename,"r")
+    A = f.readlines()
+    f.close()
 
-    gradient(l_gam,params)
+    info = detect.detect(A,flag)
 
-    molecular_orbitals(l_gam,params)
 
-    atomic_basis_set(l_gam,params)
+    label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
+    grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
+    E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
+    ao = extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
+
     
     if flag == 1:
-        print "expo_s=",params["expo_s"]
-        print "expo_p=",params["expo_p"]
-        print "expo_d=",params["expo_d"]
-        print "coef_s=",params["coef_s"]
-        print "coef_p=",params["coef_p"]
-        print "coef_d=",params["coef_d"]
+        print "********************************************"
+        print "extract program ends"
+        print "********************************************\n"
 
-        print "E Matrix is";    params["E"].show_matrix()
-        print "C Matrix is";    params["C"].show_matrix()
+    return label, Q, R, grad, E, C, ao
 
-        print "l_atoms=", params["l_atoms"]
-        print "l_charges=", params["l_charges"]
-        print "coor_atoms=", params["coor_atoms"]
-
-        print "gradient=",params["gradient"]
-
-    #print "********************************************"
-    #print "extract program ends"
-    #print "********************************************"
-    #print 
 

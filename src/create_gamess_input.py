@@ -57,7 +57,7 @@ def read_gms_inp_templ(inp_filename):
     return templ
     
 
-def write_gms_inp(data, params, mol):
+def write_gms_inp(label, Q, params, mol):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] l_atoms   A list of atoms
@@ -84,10 +84,10 @@ def write_gms_inp(data, params, mol):
     g.write("\n")
 
     # Print coordinates
-    Natoms = len(data["l_atoms"])
+    Natoms = len(label)
     for i in xrange(Natoms):
-        elt = data["l_atoms"][i]
-        q = data["l_charges"][i]
+        elt = label[i]
+        q = Q[i]
         x = B_to_A*mol.q[3*i] 
         y = B_to_A*mol.q[3*i+1]
         z = B_to_A*mol.q[3*i+2]

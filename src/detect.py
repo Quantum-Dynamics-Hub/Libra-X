@@ -104,21 +104,21 @@ def show_outputs(inp_lines,info):
     #        : main.py/main/unpack_file/detect
 
     print "******************************************"
-    print "according to the %i th column,"% info["lele"]+1
+    print "according to the %i th column," % (info["lele"]+1)
     print inp_lines[info["lele"]]
     print "Nele = %i" % info["Nele"]
     print "*******************************************"
     print "******************************************"
-    print "according to the %i th column," % info["locc_alp"]+1
+    print "according to the %i th column," % (info["locc_alp"]+1)
     print inp_lines[info["locc_alp"]]
     print "Nocc_alp = %i" % info["Nocc_alp"]
-    print "according to the %i th column," % info["locc_bet"]+1 
+    print "according to the %i th column," % (info["locc_bet"]+1)
     print inp_lines[info["locc_bet"]]
     print "Nocc_bet = %i" % info["Nocc_bet"]
     print "*******************************************"
     print
     print "******************************************"
-    print "according to the %i th column," % info["lgbf"]+1
+    print "according to the %i th column," % (info["lgbf"]+1)
     print inp_lines[info["lgbf"]]
     print "Ngbf = %i" % info["Ngbf"]
     print "*******************************************"
@@ -149,7 +149,7 @@ def show_outputs(inp_lines,info):
     print "******************************************"
     print
     print "******************************************"
-    print "according to the %i th column," % info["ltot_ene"]+1
+    print "according to the %i th column," % (info["ltot_ene"]+1)
     print inp_lines[info["ltot_ene"]]
     print "total energy = %i" % info["tot_ene"]
     print "******************************************"

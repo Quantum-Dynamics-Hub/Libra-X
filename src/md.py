@@ -55,7 +55,7 @@ def exe_gamess(params):
     os.system("rm -r %s/*" %(scr_dir)) 
 
 
-def run_MD(syst,el,ao0,E0,C0,data0,params):
+def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     ##
     # This function handles a SINGLE trajectory.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
@@ -155,7 +155,7 @@ def run_MD(syst,el,ao0,E0,C0,data0,params):
 
     E = MATRIX(E0)
     C = MATRIX(C0)
-    data = data0
+    #data = data0
 
     # Initialize forces and Hamiltonians
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
@@ -164,16 +164,18 @@ def run_MD(syst,el,ao0,E0,C0,data0,params):
     #Grad, data, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, 0) # this will update AO and gradients
     #Hvib, D_SD = vibronic_hamiltonian(params,E_mol_red,D_mol_red,0) # create vibronic hamiltonian
 
+    #sys.exit(0) # DEBUG!!!
 
     print "Starting propagation"
 
     #=============== Propagation =======================
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
+    mu = []
 
 
     for i in xrange(Nsnaps):
         syst.set_atomic_q(mol.q)
-        syst.print_xyz(params["traj_file"],i)
+        syst.print_xyz(params["traj_file"],i)       
 
         for j in xrange(Nsteps):
 
@@ -194,11 +196,11 @@ def run_MD(syst,el,ao0,E0,C0,data0,params):
             mol.propagate_q(dt_nucl)
 
             # ======= Compute forces and energies using GAMESS ============
-            write_gms_inp(data, params, mol)
+            write_gms_inp(label, Q, params, mol)
             exe_gamess(params)
 
             # update AO and gradients
-            Grad, data, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, str(ij))
+            Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, str(ij))
 
             #========= Update the matrices that are bound to the Hamiltonian =========
             # Compose electronic and vibronic Hamiltonians
@@ -206,9 +208,9 @@ def run_MD(syst,el,ao0,E0,C0,data0,params):
 
             for k in xrange(syst.Number_of_atoms):
                 for st in xrange(nstates):
-                    d1ham_adi[3*k+0].set(st,st,Grad[k][0])
-                    d1ham_adi[3*k+1].set(st,st,Grad[k][1])
-                    d1ham_adi[3*k+2].set(st,st,Grad[k][2])
+                    d1ham_adi[3*k+0].set(st,st,Grad[k].x)
+                    d1ham_adi[3*k+1].set(st,st,Grad[k].y)
+                    d1ham_adi[3*k+2].set(st,st,Grad[k].z)
            
             epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
             ekin = compute_kinetic_energy(mol)
@@ -279,55 +281,51 @@ def run_MD(syst,el,ao0,E0,C0,data0,params):
             curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
 
 
-            ################### Printing results ############################
+        ################### Printing results ############################
 
-            # Energy
-            fe = open(params["ene_file"],"a")
-            fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
-            fe.close()
+        # Energy
+        fe = open(params["ene_file"],"a")
+        fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
+        fe.close()
         
-            # Dipole moment components
-            fm = open(params["mu_file"],"a")
-            line = "t= %8.5f " % (ij*dt_nucl)
-            for k in xrange(len(ao)):
-                line = line + " %8.5f %8.5f %8.5f " % (data["mu_x"].get(k,k),data["mu_y"].get(k,k),data["mu_z"].get(k,k))
-            line = line + "\n"
-            fm.write(line)
-            fm.close()
+        # Dipole moment components
+        fm = open(params["mu_file"],"a")
+        line = "t= %8.5f " % (ij*dt_nucl)
+        for k in xrange(len(ao)):
+            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        line = line + "\n"
+        fm.write(line)
+        fm.close()
 
-            # Populations            
-            fel = open(params["se_pop_file"],"a")
+        # Populations            
+        fel = open(params["se_pop_file"],"a")
 
-            # Print time
-            line_se = "t= %8.5f " % (ij*dt_nucl)
+        # Print time
+        line_se = "t= %8.5f " % (ij*dt_nucl)
 
-            # Print populations
+        # Print populations
+        for st in xrange(nstates):
+            line_se = line_se + " %8.5f " % el.rho(st,st).real
+
+        if print_coherences == 1:
+            # Print coherences
             for st in xrange(nstates):
-                line_se = line_se + " %8.5f " % el.rho(st,st).real
-
-            if print_coherences == 1:
-                # Print coherences
-                for st in xrange(nstates):
-                    for st1 in xrange(st):
-                        line_se = line_se + " %8.5f %8.5f " % (el.rho(st,st1).real, el.rho(st,st1).imag)
+                for st1 in xrange(st):
+                    line_se = line_se + " %8.5f %8.5f " % (el.rho(st,st1).real, el.rho(st,st1).imag)
              
-            line_se = line_se + "\n"
+        line_se = line_se + "\n"
 
-            fel.write(line_se)
-            fel.close()
+        fel.write(line_se)
+        fel.close()
 
     print "       ********* %i snap ends ***********" % i
     print 
 
-    # input test_data for debugging
     test_data = {}
-#    test_data["D_mol"] = D_mol
-#    test_data["D_mol_red"] = D_mol_red
-#    test_data["D_SD"] = D_SD
 
     return test_data
 
-def init_system(data, g, rnd, T, sigma):
+def init_system(label, R, g, rnd, T, sigma):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] data     The list of variables, containing atomic element names and coordinates
@@ -344,20 +342,20 @@ def init_system(data, g, rnd, T, sigma):
 
     syst = System()
 
-    sz = len(data["coor_atoms"])
+    sz = len(label)
     for i in xrange(sz):
         atom_dict = {} 
-        atom_dict["Atom_element"] = data["l_atoms"][i]
+        atom_dict["Atom_element"] = label[i]
 
         # warning: below we take coordinates in Angstroms, no need for conversion here - it will be
         # done inside
-        atom_dict["Atom_cm_x"] = data["coor_atoms"][i][0] + sigma*rnd.normal()
-        atom_dict["Atom_cm_y"] = data["coor_atoms"][i][1] + sigma*rnd.normal()
-        atom_dict["Atom_cm_z"] = data["coor_atoms"][i][2] + sigma*rnd.normal()
+        atom_dict["Atom_cm_x"] = R[i].x + sigma*rnd.normal()
+        atom_dict["Atom_cm_y"] = R[i].y + sigma*rnd.normal()
+        atom_dict["Atom_cm_z"] = R[i].z + sigma*rnd.normal()
 
         print "CREATE_ATOM ",atom_dict["Atom_element"]
         at = Atom(U, atom_dict)
-        at.Atom_RB.rb_force = VECTOR(-g[i][0], -g[i][1], -g[i][2])
+        at.Atom_RB.rb_force = VECTOR(-g[i].x, -g[i].y, -g[i].z)
 
         syst.CREATE_ATOM(at)
 

@@ -27,32 +27,42 @@ sys.path.insert(1,os.environ["libra_qchem_path"])
 from libmmath import *
 from libqchem import *
 
-def input_AO_name(params):
+def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params : The list which contains extracted data from the file.
-    # This function returns the list of atomic orbital type (s, px, py, pz, etc...) 
-    # in params.
+    # \param[in] l_atom The list of all atom labels (e.g. C, C, C, H, H, ..)
+    # \param[in] atom_spec A list of distinct atomic species (e.g. C, H)
+    # \param[in] basis_type A list of AO types coming with the atom of each distinct type
+    # (e.g. basis_type[i] = ["S","P"] implies that the atom of type i (e.g. C) has S and P orbitals) 
+    #
+    # This function returns the list of atomic orbital type (s, px, py, pz, etc...) and the number
+    # of orbitals of each type: S, P, D, L (S + P)
     #
     # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
     #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
 
-    atom_spec = params["atom_spec"]
-    basis_type = params["basis_type"]
-    l_atoms = params["l_atoms"]
     orb_name = []
 
     for la in l_atoms: # all atoms
-        for j in range(0,len(atom_spec)): # specify the kind of the atom
+
+        # Determine the kind of the atom
+        i = -1
+        for j in range(0,len(atom_spec)): 
             if la == atom_spec[j]:
                 i = j
+        if i==-1:
+            print "Error in input_AO_name: atom ", la, " is not known\n"
+            sys.exit(0)
+
         aoa_tmp = []
         orb_name1 = []
         scount = 0
         pcount = 0
         dcount = 0
         lcount = 0
-        for j in range(0,len(basis_type[i])): # basis number of atoms
+
+        # Over all basis functions coming with the atom of type i
+        # len(basis_type[i]) - the number of AOs coming with atom of type i
+        for j in range(0,len(basis_type[i])): 
             b_tmp = basis_type[i][j]
             if b_tmp == "S":
                 scount += 1
@@ -81,11 +91,22 @@ def input_AO_name(params):
                     orb_name1.append("pz")
         orb_name.append(orb_name1)
 
-    params["nGTO"] = scount
-    params["orb_name"] = orb_name
+
+    if flag == 1:
+        print "number of s-type orbitals =", scount
+        print "number of p-type orbitals =", pcount
+        print "number of d-type orbitals =", dcount
+        print "number of l-type orbitals =", lcount
+        print "all orbitals: "
+        for i in xrange(len(orb_name)):
+            print i, orb_name[i]
 
 
-def construct_ao_basis(params):
+    return orb_name, scount, pcount, dcount, lcount
+
+
+
+def construct_ao_basis(ao_data,label,R,nGTO,orb_name):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params : The list which contains extracted data from the file.
@@ -94,21 +115,19 @@ def construct_ao_basis(params):
     # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
     #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
 
-    l_atoms = params["l_atoms"]
-    coor_atoms = params["coor_atoms"]
-    expo_s = params["expo_s"]
-    expo_p = params["expo_p"]
-    expo_d = params["expo_d"]
-    coef_s =  params["coef_s"]
-    coef_p =  params["coef_p"]
-    coef_d =  params["coef_d"]
-    nGTO = params["nGTO"]
-    orb_name = params["orb_name"]
+
+    expo_s = ao_data["expo_s"]
+    expo_p = ao_data["expo_p"]
+    expo_d = ao_data["expo_d"]
+    coef_s = ao_data["coef_s"]
+    coef_p = ao_data["coef_p"]
+    coef_d = ao_data["coef_d"]
 
     ao_basis = []
+
     Bohr_to_Angs = 0.529177208
     # define atomic orbitals by using the Gaussian basis
-    for i in range(0,len(l_atoms)): # all atoms
+    for i in range(0,len(label)): # all atoms
 
         k_s = 0 # add nGTO for s orbital
         k_p = 0 #              p orbital
@@ -139,55 +158,21 @@ def construct_ao_basis(params):
                     nx,ny,nz = 0,1,1
                 elif orb_name[i][j][1:3] == "zx":
                     nx,ny,nz = 1,0,1
-                elif orb_name[i][j][1:3] == "z^":
+                elif orb_name[i][j][1:3] == "z^":  # !!!! Here is unfixed BUG !!! 
                     nx,ny,nz = 0,0,2
                 # in the case of dx^2-y^2, i should add AO later. 
 
             # Construct AO from the primitive Gaussians
             for k in range(0,len(expo_tmp)):         
-
-                # Contraction coefficients correspond to the Gaussian primitives as they are
-                R = VECTOR(coor_atoms[i][0], coor_atoms[i][1], coor_atoms[i][2])
-
-                g = PrimitiveG(nx, ny, nz, expo_tmp[k], R) # single point
-                # g = PrimitiveG(nx, ny, nz, expo_tmp[k], R/Bohr_to_Angs) : optimization
+                g = PrimitiveG(nx, ny, nz, expo_tmp[k], R[i]) # single point
 
                 # Contraction coefficients correspond to the Gaussian primitives as they are
                 ao.add_primitive(coef_tmp[k], g )
                    
-                # Contraction coefficients correspond to normalized Gaussian primitives
-                # this looks like a more probable case
-                #ao.add_primitive(g.normalization_factor() * coef_tmp[k], g )
-
-                # One more option:
-                #ao.add_primitive(g.norm1() * coef_tmp[k], g )
-
-
             # Normalize the overall contraction
             ao.normalize()
-
             ao_basis.append(ao)
     
     return ao_basis
 
-def ao_basis(params,flag):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params : The list which contains extracted data from the file.
-    # \param[in] flag : a flag for debugging detect module    
-    # This function returns the list of atomic orbital basis as "ao".
-    #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-    #        : main.py/main/initial_gamess_exe/unpack_file
 
-    input_AO_name(params)
-    
-    ao = construct_ao_basis(params)
-
-    if flag == 1:
-
-        print "nGTO=",params["nGTO"]
-        print "orb_name=",params["orb_name"]
-
-
-    return ao
