@@ -5,6 +5,7 @@ slurm*
 .nfs*
 *_pop*
 *.xyz
+*.txt
 *.dat
 *_Ham_*
 *wrk.inp

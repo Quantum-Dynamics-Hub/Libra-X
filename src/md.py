@@ -21,6 +21,7 @@ from vibronic_hamiltonian import *
 import os
 import sys
 import math
+import copy
 
 # First, we add the location of the library to test to the PYTHON path
 sys.path.insert(1,os.environ["libra_mmath_path"])
@@ -47,22 +48,34 @@ def exe_gamess(params):
     inp = params["gms_inp"]
     out = params["gms_out"]
     nproc = params["nproc"]
-    scr_dir = os.environ['SLURMTMPDIR']
-    os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
+
+    scr_dir = params["scr_dir"]
+    rungms = params["rungms"]
+    VERNO = params["VERNO"]
+
+    # set environmental variables for GAMESS execution
+    os.environ["SCR"] = scr_dir
+    os.environ["USERSCR"] = scr_dir
+    os.environ["GMSPATH"] = params["GMSPATH"]
+    os.environ["JOB"] = inp
+    os.environ["VERNO"] = VERNO
+    os.environ["NCPUS"] = str(nproc)
+
+    #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
+    os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
 
-
-def run_MD(syst,el,ao0,E0,C0,params,label,Q):
+def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
     ##
     # This function handles a SINGLE trajectory.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
     # velocity rescaling
     #
     # \param[in,out] syst a System object that includes atomic system information.
-    # \param[in,out] el The the object containig electronic DOFs for the nuclear coordinate
+    # \param[in,out] el0 The the object containig electronic DOFs for the nuclear coordinate
     # given by syst. I have decided to go back a bit - one set of electronic DOF per set of
     # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
     # ground state forces for propagation. This also brings a conceptual clarity
@@ -78,7 +91,7 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     # It outputs MD trajectories, Energy evolutions, and SE and SH populations.
     #
     # Used in:  main.py/main
-
+    
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
     if el_mts < 1:
@@ -141,6 +154,8 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     syst.extract_atomic_f(mol.f)
     syst.extract_atomic_mass(mol.mass)
 
+    # Initialize electronic varibables
+    el = Electronic(nstates, el0.istate)
 
     # Initialize Thermostat object
     therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
@@ -171,7 +186,6 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     #=============== Propagation =======================
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
     mu = []
-
 
     for i in xrange(Nsnaps):
         syst.set_atomic_q(mol.q)
