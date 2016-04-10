@@ -343,44 +343,4 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
 
     return test_data
 
-def init_system(label, R, g, rnd, T, sigma):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] data     The list of variables, containing atomic element names and coordinates
-    # \param[in] g        The list of gradients on all atoms
-    # \param[in] rnd      Random number generator object
-    # \param[in] T        target temperature used to initialize momenta of atoms.
-    # \param[in] sigma    The magnitude of a random displacement of each atom from its center
-    # This function returns System object which will be used in classical MD.
-    #
-    # Used in:  main.py/main
 
-    # Create Universe and populate it
-    U = Universe();   Load_PT(U, "elements.txt", 0)
-
-    syst = System()
-
-    sz = len(label)
-    for i in xrange(sz):
-        atom_dict = {} 
-        atom_dict["Atom_element"] = label[i]
-
-        # warning: below we take coordinates in Angstroms, no need for conversion here - it will be
-        # done inside
-        atom_dict["Atom_cm_x"] = R[i].x + sigma*rnd.normal()
-        atom_dict["Atom_cm_y"] = R[i].y + sigma*rnd.normal()
-        atom_dict["Atom_cm_z"] = R[i].z + sigma*rnd.normal()
-
-        print "CREATE_ATOM ",atom_dict["Atom_element"]
-        at = Atom(U, atom_dict)
-        at.Atom_RB.rb_force = VECTOR(-g[i].x, -g[i].y, -g[i].z)
-
-        syst.CREATE_ATOM(at)
-
-    syst.show_atoms()
-    print "Number of atoms in the system = ", syst.Number_of_atoms
-
-    # initialize momenta of the system where the temperature is T(K). 
-    syst.init_atom_velocities(T)
-    
-    return syst

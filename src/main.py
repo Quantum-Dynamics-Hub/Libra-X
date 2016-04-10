@@ -20,14 +20,24 @@ import sys
 import math
 import copy
 
+import sys
+
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+
+from libra_py import *
+
+
 
 # First, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["src_path"]) # Path the the source code
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_qchem_path"])
-sys.path.insert(1,os.environ["libra_dyn_path"])
-sys.path.insert(1,os.environ["libra_chemobjects_path"])
-sys.path.insert(1,os.environ["libra_hamiltonian_path"])
+#sys.path.insert(1,os.environ["src_path"]) # Path the the source code
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_qchem_path"])
+#sys.path.insert(1,os.environ["libra_dyn_path"])
+#sys.path.insert(1,os.environ["libra_chemobjects_path"])
+#sys.path.insert(1,os.environ["libra_hamiltonian_path"])
 
 from gamess_to_libra import *
 from md import *
@@ -120,9 +130,13 @@ def main(params):
         print "init_system..."
         #syst_ = init_system(data[i], Grad[i], rnd, params["Temperature"], params["sigma_pos"])        
         for i_ex in xrange(nstates):
-            print "Create a copy of a system"
-            #syst.append(System(syst_))
-            syst.append(init_system(label_list[i], R_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"]))          
+            print "Create a copy of a system"  
+            df = 0 # debug flag
+
+            # Here we use libra_py module!
+            x = init_system.init_system(label_list[i], R_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"], df, "elements.txt")
+            syst.append(x)    
+
             print "Create an electronic object"
             el.append(Electronic(nstates,i_ex))
     
