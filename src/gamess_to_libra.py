@@ -46,23 +46,29 @@ def reduce_matrix(M,min_shift,max_shift,HOMO_indx):
     # \param[in] max_shift - is the index defining the maximal orbital in the active space
     # to consider. This means that the highest 1-electron state will be HOMO_indx + max_shift.
     # \param[in] HOMO_indx - the index of the HOMO orbital (indexing starts from 0)
-    # Example: if we have C2H4 system - 12 valence electrons, so 6 orbitals are occupied:
-    # occ = [0,1,2,3,4,5] and lets say 4 more states unoccupied virt = [6,7,8,9] Then if we
-    # use HOMO_indx = 5, min_shift = -2, max_shift = 2 will reduce the active space to the
-    # orbitals [3,4,5,  6,7], where orbitals 3,4,5 are occupied and 6,7 are unoccupied.
-    # So we reduce the initial 10 x 10 matrix to the 5 x 5 matrix
+    # Example: if we have H2O system - 8 valence electrons, so 4 orbitals are occupied:
+    # occ = [0,1,2,3] and 2 more states are unoccupied virt = [4,5] Then if we
+    # use HOMO_indx = 3, min_shift = -1, max_shift = 1 will reduce the active space to the
+    # orbitals [2, 3, 4], where orbitals 2,3 are occupied and 4 is unoccupied.
+    # So we reduce the initial 6 x 6 matrix to the 3 x 3 matrix
     # This function returns the reduced matrix "M_red".
     #
     # Used in: main.py/main/run_MD/gamess_to_libra
 
 
     if(HOMO_indx+min_shift<0):
-        print "Error in reduce_matrix: The min_shift/HOMO_index combination result in the out-of-range error for the reduced matrix\nExiting..."
+        print "Error in reduce_matrix: The min_shift/HOMO_index combination result in the out-of-range error for the reduced matrix"
+        print "min_shift = ", min_shift
+        print "HOMO_index = ", HOMO_index
+        print "Exiting...\n"
         sys.exit(0)
 
     sz = max_shift - min_shift + 1
     if(sz>M.num_of_cols):
-        print "Error in reduce_matrix: The size of the cropped matrix is larger than the size of the original matrix\nExiting..."
+        print "Error in reduce_matrix: The size of the cropped matrix is larger than the size of the original matrix"
+        print "size of the corpped matrix = ", sz
+        print "size of the original matrix = ", M.num_of_cols
+        print "Exiting...\n"
         sys.exit(0)
 
     M_red = MATRIX(sz,sz)

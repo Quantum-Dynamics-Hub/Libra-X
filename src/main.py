@@ -69,20 +69,42 @@ def main(params):
     e_list = []
     c_list = []
     grad_list = []
+    label_list = []
+    Q_list = []
+    R_list = []
 
     for i in xrange(ntraj):
+        # AO
         ao_tmp = []
         for x in ao:
             ao_tmp.append(AO(x))
         ao_list.append(ao_tmp)
 
+        # E and C
         e_list.append(MATRIX(e))
         c_list.append(MATRIX(c))        
 
+        # Gradients
         grd = []
         for g in grad:
             grd.append(VECTOR(g))
         grad_list.append(grd)
+
+        # Coords
+        rr = []
+        for r in R:
+            rr.append(VECTOR(r))
+        R_list.append(rr)
+
+        # Labels and Q
+        lab = []
+        qq  = []
+        for i in xrange(len(label)):
+            lab.append(label[i])
+            qq.append(Q[i])
+        label_list.append(lab)
+        Q_list.append(qq)
+        
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
@@ -100,7 +122,7 @@ def main(params):
         for i_ex in xrange(nstates):
             print "Create a copy of a system"
             #syst.append(System(syst_))
-            syst.append(init_system(label, R, grad_list[i], rnd, params["Temperature"], params["sigma_pos"]))          
+            syst.append(init_system(label_list[i], R_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"]))          
             print "Create an electronic object"
             el.append(Electronic(nstates,i_ex))
     
@@ -112,14 +134,15 @@ def main(params):
     cnt = 0
     for i in xrange(ninit):
         for i_ex in xrange(nstates):
-            print i, i_ex
+            print "Trajectory ", i, " initial excitation ",i_ex
+
             params["ene_file"] = params["ene_file_prefix"]+"_"+str(i)+"_"+str(i_ex)+".txt"
             params["traj_file"] = params["traj_file_prefix"]+"_"+str(i)+"_"+str(i_ex)+".txt"
             params["mu_file"] = params["mu_file_prefix"]+"_"+str(i)+"_"+str(i_ex)+".txt"
             params["se_pop_file"] = params["se_pop_file_prefix"]+"_"+str(i)+"_"+str(i_ex)+".txt"
 
             print "run MD"
-            run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label, Q)
+            run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label_list[i], Q_list[i])
             print "MD is done"
             cnt = cnt + 1
 

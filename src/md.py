@@ -131,6 +131,12 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     ham.bind_d1ham_adi(d1ham_adi) # bind derivative of adiabatic hamiltonian
     ham_vib = CMATRIX(nstates,nstates);  ham.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
 
+    print "Adderesses of the working matrices"
+    print "ham_adi = ", ham_adi
+    print "d1ham_adi = ", d1ham_adi
+    for k in xrange(3*syst.Number_of_atoms):
+        print "d1ham_adi[",k,"]= ", d1ham_adi[k]
+    print "ham_vib = ", ham_vib
 
     print "Setting nuclear variables"
 
@@ -204,7 +210,13 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
 
             #========= Update the matrices that are bound to the Hamiltonian =========
             # Compose electronic and vibronic Hamiltonians
-            ham_adi, ham_vib = vibronic_hamiltonian(params,E_mol_red,D_mol_red, str(ij))
+            update_vibronic_hamiltonian(ham_adi, ham_vib, params,E_mol_red,D_mol_red, str(ij))
+
+            print "Addresses of the ham matrices"
+            print "ham_adi = ", ham_adi
+            print "ham_vib = ", ham_vib
+            print "ham_adi "; ham_adi.show_matrix();
+            print "ham_vib "; ham_vib.show_matrix();
 
             for k in xrange(syst.Number_of_atoms):
                 for st in xrange(nstates):
@@ -213,6 +225,10 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
                     d1ham_adi[3*k+2].set(st,st,Grad[k].z)
            
             epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
+           
+            print "epot= ", epot
+            #sys.exit(0)
+
             ekin = compute_kinetic_energy(mol)
             etot = epot + ekin
           
@@ -271,6 +287,8 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
 
             # Re-compute energies, to print
             epot = compute_potential_energy(mol, el, ham, 1)
+            print "epot = ", epot
+
             ekin = compute_kinetic_energy(mol)
             etot = ekin + epot
 

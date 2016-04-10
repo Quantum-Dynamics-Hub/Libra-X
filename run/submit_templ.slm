@@ -1,6 +1,6 @@
 #!/bin/sh
-###SBATCH --partition=valhalla
-###SBATCH --clusters=chemistry
+#SBATCH --partition=valhalla
+#SBATCH --clusters=chemistry
 #SBATCH --time=00:05:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1

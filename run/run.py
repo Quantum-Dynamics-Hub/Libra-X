@@ -62,15 +62,15 @@ flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 ->
 # Excited electronic states
 # caution: start from 1, not 0
 if test==0:
-    params["HOMO"] = 4 
+    params["HOMO"] = 3 
 elif test==1:
     params["HOMO"] = 92
 
-params["min_shift"] = -2  # HOMO-2, HOMO-1, HOMO
-params["max_shift"] = 2  # LUMO, LUMO+1
+params["min_shift"] = -1  # HOMO-1, HOMO
+params["max_shift"] = 1  # LUMO
 
 # Surface Hopping
-params["SH_type"] = 1 # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
+params["SH_type"] = 0 # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["ntraj"] = 2   # number of excited states trajectories
 
 # If you use boltzman factor, then params["use_boltz_factor"] = 1 and params["do_rescaling"] = 0
@@ -105,15 +105,15 @@ params["se_pop_file_prefix"] = "out/se_pop_"         # where the results of the 
 params["sh_pop_prefix"] = "out/"         # where the results of the SH calculations will be printed out
 
 # flags for debugging
-params["print_coherences"] = 0              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["print_sd_ham"] = 0                  # print SD basis vibronic Hamiltonian
-params["print_mo_ham"] = 0                  # print full and reduced size MO basis vibronic Hamiltonian
+params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
+params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
+params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
 params["print_SH_results_with_scaling"] = 1 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
 params["debug_densmat_output"] = 0          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
-params["debug_ham_ex"] = 0                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["debug_SH_cal"] = 0                  # print the debug info into standard output: hopping probabilities matrices and SH_states
+params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
+params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
+params["debug_SH_cal"] = 1                  # print the debug info into standard output: hopping probabilities matrices and SH_states
 params["check_hopping_probs"] = 1           # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************
@@ -122,7 +122,7 @@ from path_libra_lib import * # import path_libra_lib module
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 from create_states import *
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(0,1,2,1) ] 
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
 # create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
