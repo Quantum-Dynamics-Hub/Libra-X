@@ -144,6 +144,12 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
     ham.bind_d1ham_adi(d1ham_adi) # bind derivative of adiabatic hamiltonian
     ham_vib = CMATRIX(nstates,nstates);  ham.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
 
+    print "Adderesses of the working matrices"
+    print "ham_adi = ", ham_adi
+    print "d1ham_adi = ", d1ham_adi
+    for k in xrange(3*syst.Number_of_atoms):
+        print "d1ham_adi[",k,"]= ", d1ham_adi[k]
+    print "ham_vib = ", ham_vib
 
     print "Setting nuclear variables"
 
@@ -218,7 +224,13 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
 
             #========= Update the matrices that are bound to the Hamiltonian =========
             # Compose electronic and vibronic Hamiltonians
-            ham_adi, ham_vib = vibronic_hamiltonian(params,E_mol_red,D_mol_red, str(ij))
+            update_vibronic_hamiltonian(ham_adi, ham_vib, params,E_mol_red,D_mol_red, str(ij))
+
+            print "Addresses of the ham matrices"
+            print "ham_adi = ", ham_adi
+            print "ham_vib = ", ham_vib
+            print "ham_adi "; ham_adi.show_matrix();
+            print "ham_vib "; ham_vib.show_matrix();
 
             for k in xrange(syst.Number_of_atoms):
                 for st in xrange(nstates):
@@ -227,6 +239,10 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
                     d1ham_adi[3*k+2].set(st,st,Grad[k].z)
            
             epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
+           
+            print "epot= ", epot
+            #sys.exit(0)
+
             ekin = compute_kinetic_energy(mol)
             etot = epot + ekin
           
@@ -285,6 +301,8 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
 
             # Re-compute energies, to print
             epot = compute_potential_energy(mol, el, ham, 1)
+            print "epot = ", epot
+
             ekin = compute_kinetic_energy(mol)
             etot = ekin + epot
 
@@ -339,44 +357,4 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
 
     return test_data
 
-def init_system(label, R, g, rnd, T, sigma):
-    ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] data     The list of variables, containing atomic element names and coordinates
-    # \param[in] g        The list of gradients on all atoms
-    # \param[in] rnd      Random number generator object
-    # \param[in] T        target temperature used to initialize momenta of atoms.
-    # \param[in] sigma    The magnitude of a random displacement of each atom from its center
-    # This function returns System object which will be used in classical MD.
-    #
-    # Used in:  main.py/main
 
-    # Create Universe and populate it
-    U = Universe();   Load_PT(U, "elements.txt", 0)
-
-    syst = System()
-
-    sz = len(label)
-    for i in xrange(sz):
-        atom_dict = {} 
-        atom_dict["Atom_element"] = label[i]
-
-        # warning: below we take coordinates in Angstroms, no need for conversion here - it will be
-        # done inside
-        atom_dict["Atom_cm_x"] = R[i].x + sigma*rnd.normal()
-        atom_dict["Atom_cm_y"] = R[i].y + sigma*rnd.normal()
-        atom_dict["Atom_cm_z"] = R[i].z + sigma*rnd.normal()
-
-        print "CREATE_ATOM ",atom_dict["Atom_element"]
-        at = Atom(U, atom_dict)
-        at.Atom_RB.rb_force = VECTOR(-g[i].x, -g[i].y, -g[i].z)
-
-        syst.CREATE_ATOM(at)
-
-    syst.show_atoms()
-    print "Number of atoms in the system = ", syst.Number_of_atoms
-
-    # initialize momenta of the system where the temperature is T(K). 
-    syst.init_atom_velocities(T)
-    
-    return syst
