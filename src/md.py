@@ -57,9 +57,6 @@ def exe_gamess(params):
     os.environ["SCR"] = scr_dir
     os.environ["USERSCR"] = scr_dir
     os.environ["GMSPATH"] = params["GMSPATH"]
-    os.environ["JOB"] = inp
-    os.environ["VERNO"] = VERNO
-    os.environ["NCPUS"] = str(nproc)
 
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
