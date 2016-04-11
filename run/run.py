@@ -21,7 +21,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/Downloads/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/install/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
@@ -31,7 +31,7 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 params = {}
 
 ## set variables in GAMESS
-# Supposed we invoke "/usr/bin/time $rungms $gms_inp $VERNO $nproc > $gms_out" in md.py/exe_gamess
+# Supposed we invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
 # Variables such as SCR, USERSCR, GMSPATH, JOB, VERNO, and NCPUS in the rungms script will be defined later by the parameters below.
 # (Supposed TARGET is already defined as sockets or mpi.)
 
@@ -41,7 +41,7 @@ params["gms_inp0"] = ""           # initial input file of GAMESS
 params["gms_inp"] = ""            # working input file of GAMESS
 params["gms_out"] = ""            # output file of GAMESS
 params["nproc"] = 1               # the number of processors : default = 1
-params["VERNO"] = ""              # Version No. e.g. 00, 01, etc....
+params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
 params["scr_dir"] = ""            # scratch directory including GAMESS output files.
 
 if user==0:
@@ -87,14 +87,14 @@ spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
 
 # Excited electronic states
-# caution: start from 1, not 0
+# caution: start from 0
 if test==0:
-    params["HOMO"] = 4 
+    params["HOMO"] = 3 # not 4 
 elif test==1:
-    params["HOMO"] = 92
+    params["HOMO"] = 91 # not 92
 
-params["min_shift"] = -2  # HOMO-2, HOMO-1, HOMO
-params["max_shift"] = 2  # LUMO, LUMO+1
+params["min_shift"] = -1  # HOMO-1, HOMO
+params["max_shift"] = 1  # LUMO
 
 # Surface Hopping
 params["SH_type"] = 1 # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
@@ -120,9 +120,10 @@ if user==0:
     params["sd_ham"] = "/user/alexeyak/Programming/libra-gamess_interface/run/sd_ham/" 
 elif user==1:
     # For Kosuke
-    params["res"] = os.environ['LS_SUBCWD'] + "/res/" #; print "res is located on ",params["res"] ; 
-    params["mo_ham"] = os.environ['LS_SUBCWD'] + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
-    params["sd_ham"] = os.environ['LS_SUBCWD'] + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
+    cwd = os.getcwd()
+    params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
+    params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
+    params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
 
 # output file
 params["traj_file_prefix"] = params["res"]+"md" # containing MD trajectories
@@ -149,13 +150,14 @@ from path_libra_lib import * # import path_libra_lib module
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 from create_states import *
-#params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(0,1,2,1) ] 
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
-HOMO = params["HOMO"]
-Nmin = params["HOMO"] + params["min_shift"]
-Nmax = params["HOMO"] + params["max_shift"]
-params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
+#HOMO = params["HOMO"]
+#Nmin = params["HOMO"] + params["min_shift"]
+#Nmax = params["HOMO"] + params["max_shift"]
+#params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
 
-data, test_data = main.main(params)  # run actual calculations
+#data, test_data = main.main(params)  # run actual calculations
+main.main(params)  # run actual calculations

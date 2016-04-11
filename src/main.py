@@ -20,16 +20,12 @@ import sys
 import math
 import copy
 
-import sys
-
 if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 from libra_py import *
-
-
 
 # First, we add the location of the library to test to the PYTHON path
 #sys.path.insert(1,os.environ["src_path"]) # Path the the source code
