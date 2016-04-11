@@ -17,10 +17,14 @@ import os
 import sys
 import math
 
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_qchem_path"])
-from libmmath import *
-from libqchem import *
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_qchem_path"])
+#from libmmath import *
+#from libqchem import *
 
 
 def NAC(P12,P21,dt_nucl):
