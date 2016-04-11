@@ -15,17 +15,22 @@ import os
 import sys
 import math
 
-sys.path.insert(1,os.environ["libra_qchem_path"])
-sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_util_path"])
-sys.path.insert(1,os.environ["libra_converters_path"])
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
 
-from libqchem import *
+#sys.path.insert(1,os.environ["libra_qchem_path"])
+sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_util_path"])
+#sys.path.insert(1,os.environ["libra_converters_path"])
+
+#from libqchem import *
 from libcontrol_parameters import *
-from libmmath import *
-from libconverters import *
-from libutil import *
+#from libmmath import *
+#from libconverters import *
+#from libutil import *
 
 def pyxaid_states(states, min_shift, max_shift):
     ##

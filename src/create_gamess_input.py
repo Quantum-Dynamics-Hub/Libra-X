@@ -17,18 +17,23 @@ import os
 import sys
 import math
 
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+
 # First, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_chemobjects_path"])
-sys.path.insert(1,os.environ["libra_hamiltonian_path"])
-sys.path.insert(1,os.environ["libra_dyn_path"])
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_chemobjects_path"])
+#sys.path.insert(1,os.environ["libra_hamiltonian_path"])
+#sys.path.insert(1,os.environ["libra_dyn_path"])
 #sys.path.insert(1,cwd+"/../../_build/src/hamiltonian/hamiltonian_atomistic")
 
 #print "\nTest 1: Importing the library and its content"
-from libmmath import *
-from libchemobjects import *
-from libhamiltonian import *
-from libdyn import *
+#from libmmath import *
+#from libchemobjects import *
+#from libhamiltonian import *
+#from libdyn import *
 #from cyghamiltonian_atomistic import *
 
 

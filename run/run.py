@@ -146,16 +146,21 @@ params["check_hopping_probs"] = 1           # print the hopping probabilities if
 
 # ***************************************************************
 
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+
 from path_libra_lib import * # import path_libra_lib module 
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 from create_states import *
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+#params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
-#HOMO = params["HOMO"]
-#Nmin = params["HOMO"] + params["min_shift"]
-#Nmax = params["HOMO"] + params["max_shift"]
-#params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
+HOMO = params["HOMO"]
+Nmin = params["HOMO"] + params["min_shift"]
+Nmax = params["HOMO"] + params["max_shift"]
+params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
 
