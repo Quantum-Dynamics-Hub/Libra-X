@@ -105,7 +105,7 @@ def gamess_to_libra(params, ao, E, C, suff):
     # Used in: main.py/nve_MD/
 
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, C2, ao2 = extract(params["gms_out"],params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
 
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
@@ -162,5 +162,5 @@ def gamess_to_libra(params, ao, E, C, suff):
     # E_mol_red: the matrix of the 1-el orbital energies in the reduced (active) space
     # D_mol_red: the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
 
-    return Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red
+    return tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red
 
