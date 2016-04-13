@@ -30,9 +30,9 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 params = {}
 
-## set variables in GAMESS
+#  GAMESS variables
 # Supposed we invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
-# Variables such as SCR, USERSCR, GMSPATH, JOB, VERNO, and NCPUS in the rungms script will be defined later by the parameters below.
+# Paths of SCR, USERSCR, GMSPATH in the rungms script will be defined by environmental variables later.
 # (Supposed TARGET is already defined as sockets or mpi.)
 
 params["GMSPATH"] = ""            # the directory including GAMESS binary files.
@@ -43,6 +43,7 @@ params["gms_out"] = ""            # output file of GAMESS
 params["nproc"] = 1               # the number of processors : default = 1
 params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
 params["scr_dir"] = ""            # scratch directory including GAMESS output files.
+params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 
 if user==0:
     # For Alexey (setting for CCR @ UB)
@@ -68,15 +69,13 @@ elif test==1:
     params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
     params["gms_out"] = "23waters.out"     # output file of GAMESS
 
-params["basis_option"] = 2             # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
-params["dt_nucl"] = 20.0               # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["Nsnaps"] = 1                   # the number of MD rounds
-params["Nsteps"] = 1                   # the number of MD steps per snap
-params["nconfig"] = 1                  # the number of initial nuclear/velocity configurations
+# MD variables
 
-# Thermostat parameters for NVT MD (if MD_type=1)
-params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
+params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
+params["Nsnaps"] = 1                        # the number of MD rounds
+params["Nsteps"] = 1                        # the number of MD steps per snap
+params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
+params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
@@ -86,27 +85,22 @@ params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Po
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
 
-# Excited electronic states
-# caution: start from 0
+# Excited electron dynamics
+
 if test==0:
     params["HOMO"] = 3 # not 4 
 elif test==1:
     params["HOMO"] = 91 # not 92
 
-params["min_shift"] = -1  # HOMO-1, HOMO
-params["max_shift"] = 1  # LUMO
-
-# Surface Hopping
-params["SH_type"] = 1 # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["ntraj"] = 1   # number of excited states trajectories
-
-# If you use boltzman factor, then params["use_boltz_factor"] = 1 and params["do_rescaling"] = 0
-#            velocity rescaling, then params["use_boltz_factor"] = 0 and params["do_rescaling"] = 1 (This calculation will be expensive) 
-
-params["use_boltz_factor"] = 0 # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 1     # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
-params["do_reverse"] = 0       # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
-                               # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
+params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
+params["max_shift"] = 1                # e.g.  1 -> LUMO
+params["el_mts"] = 1                   # electronic time steps per one nuclear time step
+params["SH_type"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
+params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei configuration and excited states
+params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
+params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
+params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
+                                       # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
 # select directories where the results will be printed out.
 params["res"] = ""     # directory where the energies and trajectories files will be printed out
@@ -145,11 +139,6 @@ params["debug_SH_cal"] = 0                  # print the debug info into standard
 params["check_hopping_probs"] = 1           # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************
-
-if sys.platform=="cygwin":
-    from cyglibra_core import *
-elif sys.platform=="linux" or sys.platform=="linux2":
-    from liblibra_core import *
 
 from path_libra_lib import * # import path_libra_lib module 
 path_libra_lib(libra_bin_path) # Path to the libra libraries

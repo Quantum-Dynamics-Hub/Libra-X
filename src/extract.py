@@ -334,6 +334,6 @@ def extract(filename,flag):
         print "extract program ends"
         print "********************************************\n"
 
-    return label, Q, R, grad, E, C, ao
+    return label, Q, R, grad, E, C, ao, info["tot_ene"]
 
 

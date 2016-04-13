@@ -69,14 +69,14 @@ def exe_gamess(params):
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
 
-def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
+def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     ##
     # This function handles a SINGLE trajectory.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
     # velocity rescaling
     #
     # \param[in,out] syst a System object that includes atomic system information.
-    # \param[in,out] el0 The the object containig electronic DOFs for the nuclear coordinate
+    # \param[in,out] el The the object containig electronic DOFs for the nuclear coordinate
     # given by syst. I have decided to go back a bit - one set of electronic DOF per set of
     # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
     # ground state forces for propagation. This also brings a conceptual clarity
@@ -112,6 +112,12 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
 
     rnd = Random()
 
+    # a flag for potential energy (Ehrenfest or SH)
+    if SH_type >= 1: # use SH potential
+        f_pot = 1
+    else: # use only Ehrenfest potential
+        f_pot = 0
+
     #=============== Initialization =======================
 
     # Open and close energy and trajectory files - this will effectively
@@ -145,7 +151,7 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
     ham.bind_d1ham_adi(d1ham_adi) # bind derivative of adiabatic hamiltonian
     ham_vib = CMATRIX(nstates,nstates);  ham.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
 
-    print "Adderesses of the working matrices"
+    print "Addresses of the working matrices"
     print "ham_adi = ", ham_adi
     print "d1ham_adi = ", d1ham_adi
     for k in xrange(3*syst.Number_of_atoms):
@@ -161,14 +167,12 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
     syst.extract_atomic_f(mol.f)
     syst.extract_atomic_mass(mol.mass)
 
-    # Initialize electronic varibables
-    el = Electronic(nstates, el0.istate)
-
     # Initialize Thermostat object
-    therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
-    therm.set_Nf_t(3*syst.Number_of_atoms)
-    therm.set_Nf_r(0)
-    therm.init_nhc()
+    if MD_type == 1:
+        therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
+        therm.set_Nf_t(3*syst.Number_of_atoms)
+        therm.set_Nf_r(0)
+        therm.init_nhc()
 
     # set initial data from GAMESS output
     ao = []
@@ -193,6 +197,7 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
     #=============== Propagation =======================
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
     mu = []
+    SH_states = [] # stores SH states
 
     for i in xrange(Nsnaps):
         syst.set_atomic_q(mol.q)
@@ -221,7 +226,7 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
             exe_gamess(params)
 
             # update AO and gradients
-            Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, str(ij))
+            tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, str(ij))
 
             #========= Update the matrices that are bound to the Hamiltonian =========
             # Compose electronic and vibronic Hamiltonians
@@ -239,8 +244,9 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
                     d1ham_adi[3*k+1].set(st,st,Grad[k].y)
                     d1ham_adi[3*k+2].set(st,st,Grad[k].z)
            
-            epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
-           
+            #epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
+            epot = tot_ene + compute_forces(mol, el, ham, f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+
             print "epot= ", epot
             #sys.exit(0)
 
@@ -273,7 +279,7 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
 
                 # Compute hopping probabilities
                 g = MATRIX(nstates,nstates) # initialize a matrix of hopping probability
-                use_boltz_factor = 0  # we don't need to use Boltzmann factor, since we 
+                use_boltz_factor = 0  # we don't need to use Boltzmann factor, since  
                                       # we are using velocity rescaling in the hopping procedure.
                                       # Although the rescaling doesn't account for the direction, but it
                                       # still accounts for energy partitioning between electronic and
@@ -292,8 +298,8 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
                         # no derivative couplings will be needed - we don't have them
                         # !!! This option makes do_rescaling and do_reverse not relevant - so
                         # we can set them to any value - they are not used
-                do_rescaling = 0
-                do_reverse = 0
+                do_rescaling = 1
+                do_reverse = 1
                 el.istate = hop(el.istate, mol, ham, ksi, g, do_rescaling, rep, do_reverse)
 
             ################### END of TSH ##########################
@@ -301,7 +307,8 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
             print "Finished TSH"
 
             # Re-compute energies, to print
-            epot = compute_potential_energy(mol, el, ham, 1)
+            epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot) #  f_pot = 0 - Ehrenfest, 1 - TSH
+            #epot = compute_potential_energy(mol, el, ham, 1)
             print "epot = ", epot
 
             ekin = compute_kinetic_energy(mol)
@@ -351,11 +358,18 @@ def run_MD(syst,el0,ao0,E0,C0,params,label,Q):
         fel.write(line_se)
         fel.close()
 
+        #**************** store states as a function of time **************
+        if SH_type >= 1:
+            SH_states.append(el.istate)
+
+
     print "       ********* %i snap ends ***********" % i
     print 
 
     test_data = {}
 
-    return test_data
+    print "SH_states = ", SH_states
+
+    return SH_states
 
 

@@ -56,7 +56,7 @@ def pyxaid_states(states, min_shift, max_shift):
 
     # Now lets create all excitations from the reference state
     res = []
-    print "All renerated configurations (pyxaid indexing)\n"
+    print "All generated configurations (pyxaid indexing)\n"
     for i in xrange(nstates):        
         es = list(gs)
         print "Configuration ", i, es
@@ -149,23 +149,24 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     for I in xrange(nstates):
         for J in xrange(nstates):
 
-            st_I = Py2Cpp_int(pyx_st[I])
-            st_J = Py2Cpp_int(pyx_st[J])
-            print "st_I= ", pyx_st[I] # show_vector(st_I)
-            print "st_J= ", pyx_st[J] # show_vector(st_J)
-            coupled,a,b = delta(st_I, st_J)
-            print "delta returns ", coupled, a, b
+            if I != J:
+                st_I = Py2Cpp_int(pyx_st[I])
+                st_J = Py2Cpp_int(pyx_st[J])
+                print "st_I= ", pyx_st[I] # show_vector(st_I)
+                print "st_J= ", pyx_st[J] # show_vector(st_J)
+                coupled,a,b = delta(st_I, st_J)
+                print "delta returns ", coupled, a, b
             
-            if coupled:
-                i = abs(a) - 1
-                j = abs(b) - 1
-                print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
-                D_el.set(I,J, -D_mol_red.get(i,j))
-                ham_vib.set(I,J,0.0, -D_mol_red.get(i,j))
-            else:
-                D_el.set(I,J, 0.0)
-                ham_vib.set(I,J, 0.0, 0.0)
-            print "\n"
+                if coupled:
+                    i = abs(a) - 1
+                    j = abs(b) - 1
+                    print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
+                    D_el.set(I,J, -D_mol_red.get(i,j))
+                    ham_vib.set(I,J,0.0, -D_mol_red.get(i,j))
+                else:
+                    D_el.set(I,J, 0.0)
+                    ham_vib.set(I,J, 0.0, 0.0)
+                print "\n"
 
       
     if params["print_sd_ham"] == 1:
