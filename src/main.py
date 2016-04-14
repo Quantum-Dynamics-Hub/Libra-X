@@ -26,15 +26,6 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 from libra_py import *
-
-# First, we add the location of the library to test to the PYTHON path
-#sys.path.insert(1,os.environ["src_path"]) # Path the the source code
-#sys.path.insert(1,os.environ["libra_mmath_path"])
-#sys.path.insert(1,os.environ["libra_qchem_path"])
-#sys.path.insert(1,os.environ["libra_dyn_path"])
-#sys.path.insert(1,os.environ["libra_chemobjects_path"])
-#sys.path.insert(1,os.environ["libra_hamiltonian_path"])
-
 from gamess_to_libra import *
 from md import *
 from create_gamess_input import *
@@ -124,8 +115,6 @@ def main(params):
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
-    #sys.exit(0)
-
     print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
     syst = []
@@ -133,13 +122,11 @@ def main(params):
 
     # all excitations fr each nuclear configuration
     for i in xrange(ninit):
-        print "init_system..."
-        #syst_ = init_system(data[i], Grad[i], rnd, params["Temperature"], params["sigma_pos"])        
+        print "init_system..." 
         for i_ex in xrange(nstates):
             for itraj in xrange(num_SH_traj):
                 print "Create a copy of a system"  
                 df = 0 # debug flag
-
                 # Here we use libra_py module!
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"], df, "elements.txt")
                 syst.append(x)    
@@ -147,15 +134,8 @@ def main(params):
                 print "Create an electronic object"
                 el.append(Electronic(nstates,i_ex))
     
-    #sys.exit(0)  #### DEBUG!!!
-
     # set list of SH state trajectories
-
     SH_traj_t = [0]*(Nsnaps*nstates)
-    #for t in xrange(Nsnaps):
-    #    for s in xrange(nstates):
-    #        SH_traj_t.append(0)
-
 
     print "Starting MD..."
     cnt = 0
