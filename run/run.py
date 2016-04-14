@@ -6,7 +6,7 @@ import os
 import sys
 import math
 
-user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+user = 0 # 0 for Alexey, 1 for Kosuke, others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -72,7 +72,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"] = 10                        # the number of MD rounds
+params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
@@ -128,8 +128,8 @@ params["sh_pop_file_prefix"] = "out/sh_pop"         # where the results of the S
 
 # flags for debugging
 params["print_coherences"] = 0              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["print_sd_ham"] = 0                  # print SD basis vibronic Hamiltonian
-params["print_mo_ham"] = 0                  # print full and reduced size MO basis vibronic Hamiltonian
+params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
+params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
 params["print_SH_results_with_scaling"] = 1 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
 params["debug_densmat_output"] = 0          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
@@ -144,12 +144,12 @@ from path_libra_lib import * # import path_libra_lib module
 path_libra_lib(libra_bin_path) # Path to the libra libraries
 
 from create_states import *
-#params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
-HOMO = params["HOMO"]
-Nmin = params["HOMO"] + params["min_shift"]
-Nmax = params["HOMO"] + params["max_shift"]
-params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
+#HOMO = params["HOMO"]
+#Nmin = params["HOMO"] + params["min_shift"]
+#Nmax = params["HOMO"] + params["max_shift"]
+#params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
 
