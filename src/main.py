@@ -77,6 +77,7 @@ def main(params):
     
     params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
 
+    #sys.exit(0)
     exe_gamess(params)
 
     label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
