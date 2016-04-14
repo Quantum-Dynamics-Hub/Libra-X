@@ -22,15 +22,8 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 #sys.path.insert(1,os.environ["libra_qchem_path"])
 sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-#sys.path.insert(1,os.environ["libra_mmath_path"])
-#sys.path.insert(1,os.environ["libra_util_path"])
-#sys.path.insert(1,os.environ["libra_converters_path"])
 
-#from libqchem import *
 from libcontrol_parameters import *
-#from libmmath import *
-#from libconverters import *
-#from libutil import *
 
 def pyxaid_states(states, min_shift, max_shift):
     ##
@@ -172,9 +165,6 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     if params["print_sd_ham"] == 1:
         H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)
         D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
-
-
-    #Hvib = CMATRIX(H_el, D_el) # vibronic Hamiltonian
 
 
     # Returned values - actually we just update matrices ham_el and ham_vib 
