@@ -63,7 +63,9 @@ def exe_gamess(params):
     os.environ["GMSPATH"] = params["GMSPATH"]
 
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
+    print "/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out)
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
+    sys.exit(0)
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")              
@@ -292,6 +294,8 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
                 elif SH_type == 3: # MSSH
                     compute_hopping_probabilities_mssh(mol, el, ham, g, dt_nucl, use_boltz_factor, params["Temperature"])
 
+                #if params["debug_SH_cal"] = 1:
+                    
                 # Attempt to hop
                 ksi = rnd.uniform(0.0,1.0) # generate random number for every trajectory  
                 rep = 0 # velocity rescaling will be done based on the total energy conservation,

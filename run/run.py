@@ -42,7 +42,7 @@ params["gms_inp"] = ""            # working input file of GAMESS
 params["gms_out"] = ""            # output file of GAMESS
 params["nproc"] = 1               # the number of processors : default = 1
 params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
-params["scr_dir"] = ""            # scratch directory including GAMESS output files.
+params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 
 if user==0:
@@ -55,7 +55,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     params["GMSPATH"] = "/home/e1667/install/gamess"
-    params["rungms"] =  params["GMSPATH"] + "/rungms"
+    params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
     params["scr_dir"] = "/home/e1667/work_NAMD/gamess_scratch"
 
@@ -72,7 +72,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"] = 1                        # the number of MD rounds
+params["Nsnaps"] = 10                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
@@ -92,11 +92,11 @@ if test==0:
 elif test==1:
     params["HOMO"] = 91 # not 92
 
-params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
+params["min_shift"] = -1                # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["SH_type"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei configuration and excited states
+params["num_SH_traj"] = 10             # number of excited states trajectories per initial nuclei configuration and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
@@ -133,7 +133,7 @@ params["print_mo_ham"] = 0                  # print full and reduced size MO bas
 params["print_SH_results_with_scaling"] = 1 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
 params["debug_densmat_output"] = 0          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
+params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
 params["debug_ham_ex"] = 0                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
 params["debug_SH_cal"] = 0                  # print the debug info into standard output: hopping probabilities matrices and SH_states
 params["check_hopping_probs"] = 1           # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
