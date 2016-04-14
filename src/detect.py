@@ -151,7 +151,7 @@ def show_outputs(inp_lines,info):
     print "******************************************"
     print "according to the %i th column," % (info["ltot_ene"]+1)
     print inp_lines[info["ltot_ene"]]
-    print "total energy = %i" % info["tot_ene"]
+    print "total energy = %f" % info["tot_ene"]
     print "******************************************"
     print
 

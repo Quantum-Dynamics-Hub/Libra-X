@@ -21,11 +21,15 @@ import sys
 import math
 
 # First, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_qchem_path"])
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_qchem_path"])
 
-from libmmath import *
-from libqchem import *
+#from libmmath import *
+#from libqchem import *
 
 def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     ##

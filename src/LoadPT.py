@@ -15,12 +15,17 @@ import sys
 import math
 
 
-# Fisrt, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["libra_mmath_path"])
-sys.path.insert(1,os.environ["libra_chemobjects_path"])
 
-from libmmath import *
-from libchemobjects import *
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+# Fisrt, we add the location of the library to test to the PYTHON path
+#sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_chemobjects_path"])
+
+#from libmmath import *
+#from libchemobjects import *
 
 
 Mass_conv = 1822.8881840387910605563454737686  # convert Dalton to atomic units

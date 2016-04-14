@@ -1,0 +1,13 @@
+#!/bin/bash
+#BSUB -R "span[hosts=1]"
+#BSUB -n 1
+#BSUB -o lsf.out
+#BSUB -e lsf.err
+#BSUB -J "l-g_int"
+
+echo "LSB_JOBID="$LSB_JOBID
+echo "LSB_QUEUE="$LSB_QUEUE
+echo "LS_SUBCWD="$LS_SUBCWD
+#echo "LSB_PROCS="$LSB_PROCS
+
+python run.py
