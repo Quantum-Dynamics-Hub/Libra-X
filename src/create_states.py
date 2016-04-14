@@ -21,13 +21,17 @@ import os
 import sys
 import math
 
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
 # First, we add the location of the library to test to the PYTHON path
 sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-sys.path.insert(1,os.environ["libra_mmath_path"])
+#sys.path.insert(1,os.environ["libra_mmath_path"])
 
 #from libhamiltonian import *
 from libcontrol_parameters import *
-from libmmath import *
+#from libmmath import *
 
 def create_states(Nmin,HOMO,Nmax,spin,flip):
     # Finds the keywords and their patterns and extracts the parameters
