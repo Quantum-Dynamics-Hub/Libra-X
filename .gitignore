@@ -9,3 +9,4 @@ slurm*
 *.dat
 *_Ham_*
 *wrk.inp
+run/H2O_wrk.inp

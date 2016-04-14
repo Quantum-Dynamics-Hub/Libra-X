@@ -27,17 +27,7 @@ if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
-# First, we add the location of the library to test to the PYTHON path
-#sys.path.insert(1,os.environ["libra_mmath_path"])
-#sys.path.insert(1,os.environ["libra_chemobjects_path"])
-#sys.path.insert(1,os.environ["libra_hamiltonian_path"])
-#sys.path.insert(1,os.environ["libra_dyn_path"])
 
-#from libmmath import *
-#from libchemobjects import *
-#from libhamiltonian import *
-#from libdyn import *
-#from LoadPT import * # Load_PT
 
 ##############################################################
 
@@ -113,10 +103,9 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     rnd = Random()
 
     # a flag for potential energy (Ehrenfest or SH)
+    f_pot = 0 # Default: Ehrenfest
     if SH_type >= 1: # use SH potential
         f_pot = 1
-    else: # use only Ehrenfest potential
-        f_pot = 0
 
     #=============== Initialization =======================
 
