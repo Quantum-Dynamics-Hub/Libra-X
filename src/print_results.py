@@ -30,7 +30,7 @@ def print_results(iconf,i_ex,i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
     # \param[in] el    Electronic object
     # \param[in] ham   hamiltonian object
     # \param[in] syst  System object
-    # \param[in] ao    Atomic Orbital object  
+    # \param[in] ao    Atomic Orbital basis object  
     # \param[in] therm thermostat object
     # \param[in] mu    list of dipole moment  
     # \param[in] tot_ene total energy from GAMESS output

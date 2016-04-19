@@ -68,17 +68,17 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
     # velocity rescaling
     #
-    # \param[in,out] syst a System object that includes atomic system information.
-    # \param[in,out] el The the object containig electronic DOFs for the nuclear coordinate
+    # \param[in,out] syst list of  System objects that include atomic system information.
+    # \param[in,out] el list of object containig electronic DOFs for the nuclear coordinate
     # given by syst. I have decided to go back a bit - one set of electronic DOF per set of
     # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
     # ground state forces for propagation. This also brings a conceptual clarity
     # 
-    # \param[in,out] ao   Atomic orbital basis
-    # \param[in,out] E    Molecular orbital energies
-    # \param[in,out] C    MO-LCAO coefficients
-    # \param[in] label    atomic label e.g. H, He, Li, etc...
-    # \param[in] Q        atomic charge
+    # \param[in,out] ao   list pf Atomic orbital basis
+    # \param[in,out] E    list of Molecular orbital energies
+    # \param[in,out] C    list of MO-LCAO coefficients
+    # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
+    # \param[in] Q        list of atomic charges
 
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
