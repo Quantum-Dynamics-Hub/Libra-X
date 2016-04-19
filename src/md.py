@@ -17,6 +17,9 @@
 from create_gamess_input import *
 from gamess_to_libra import *
 from vibronic_hamiltonian import *
+from create_MD_objects import *
+from surface_hopping import *
+from print_results import *
 
 import os
 import sys
@@ -53,15 +56,13 @@ def exe_gamess(params):
     os.environ["GMSPATH"] = params["GMSPATH"]
 
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
-    print "/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out)
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
-    sys.exit(0)
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
 
-def run_MD(syst,el,ao0,E0,C0,params,label,Q):
+def run_MD(syst,el,ao,E,C,params,label,Q):
     ##
     # This function handles a SINGLE trajectory.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
@@ -73,11 +74,11 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
     # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
     # ground state forces for propagation. This also brings a conceptual clarity
     # 
-    # \param[in,out] ao0   Atomic orbital basis
-    # \param[in,out] E0    Molecular orbital energies
-    # \param[in,out] C0    MO-LCAO coefficients
-    # \param[in,out] data0 Data extracted from GAMESS output file, in the dictionary form.
-    # \param[in,out] params Input data containing all manual settings and some extracted data.
+    # \param[in,out] ao   Atomic orbital basis
+    # \param[in,out] E    Molecular orbital energies
+    # \param[in,out] C    MO-LCAO coefficients
+    # \param[in] label    atomic label e.g. H, He, Li, etc...
+    # \param[in] Q        atomic charge
 
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
@@ -94,15 +95,13 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
         sys.exit(0)
     dt_elec = dt_nucl/float(el_mts)
 
+    nconfig = params["nconfig"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
     SH_type = params["SH_type"]
-    kB = 3.166811429e-6 # Boltzmann constant in a.u.
-
-    rnd = Random()
 
     # a flag for potential energy (Ehrenfest or SH)
     f_pot = 0 # Default: Ehrenfest
@@ -113,68 +112,29 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
 
     # Open and close energy and trajectory files - this will effectively
     # make them empty (to remove older info, in case we restart calculations)
-    fe = open(params["ene_file"],"w")
-    fe.close()
-    ft = open(params["traj_file"],"w")
-    ft.close()
-    fm = open(params["mu_file"],"w")
-    fm.close()   
-    fel = open(params["se_pop_file"],"w")
-    fel.close()
+    for i in xrange(nconfig):
+        for i_ex in xrange(nstates):
 
+            num_tmp = "_"+str(i)+"_"+str(i_ex)
 
-    print "In run_MD. Creating Hamiltonians"
+            ene_file = params["ene_file_prefix"]+num_tmp+".txt"                                                                                    
+            traj_file = params["traj_file_prefix"]+num_tmp+".xyz"                                                                                  
+            mu_file = params["mu_file_prefix"]+num_tmp+".txt"                                                                                      
+            se_pop_file = params["se_pop_file_prefix"]+num_tmp+".txt" 
+            
+            fe = open(ene_file,"w")
+            fe.close()
+            ft = open(traj_file,"w")
+            ft.close()
+            fm = open(mu_file,"w")
+            fm.close()   
+            fel = open(se_pop_file,"w")
+            fel.close()
 
-    # Create an External Hamiltonian object
-    ham = Hamiltonian_Extern(nstates,3*syst.Number_of_atoms) # (electronic DOF,nuclear DOF)
-    ham.set_rep(1)            # adiabatic representation
-    ham.set_adiabatic_opt(0)  # use the externally-computed 
-                                 # adiabatic electronic Hamiltonian and derivatives
-    ham.set_vibronic_opt(0)   # use the externally-computed vibronic Hamiltonian and derivatives
+    # prepare objects for MD
+    ham, ham_adi, d1ham_adi, ham_vib, mol, therm = md_objects(syst,nstates,params)
 
-        
-    # bind actual matrices to external hamiltonian
-    ham_adi = MATRIX(nstates,nstates);  ham.bind_ham_adi(ham_adi); # bind adiabatic hamiltonian
-    d1ham_adi = MATRIXList()
-    for k in xrange(3*syst.Number_of_atoms):
-        tmp = MATRIX(nstates,nstates)
-        d1ham_adi.append(tmp)
-    ham.bind_d1ham_adi(d1ham_adi) # bind derivative of adiabatic hamiltonian
-    ham_vib = CMATRIX(nstates,nstates);  ham.bind_ham_vib(ham_vib); # bind vibronic hamiltonian
-
-    print "Addresses of the working matrices"
-    print "ham_adi = ", ham_adi
-    print "d1ham_adi = ", d1ham_adi
-    for k in xrange(3*syst.Number_of_atoms):
-        print "d1ham_adi[",k,"]= ", d1ham_adi[k]
-    print "ham_vib = ", ham_vib
-
-    print "Setting nuclear variables"
-
-    # Initialize nuclear variables
-    mol = Nuclear(3*syst.Number_of_atoms)
-    syst.extract_atomic_q(mol.q)
-    syst.extract_atomic_p(mol.p)
-    syst.extract_atomic_f(mol.f)
-    syst.extract_atomic_mass(mol.mass)
-
-    # Initialize Thermostat object
-    if MD_type == 1:
-        therm = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
-        therm.set_Nf_t(3*syst.Number_of_atoms)
-        therm.set_Nf_r(0)
-        therm.init_nhc()
-
-    # set initial data from GAMESS output
-    ao = []
-    for i in range(0,len(ao0)):
-        ao.append(AO(ao0[i]))
-
-    E = MATRIX(E0)
-    C = MATRIX(C0)
-    #data = data0
-
-    # Initialize forces and Hamiltonians
+    # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
     #exe_gamess(params)
@@ -187,181 +147,126 @@ def run_MD(syst,el,ao0,E0,C0,params,label,Q):
 
     #=============== Propagation =======================
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
-    mu = []
     SH_states = [] # stores SH states
 
     for i in xrange(Nsnaps):
-        syst.set_atomic_q(mol.q)
-        syst.print_xyz(params["traj_file"],i)       
+        #syst.set_atomic_q(mol.q)
+        #syst.print_xyz(params["traj_file"],i)       
+
+        tot_ene = []; mu = []; # initialize lists
 
         for j in xrange(Nsteps):
 
             ij = i*Nsteps + j
 
-            # Electronic propagation: half-step
-            for k in xrange(el_mts):
-                el.propagate_electronic(0.5*dt_elec, ham)
+            for iconf in xrange(nconfig):
+                for i_ex in xrange(nstates):
 
+                    cnt = iconf*nstates + i_ex
 
-            # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
-            # Optional thermostat            
-            if MD_type == 1: # NVT-MD
-                for k in xrange(3*syst.Number_of_atoms):
-                    mol.p[k] = mol.p[k] * therm.vel_scale(0.5*dt_nucl)
+                    print "Initial geometry %i, initial excitation %i"%(iconf,i_ex)
 
-            mol.propagate_p(0.5*dt_nucl)
-            mol.propagate_q(dt_nucl)
+                    # Electronic propagation: half-step
+                    for k in xrange(el_mts):
+                        el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
-            # ======= Compute forces and energies using GAMESS ============
-            write_gms_inp(label, Q, params, mol)
-            exe_gamess(params)
+                    # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
+                    # Optional thermostat            
+                    if MD_type == 1: # NVT-MD
+                        for k in xrange(3*syst[cnt].Number_of_atoms):
+                            mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-            # update AO and gradients
-            tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao, E, C, str(ij))
+                    mol[cnt].propagate_p(0.5*dt_nucl)
+                    mol[cnt].propagate_q(dt_nucl)
 
-            #========= Update the matrices that are bound to the Hamiltonian =========
-            # Compose electronic and vibronic Hamiltonians
-            update_vibronic_hamiltonian(ham_adi, ham_vib, params,E_mol_red,D_mol_red, str(ij))
-
-            print "Addresses of the ham matrices"
-            print "ham_adi = ", ham_adi
-            print "ham_vib = ", ham_vib
-            print "ham_adi "; ham_adi.show_matrix();
-            print "ham_vib "; ham_vib.show_matrix();
-
-            for k in xrange(syst.Number_of_atoms):
-                for st in xrange(nstates):
-                    d1ham_adi[3*k+0].set(st,st,Grad[k].x)
-                    d1ham_adi[3*k+1].set(st,st,Grad[k].y)
-                    d1ham_adi[3*k+2].set(st,st,Grad[k].z)
-           
-            #epot = compute_forces(mol, el, ham, 1)  # 0 - Ehrenfest, 1 - TSH
-            epot = tot_ene + compute_forces(mol, el, ham, f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
-
-            print "epot= ", epot
-            #sys.exit(0)
-
-            ekin = compute_kinetic_energy(mol)
-            etot = epot + ekin
-          
-            if MD_type == 1:
-                therm.propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
-
-            mol.propagate_p(0.5*dt_nucl)
-
-            # optional thrmostat
-            if MD_type == 1: # NVT-MD
-                for k in xrange(3*syst.Number_of_atoms):
-                    mol.p[k] = mol.p[k] * therm.vel_scale(0.5*dt_nucl)
-
-            # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
-
-
-            # Electronic propagation: half-step
-            for k in xrange(el_mts):
-                el.propagate_electronic(0.5*dt_elec, ham)
-
-
-            ############## Add surface hopping ######################
-
-            print "Before TSH"
-
-            if SH_type>=1:
-
-                # Compute hopping probabilities
-                g = MATRIX(nstates,nstates) # initialize a matrix of hopping probability
-                use_boltz_factor = 0  # we don't need to use Boltzmann factor, since  
-                                      # we are using velocity rescaling in the hopping procedure.
-                                      # Although the rescaling doesn't account for the direction, but it
-                                      # still accounts for energy partitioning between electronic and
-                                      # nuclear DOFs
-
-                if SH_type == 1: # FSSH
-                    compute_hopping_probabilities_fssh(mol, el, ham, g, dt_nucl, use_boltz_factor, params["Temperature"])
-                elif SH_type == 2: # GFSH
-                    compute_hopping_probabilities_gfsh(mol, el, ham, g, dt_nucl, use_boltz_factor, params["Temperature"])
-                elif SH_type == 3: # MSSH
-                    compute_hopping_probabilities_mssh(mol, el, ham, g, dt_nucl, use_boltz_factor, params["Temperature"])
-
-                #if params["debug_SH_cal"] = 1:
+                    # ======= Compute forces and energies using GAMESS ============
+                    write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
+                    exe_gamess(params)
                     
-                # Attempt to hop
-                ksi = rnd.uniform(0.0,1.0) # generate random number for every trajectory  
-                rep = 0 # velocity rescaling will be done based on the total energy conservation,
-                        # no derivative couplings will be needed - we don't have them
-                        # !!! This option makes do_rescaling and do_reverse not relevant - so
-                        # we can set them to any value - they are not used
-                do_rescaling = 1
-                do_reverse = 1
-                el.istate = hop(el.istate, mol, ham, ksi, g, do_rescaling, rep, do_reverse)
+                    #sys.exit(0)
+                    # update AO and gradients
+                    tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij))
+                    
+                    tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment 
+                    #========= Update the matrices that are bound to the Hamiltonian =========
+                    #Compose electronic and vibronic Hamiltonians
+                    update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,D_mol_red, str(ij))
 
-            ################### END of TSH ##########################
+                    print "Addresses of the ham matrices"
+                    print "ham_adi = ", ham_adi[cnt]
+                    print "ham_vib = ", ham_vib[cnt]
+                    print "ham_adi "; ham_adi[cnt].show_matrix();
+                    print "ham_vib "; ham_vib[cnt].show_matrix();
+                    #sys.exit(0)
+
+                    # update forces
+                    for k in xrange(syst[cnt].Number_of_atoms):
+                        for st in xrange(nstates):
+                            d1ham_adi[cnt][3*k+0].set(st,st,Grad[k].x)
+                            d1ham_adi[cnt][3*k+1].set(st,st,Grad[k].y)
+                            d1ham_adi[cnt][3*k+2].set(st,st,Grad[k].z)
+           
+                    # update potential energy
+                    epot = tot_ene0 + compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+
+                    print "epot= ", epot
+                    #sys.exit(0)
+
+                    ekin = compute_kinetic_energy(mol[cnt])
+                    etot = epot + ekin
+          
+                    if MD_type == 1:
+                        therm[cnt].propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
+
+                    mol[cnt].propagate_p(0.5*dt_nucl)
+
+                    # optional thrmostat
+                    if MD_type == 1: # NVT-MD
+                        for k in xrange(3*syst[cnt].Number_of_atoms):
+                            mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
+
+                    # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
+
+
+                    # Electronic propagation: half-step
+                    for k in xrange(el_mts):
+                        el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+
+                    
+                    ############ Add surface hopping ######################
+
+                    print "Before TSH";# sys.exit(0)
+
+                    if SH_type>=1:
+
+                        mol[cnt], el[cnt], ham[cnt] = surface_hopping(mol[cnt],el[cnt],ham[cnt],params)
+
+                    ################### END of TSH ##########################
          
-            print "Finished TSH"
+                    print "Finished TSH";# sys.exit(0)
 
-            # Re-compute energies, to print
-            epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot) #  f_pot = 0 - Ehrenfest, 1 - TSH
-            #epot = compute_potential_energy(mol, el, ham, 1)
-            print "epot = ", epot
+                    #********* end of i_ex loop
 
-            ekin = compute_kinetic_energy(mol)
-            etot = ekin + epot
+        #************ end of j loop
 
-            ebath = 0.0
-            if MD_type == 1:
-                ebath = therm.energy()
-            eext = etot + ebath
-            curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
-
+        # check d1ham_adi objects different forces
+        #for l in xrange(len(ham)):
+        #    print "%d th hamiltonian" %(l)
+        #    for k in xrange(3*syst[l].Number_of_atoms):
+        #        print "d1ham_adi[",k,"]= ", d1ham_adi[l][k].show_matrix()
 
         ################### Printing results ############################
 
-        # Energy
-        fe = open(params["ene_file"],"a")
-        fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
-        fe.close()
-        
-        # Dipole moment components
-        fm = open(params["mu_file"],"a")
-        line = "t= %8.5f " % (ij*dt_nucl)
-        for k in xrange(len(ao)):
-            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
-        line = line + "\n"
-        fm.write(line)
-        fm.close()
+        for iconf in xrange(nconfig):
+            for i_ex in xrange(nstates):
 
-        # Populations            
-        fel = open(params["se_pop_file"],"a")
+                cnt = iconf*nstates + i_ex
+                print_results(iconf,i_ex,i,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
 
-        # Print time
-        line_se = "t= %8.5f " % (ij*dt_nucl)
+        print "       ********* %i snap ends ***********" % i
+        print 
 
-        # Print populations
-        for st in xrange(nstates):
-            line_se = line_se + " %8.5f " % el.rho(st,st).real
-
-        if print_coherences == 1:
-            # Print coherences
-            for st in xrange(nstates):
-                for st1 in xrange(st):
-                    line_se = line_se + " %8.5f %8.5f " % (el.rho(st,st1).real, el.rho(st,st1).imag)
-             
-        line_se = line_se + "\n"
-
-        fel.write(line_se)
-        fel.close()
-
-        #**************** store states as a function of time **************
-        if SH_type >= 1:
-            SH_states.append(el.istate)
-
-
-    print "       ********* %i snap ends ***********" % i
-    print 
-
-    test_data = {}
-
-    print "SH_states = ", SH_states
+    #print "SH_states = ", SH_states
 
     return SH_states
 

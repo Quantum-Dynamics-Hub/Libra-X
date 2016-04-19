@@ -6,8 +6,8 @@ import os
 import sys
 import math
 
-user = 0 # 0 for Alexey, 1 for Kosuke, others should input the path they use
-test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
+user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -71,7 +71,7 @@ elif test==1:
 
 # MD variables
 
-params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
+params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 hartree = 0.5 fsec
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
@@ -127,15 +127,15 @@ params["se_pop_file_prefix"] = "out/se_pop"         # where the results of the T
 params["sh_pop_file_prefix"] = "out/sh_pop"         # where the results of the SH calculations will be printed out
 
 # flags for debugging
-params["print_coherences"] = 0              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
+params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
 params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
 params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
 params["print_SH_results_with_scaling"] = 1 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
-params["debug_densmat_output"] = 0          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
-params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
-params["debug_ham_ex"] = 0                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["debug_SH_cal"] = 0                  # print the debug info into standard output: hopping probabilities matrices and SH_states
+params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
+params["debug_mu_output"] = 1               # print the debug info into standard output: transition dipole moment matrices
+params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
+#params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
+params["debug_SH_cal"] = 1                  # print the debug info into standard output: hopping probabilities matrices and SH_states
 params["check_hopping_probs"] = 1           # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************

@@ -53,10 +53,9 @@ def main(params):
     nstates = len(params["excitations"])
     ninit = params["nconfig"]  
 
-    if SH_type == 0: # calculate no SH probs.
-        num_SH_traj = 1
-    else: 
-        num_SH_traj = params["num_SH_traj"]
+    num_SH_traj = 1
+    #if SH_type >= 1: # calculate no SH probs.  
+    #    num_SH_traj = params["num_SH_traj"]
 
     ntraj = nstates*ninit*num_SH_traj
 
@@ -136,7 +135,12 @@ def main(params):
                 el.append(Electronic(nstates,i_ex))
     
     # set list of SH state trajectories
-    SH_traj_t = [0]*(Nsnaps*nstates)
+    #SH_traj_t = [0]*(Nsnaps*nstates)
+
+    print "run MD"
+    SH_states = run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list)
+    print "MD is done"
+    sys.exit(0)
 
     print "Starting MD..."
     cnt = 0
@@ -155,43 +159,43 @@ def main(params):
                 params["mu_file"] = params["mu_file_prefix"]+num_tmp+".txt"
                 params["se_pop_file"] = params["se_pop_file_prefix"]+num_tmp+".txt"
 
-                print "run MD"
-                SH_states = run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label_list[i], Q_list[i])
-                print "MD is done"
-                cnt = cnt + 1
+    print "run MD"
+    SH_states = run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label_list[i], Q_list[i])
+    print "MD is done"
+    cnt = cnt + 1
+    
+    # count SH trajectories per time
+    if SH_type > 0:
+        for t in xrange(Nsnaps):
+            for st in SH_states:
+                SH_traj_t[t*nstates+st] += 1
 
-                # count SH trajectories per time
-                if SH_type > 0:
-                    for t in xrange(Nsnaps):
-                        for st in SH_states:
-                            SH_traj_t[t*nstates+st] += 1
+    # evaluate SH populations
+    if SH_type >= 1:
 
-            # evaluate SH populations
-            if SH_type >= 1:
+        print "SH_traj_t=",SH_traj_t
 
-                print "SH_traj_t=",SH_traj_t
+        sh_pop_file = params["sh_pop_file_prefix"]+num_tmp0+".txt"
+        # clean file
+        fel = open(sh_pop_file,"w") 
+        fel.close()
 
-                sh_pop_file = params["sh_pop_file_prefix"]+num_tmp0+".txt"
-                # clean file
-                fel = open(sh_pop_file,"w") 
-                fel.close()
+        fel = open(sh_pop_file,"a")
 
-                fel = open(sh_pop_file,"a")
+        for t in xrange(Nsnaps):
+            # Print time
+            line_sh = "t= %8.5f " % (t*Nsteps*dt_nucl)
 
-                for t in xrange(Nsnaps):
-                    # Print time
-                    line_sh = "t= %8.5f " % (t*Nsteps*dt_nucl)
+            # Print populations
+            for st in xrange(nstates):
+                line_sh = line_sh + " %8.5f " % (float(SH_traj_t[t*nstates+st])/float(num_SH_traj))
 
-                    # Print populations
-                    for st in xrange(nstates):
-                        line_sh = line_sh + " %8.5f " % (float(SH_traj_t[t*nstates+st])/float(num_SH_traj))
+            line_sh = line_sh + "\n"
+            fel.write(line_sh)
+            fel.close()
 
-                    line_sh = line_sh + "\n"
-                    fel.write(line_sh)
-                fel.close()
-
-                # initialize SH_traj_t
-                SH_traj_t = [0]*(Nsnaps*nstates)
+            # initialize SH_traj_t
+            SH_traj_t = [0]*(Nsnaps*nstates)
 
 
     #return data, test_data
