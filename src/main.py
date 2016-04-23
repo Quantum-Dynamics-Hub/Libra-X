@@ -53,10 +53,9 @@ def main(params):
     nstates = len(params["excitations"])
     ninit = params["nconfig"]  
 
-    if SH_type == 0: # calculate no SH probs.
-        num_SH_traj = 1
-    else: 
-        num_SH_traj = params["num_SH_traj"]
+    num_SH_traj = 1
+    #if SH_type >= 1: # calculate no SH probs.  
+    #    num_SH_traj = params["num_SH_traj"]
 
     ntraj = nstates*ninit*num_SH_traj
 
@@ -68,6 +67,7 @@ def main(params):
     
     params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
 
+    #sys.exit(0)
     exe_gamess(params)
 
     label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
@@ -135,62 +135,11 @@ def main(params):
                 el.append(Electronic(nstates,i_ex))
     
     # set list of SH state trajectories
-    SH_traj_t = [0]*(Nsnaps*nstates)
+    #SH_traj_t = [0]*(Nsnaps*nstates)
 
-    print "Starting MD..."
-    cnt = 0
-    for i in xrange(ninit):
-        for i_ex in xrange(nstates):
-
-            num_tmp0 = "_"+str(i)+"_"+str(i_ex)
-
-            for itraj in xrange(num_SH_traj):
-
-                print "Initial nuclei config %i, initial excitation %i, trajectory %i"%(i,i_ex,itraj)
-                num_tmp = num_tmp0+"_"+str(itraj)
-
-                params["ene_file"] = params["ene_file_prefix"]+num_tmp+".txt"
-                params["traj_file"] = params["traj_file_prefix"]+num_tmp+".xyz"
-                params["mu_file"] = params["mu_file_prefix"]+num_tmp+".txt"
-                params["se_pop_file"] = params["se_pop_file_prefix"]+num_tmp+".txt"
-
-                print "run MD"
-                SH_states = run_MD(syst[cnt],el[cnt],ao_list[cnt],e_list[cnt],c_list[cnt],params,label_list[i], Q_list[i])
-                print "MD is done"
-                cnt = cnt + 1
-
-                # count SH trajectories per time
-                if SH_type > 0:
-                    for t in xrange(Nsnaps):
-                        for st in SH_states:
-                            SH_traj_t[t*nstates+st] += 1
-
-            # evaluate SH populations
-            if SH_type >= 1:
-
-                print "SH_traj_t=",SH_traj_t
-
-                sh_pop_file = params["sh_pop_file_prefix"]+num_tmp0+".txt"
-                # clean file
-                fel = open(sh_pop_file,"w") 
-                fel.close()
-
-                fel = open(sh_pop_file,"a")
-
-                for t in xrange(Nsnaps):
-                    # Print time
-                    line_sh = "t= %8.5f " % (t*Nsteps*dt_nucl)
-
-                    # Print populations
-                    for st in xrange(nstates):
-                        line_sh = line_sh + " %8.5f " % (float(SH_traj_t[t*nstates+st])/float(num_SH_traj))
-
-                    line_sh = line_sh + "\n"
-                    fel.write(line_sh)
-                fel.close()
-
-                # initialize SH_traj_t
-                SH_traj_t = [0]*(Nsnaps*nstates)
-
+    print "run MD"
+    SH_states = run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list)
+    print "MD is done"
+    sys.exit(0)
 
     #return data, test_data
