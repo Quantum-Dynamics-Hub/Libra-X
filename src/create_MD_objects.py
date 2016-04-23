@@ -22,7 +22,10 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 def md_objects(syst,nstates,params):
     ##
-    # find the parameters below. 
+    # This function allocates memory for all utilized objects, makes necessary preparations
+    # including: binding external (created here) matrices to the Hamiltonian objects (also created
+    # here), extract infromation from the "syst" list of systems into the corresponding "Nuclear"
+    # object, create thermostats, 
     # \param[in] list of System objects
     # \param[in] nstates number of excitation states
     # \param[in] params input parameters from run.py
@@ -31,28 +34,42 @@ def md_objects(syst,nstates,params):
 
     print "In run_MD. Creating Hamiltonians"
 
+    ntraj = len(syst)  # the number of copies of the system = the number of trajectories
+
     # Create an External Hamiltonian object
     ham = []
-    for i in xrange(len(syst)):
-        ham0 = Hamiltonian_Extern(nstates,3*syst[i].Number_of_atoms) # (electronic DOF,nuclear DOF)
-        ham0.set_rep(1)            # adiabatic representation
-        ham0.set_adiabatic_opt(0)  # use the externally-computed 
-                                  # adiabatic electronic Hamiltonian and derivatives
-        ham0.set_vibronic_opt(0)   # use the externally-computed vibronic Hamiltonian and derivatives
-        ham.append(ham0)
+    for i in xrange(ntraj):
+        ham_i = Hamiltonian_Extern(nstates,3*syst[i].Number_of_atoms) # (electronic DOF,nuclear DOF)
+        ham_i.set_rep(1)            # adiabatic representation
+        ham_i.set_adiabatic_opt(0)  # use the externally-computed 
+                                    # adiabatic electronic Hamiltonian and derivatives
+        ham_i.set_vibronic_opt(0)   # use the externally-computed vibronic Hamiltonian and derivatives
+        ham.append(ham_i)
 
-    # bind actual matrices to external hamiltonian
+    # bind actual matrices to external Hamiltonian
     ham_adi = []; d1ham_adi = []; ham_vib = []
-    for i in xrange(len(ham)):
-        ham_adi0 = MATRIX(nstates,nstates)
-        ham_adi.append(ham_adi0);  ham[i].bind_ham_adi(ham_adi[i]); # bind adiabatic hamiltonian
-        d1ham_adi0= MATRIXList()
+
+    for i in xrange(ntraj):
+        # create external matrix for adiabatic Hamiltonian
+        ham_adi_i = MATRIX(nstates,nstates)
+        ham_adi.append(ham_adi_i)
+        # bind adiabatic Hamiltonian
+        ham[i].bind_ham_adi(ham_adi[i])
+
+        # create external matrices for the derivatives
+        d1ham_adi_i= MATRIXList()
         for k in xrange(3*syst[i].Number_of_atoms):
             tmp = MATRIX(nstates,nstates)
-            d1ham_adi0.append(tmp)
-        d1ham_adi.append(d1ham_adi0); ham[i].bind_d1ham_adi(d1ham_adi[i]) # bind derivative of adiabatic hamiltonian
-        ham_vib0 = CMATRIX(nstates,nstates)
-        ham_vib.append(ham_vib0);  ham[i].bind_ham_vib(ham_vib[i]); # bind vibronic hamiltonian
+            d1ham_adi_i.append(tmp)
+        d1ham_adi.append(d1ham_adi_i)
+        # bind derivative of adiabatic Hamiltonian
+        ham[i].bind_d1ham_adi(d1ham_adi[i])
+
+        # create external matrix for vibronic Hamiltonian
+        ham_vib_i = CMATRIX(nstates,nstates)
+        ham_vib.append(ham_vib_i)
+        # bind vibronic Hamiltonian
+        ham[i].bind_ham_vib(ham_vib[i])
 
     print "after bind hamiltonian";# sys.exit(0)
 
@@ -65,12 +82,11 @@ def md_objects(syst,nstates,params):
             print "d1ham_adi[",k,"]= ", d1ham_adi[i][k]
         print "ham_vib = ", ham_vib[i]
 
-    #sys.exit(0)
     print "Setting nuclear variables"
 
     # Initialize nuclear variables
     mol = []
-    for i in xrange(len(syst)):
+    for i in xrange(ntraj):
         mol.append(Nuclear(3*syst[i].Number_of_atoms))
         syst[i].extract_atomic_q(mol[i].q)
         syst[i].extract_atomic_p(mol[i].p)
@@ -81,16 +97,19 @@ def md_objects(syst,nstates,params):
         for k in xrange(syst[i].Number_of_atoms):
             print "mol[%d][%d]=%f,%f,%f"%(i,k,mol[i].q[3*k+0],mol[i].q[3*k+1],mol[i].q[3*k+2])  ;# sys.exit(0)
 
-    # Initialize Thermostat object
+    # Initialize Thermostat object    
     if params["MD_type"] == 1:
         therm = []
-        for i in xrange(len(syst)):
-            therm0 = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
-            therm0.set_Nf_t(3*syst[i].Number_of_atoms)
-            therm0.set_Nf_r(0)
-            therm0.init_nhc()
-            therm.append(therm0)
+        for i in xrange(ntraj):
+            therm_i = Thermostat({"nu_therm":params["nu_therm"], "NHC_size":params["NHC_size"], "Temperature":params["Temperature"], "thermostat_type":params["thermostat_type"]})
+            therm_i.set_Nf_t(3*syst[i].Number_of_atoms)
+            therm_i.set_Nf_r(0)
+            therm_i.init_nhc()
+            therm.append(therm_i)
 
-        print "therm =",therm #; sys.exit(0)
+        print "therm =",therm 
+
+    # Returned values:
+    # if no thermostat is included, the returned therm variable will be "None"
 
     return ham, ham_adi, d1ham_adi, ham_vib, mol, therm
