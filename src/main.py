@@ -46,9 +46,6 @@ def main(params):
     #
     # Used in:  main.py    
 
-    SH_type = params["SH_type"]
-    Nsnaps = params["Nsnaps"]
-    Nsteps = params["Nsteps"]
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
     ninit = params["nconfig"]  
