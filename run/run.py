@@ -7,7 +7,7 @@ import sys
 import math
 
 user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
-test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -72,7 +72,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 hartree = 0.5 fsec
-params["Nsnaps"] = 5                        # the number of MD rounds
+params["Nsnaps"] = 1                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
