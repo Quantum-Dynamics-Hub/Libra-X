@@ -141,9 +141,6 @@ params["check_tsh_probabilities"] = 1      # print the hopping probabilities if 
 
 # ***************************************************************
 
-from path_libra_lib import * # import path_libra_lib module 
-path_libra_lib(libra_bin_path) # Path to the libra libraries
-
 from create_states import *
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 

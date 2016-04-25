@@ -20,11 +20,6 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-#sys.path.insert(1,os.environ["libra_qchem_path"])
-sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-
-from libcontrol_parameters import *
-
 def pyxaid_states(states, min_shift, max_shift):
     ##
     # This function converts our Libra type states into Pyxaid convention
