@@ -71,8 +71,8 @@ elif test==1:
 
 # MD variables
 
-params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 hartree = 0.5 fsec
-params["Nsnaps"] = 1                        # the number of MD rounds
+params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
+params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
@@ -95,8 +95,9 @@ elif test==1:
 params["min_shift"] = -1                # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["SH_type"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["num_SH_traj"] = 10             # number of excited states trajectories per initial nuclei configuration and excited states
+params["tsh_method"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
+params["rep"] = 0                    # representation: 0 - diabatic, 1 - adiabatic
+params["num_SH_traj"] = 3             # number of excited states trajectories per initial nuclei configuration and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
@@ -135,8 +136,8 @@ params["debug_densmat_output"] = 1          # print the debug info into standard
 params["debug_mu_output"] = 1               # print the debug info into standard output: transition dipole moment matrices
 params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
 #params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["debug_SH_cal"] = 1                  # print the debug info into standard output: hopping probabilities matrices and SH_states
-params["check_hopping_probs"] = 1           # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
+params["print_tsh_probabilities"] = 1      # print the debug info into standard output: hopping probabilities matrices and SH_states
+params["check_tsh_probabilities"] = 1      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************
 

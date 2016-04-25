@@ -17,8 +17,6 @@
 from create_gamess_input import *
 from gamess_to_libra import *
 from vibronic_hamiltonian import *
-from create_MD_objects import *
-from surface_hopping import *
 from print_results import *
 
 import os
@@ -30,6 +28,8 @@ if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
+
+from libra_py import *
 
 
 ##############################################################
@@ -62,6 +62,9 @@ def exe_gamess(params):
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
 
+
+
+
 def run_MD(syst,el,ao,E,C,params,label,Q):
     ##
     # This function handles a SINGLE trajectory.
@@ -85,7 +88,8 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     # It outputs MD trajectories, Energy evolutions, and SE and SH populations.
     #
     # Used in:  main.py/main
-    
+    rnd = Random()
+
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
     if el_mts < 1:
@@ -101,7 +105,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     nstates = len(params["excitations"])
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
-    SH_type = params["SH_type"]
+    SH_type = params["tsh_method"]
 
     # a flag for potential energy (Ehrenfest or SH)
     f_pot = 0 # Default: Ehrenfest
@@ -132,7 +136,14 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
             fel.close()
 
     # prepare objects for MD
-    ham, ham_adi, d1ham_adi, ham_vib, mol, therm = md_objects(syst,nstates,params)
+    ntraj = len(syst)
+    nnucl = 3*syst[0].Number_of_atoms
+    verbose = 0
+
+    ham, ham_adi, d1ham_adi, ham_vib = init_ensembles.init_ext_hamiltonians(ntraj, nnucl, nstates, verbose)
+    mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
+    therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
+
 
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
@@ -156,7 +167,6 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
         tot_ene = []; mu = []; # initialize lists
 
         for j in xrange(Nsteps):
-
             ij = i*Nsteps + j
 
             for iconf in xrange(nconfig):
@@ -192,13 +202,6 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                     #Compose electronic and vibronic Hamiltonians
                     update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,D_mol_red, str(ij))
 
-                    print "Addresses of the ham matrices"
-                    print "ham_adi = ", ham_adi[cnt]
-                    print "ham_vib = ", ham_vib[cnt]
-                    print "ham_adi "; ham_adi[cnt].show_matrix();
-                    print "ham_vib "; ham_vib[cnt].show_matrix();
-                    #sys.exit(0)
-
                     # update forces
                     for k in xrange(syst[cnt].Number_of_atoms):
                         for st in xrange(nstates):
@@ -208,10 +211,6 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
            
                     # update potential energy
                     epot = tot_ene0 + compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
-
-                    print "epot= ", epot
-                    #sys.exit(0)
-
                     ekin = compute_kinetic_energy(mol[cnt])
                     etot = epot + ekin
           
@@ -232,22 +231,21 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                     for k in xrange(el_mts):
                         el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
-                    
-                    ############ Add surface hopping ######################
-
-                    print "Before TSH";# sys.exit(0)
-
-                    if SH_type>=1:
-
-                        mol[cnt], el[cnt], ham[cnt] = surface_hopping(mol[cnt],el[cnt],ham[cnt],params)
-
-                    ################### END of TSH ##########################
-         
-                    print "Finished TSH";# sys.exit(0)
-
                     #********* end of i_ex loop
+                #********* end of iconf loop
+            #***** End of TD-SE propagation for this step
+                    
+            ############ Add surface hopping ######################
+            print "Before TSH"
 
-        #************ end of j loop
+            if SH_type>=1:
+                tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+
+            ################### END of TSH ##########################
+            print "Finished TSH"
+
+
+        #************ end of j loop - all steps for this snap
 
         # check d1ham_adi objects different forces
         #for l in xrange(len(ham)):
