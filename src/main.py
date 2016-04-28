@@ -48,13 +48,14 @@ def main(params):
 
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
-    ninit = params["nconfig"]  
+    ninit = params["Ngeo"]  
+    SH_type = params["tsh_method"]
 
-    num_SH_traj = 1
-    #if SH_type >= 1: # calculate no SH probs.  
-    #    num_SH_traj = params["num_SH_traj"]
+    Ntsh = 1
+    if SH_type >= 1: # calculate no SH probs.  
+        Ntsh = params["Ntsh"]
 
-    ntraj = nstates*ninit*num_SH_traj
+    ntraj = nstates*ninit*Ntsh
 
     ################# Step 0: Use the initial file to create a working input file ###############
  
@@ -117,11 +118,11 @@ def main(params):
     syst = []
     el = []
 
-    # all excitations fr each nuclear configuration
+    # all excitations for each nuclear configuration
     for i in xrange(ninit):
         print "init_system..." 
         for i_ex in xrange(nstates):
-            for itraj in xrange(num_SH_traj):
+            for itsh in xrange(Ntsh):
                 print "Create a copy of a system"  
                 df = 0 # debug flag
                 # Here we use libra_py module!
@@ -132,10 +133,9 @@ def main(params):
                 el.append(Electronic(nstates,i_ex))
     
     # set list of SH state trajectories
-    #SH_traj_t = [0]*(Nsnaps*nstates)
 
     print "run MD"
-    SH_states = run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list)
+    run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list)
     print "MD is done"
     sys.exit(0)
 
