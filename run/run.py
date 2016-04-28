@@ -74,7 +74,7 @@ elif test==1:
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
-params["nconfig"] = 1                       # the number of initial nuclear/velocity configurations
+params["Ngeo"] = 1                          # the number of initial nuclear/velocity geometry
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
@@ -96,8 +96,8 @@ params["min_shift"] = -1                # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["tsh_method"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["rep"] = 0                    # representation: 0 - diabatic, 1 - adiabatic
-params["num_SH_traj"] = 3             # number of excited states trajectories per initial nuclei configuration and excited states
+params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
+params["Ntsh"] = 3                     # number of excited states trajectories per initial nuclei geometry and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
@@ -121,13 +121,16 @@ elif user==1:
     params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
 
 # output file
-params["traj_file_prefix"] = params["res"]+"md" # containing MD trajectories
-params["ene_file_prefix"] = params["res"]+"ene" # containing kinetic, potential, system, and thermostat-coupled system energies 
-params["mu_file_prefix"] = params["res"]+"mu"   # containing dipole moment matrices
-params["se_pop_file_prefix"] = "out/se_pop"         # where the results of the TD-SE calculations will be printed out
-params["sh_pop_file_prefix"] = "out/sh_pop"         # where the results of the SH calculations will be printed out
+params["traj_file_prefix"] = params["res"]+"md"       # containing MD trajectories
+params["ene_file_prefix"] = params["res"]+"ene"       # containing kinetic, potential, system, and thermostat-coupled system energies 
+params["mu_file_prefix"] = params["res"]+"mu"         # containing dipole moment matrices
+params["se_pop_file_prefix"] = "out/se_pop"           # containing the SE population (if velocity rescaling is applied, this is averaged over TSH trajectories). File name is defined as se_pop_"initial geometry"_"initial excitation"
+params["sh_pop_file_prefix"] = "out/sh_pop"           # containing the SH population averaged over TSH trajectories. File name is defined in the SE way. 
+params["se_pop_ex_file_prefix"] = "macro/se_pop_ex"   # containing the SE population averaged over initial geometries. File name is se_pop_ex"initial excitation" 
+params["sh_pop_ex_file_prefix"] = "macro/sh_pop_ex"   # containing the SH population averaged over initial geometries. File name is defined in the SH way.
 
 # flags for debugging
+params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
 params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
 params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
 params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
