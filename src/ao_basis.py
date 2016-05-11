@@ -34,7 +34,7 @@ def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     # This function returns the list of atomic orbital type (s, px, py, pz, etc...) and the number
     # of orbitals of each type: S, P, D, L (S + P)
     #
-    # Used in: gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
+    # Used in: extract.py/extract_ao_basis
 
     orb_name = []
 
@@ -108,9 +108,7 @@ def construct_ao_basis(ao_data,label,R,nGTO,orb_name):
     # \param[in] params : The list which contains extracted data from the file.
     # This function returns the list of atomic orbital basis as "ao_basis".
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
-    #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
-
+    # Used in: extract.py/extract_ao_basis
 
     expo_s = ao_data["expo_s"]
     expo_p = ao_data["expo_p"]
