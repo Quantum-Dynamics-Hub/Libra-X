@@ -154,8 +154,6 @@ def extract_ao_basis(inp_str, label, R, flag):
     return ao
 
 
-
-
 def extract_mo(inp_str,Ngbf,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
@@ -219,7 +217,7 @@ def extract_coordinates(inp_str,flag):
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
     # from the the list of input lines
     # each input line is assumed to have the format:
-    # label  Q  ....  x  y z
+    # label  Q  ....  x y z
 
     # \param[in] inp_str  Strings containing the info for all atoms
     # label - returned list of atomic labels (strings)
@@ -304,9 +302,10 @@ def extract(filename,flag):
     A = f.readlines()
     f.close()
 
+    # detect the lines including information from gamess output file
     info = detect.detect(A,flag)
 
-
+    # extract information from gamess output file
     label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
     grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
     E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
