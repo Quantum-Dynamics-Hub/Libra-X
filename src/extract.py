@@ -13,13 +13,6 @@
 # This module implements the functions that extract
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information
 # written in gamess output file.
-#
-# Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
-#        : main.py/main/unpack_file
-
-#************************************************************
-# This program extracting parameters from gamess output file.
-#************************************************************
 
 import os
 import sys
@@ -41,8 +34,7 @@ def extract_ao_basis(inp_str, label, R, flag):
     # \param[in] params : The list which contains extracted data from l_gam file.
     # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/unpack_file/extract
+    # Used in: extract.py/extract
 
     # atomic species
     l_atom_spec = []
@@ -162,8 +154,6 @@ def extract_ao_basis(inp_str, label, R, flag):
     return ao
 
 
-
-
 def extract_mo(inp_str,Ngbf,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
@@ -174,8 +164,7 @@ def extract_mo(inp_str,Ngbf,flag):
     # C - returned MATRIX object, containing the eigenvectors:
     # C.get(a,i) - is the coefficient of AO with index a in the MO with index i
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/unpack_file/extract
+    # Used in: extract.py/extract
 
     stat_span = 4 + Ngbf
 
@@ -228,7 +217,7 @@ def extract_coordinates(inp_str,flag):
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
     # from the the list of input lines
     # each input line is assumed to have the format:
-    # label  Q  ....  x  y z
+    # label  Q  ....  x y z
 
     # \param[in] inp_str  Strings containing the info for all atoms
     # label - returned list of atomic labels (strings)
@@ -236,8 +225,8 @@ def extract_coordinates(inp_str,flag):
     # R - returned list of nuclear coordinates (VECTOR objects)
 
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/unpack_file/extract
+    # Used in: extract.py/extract
+
 
     label, Q, R = [], [], []
     for a in inp_str: 
@@ -276,8 +265,7 @@ def extract_gradient(inp_str,flag):
     # \param[in] inp_str  Strings containing the gradient for all atoms
     # grad - returned list of VECTOR objects
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/extract
-    #        : main.py/main/unpack_file/extract
+    # Used in: extract.py/extract
 
     grad = []
     for a in inp_str:
@@ -308,16 +296,16 @@ def extract(filename,flag):
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, in the form of dictionary
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
-    #        : main.py/main/unpack_file
+    # Used in: gamess_to_libra.py/gamess_to_libra and main.py/main
 
     f = open(filename,"r")
     A = f.readlines()
     f.close()
 
+    # detect the lines including information from gamess output file
     info = detect.detect(A,flag)
 
-
+    # extract information from gamess output file
     label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
     grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
     E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)

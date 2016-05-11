@@ -23,9 +23,6 @@ if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
-# First, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-from libcontrol_parameters import *
 
 from extract import *
 from overlap import *
@@ -96,7 +93,7 @@ def gamess_to_libra(params, ao, E, C, suff):
     # molecular coefficients used for calculating time-averaged
     # molecular energies and Non-Adiabatic Couplings(NACs).
     #
-    # Used in: main.py/nve_MD/
+    # Used in: md.py/run_MD
 
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
