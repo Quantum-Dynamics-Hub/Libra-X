@@ -121,13 +121,13 @@ elif user==1:
     params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
 
 # output file
-params["traj_file_prefix"] = params["res"]+"md"       # containing MD trajectories
-params["ene_file_prefix"] = params["res"]+"ene"       # containing kinetic, potential, system, and thermostat-coupled system energies 
-params["mu_file_prefix"] = params["res"]+"mu"         # containing dipole moment matrices
-params["se_pop_file_prefix"] = params["res"]+"se_pop"           # containing the SE population (if velocity rescaling is applied, this is averaged over TSH trajectories). File name is defined as se_pop_"initial geometry"_"initial excitation"
-params["sh_pop_file_prefix"] = params["res"]+"sh_pop"           # containing the SH population averaged over TSH trajectories. File name is defined in the SE way. 
-params["se_pop_ex_file_prefix"] = params["res"]+"se_pop_ex"   # containing the SE population averaged over initial geometries. File name is se_pop_ex"initial excitation" 
-params["sh_pop_ex_file_prefix"] = params["res"]+"sh_pop_ex"   # containing the SH population averaged over initial geometries. File name is defined in the SE way.
+#params["traj_file_prefix"] = params["res"]+"md"       # containing MD trajectories
+#params["ene_file_prefix"] = params["res"]+"ene"       # containing kinetic, potential, system, and thermostat-coupled system energies 
+#params["mu_file_prefix"] = params["res"]+"mu"         # containing dipole moment matrices
+#params["se_pop_file_prefix"] = params["res"]+"se_pop"           # containing the SE population (if velocity rescaling is applied, this is averaged over TSH trajectories). File name is defined as se_pop_"initial geometry"_"initial excitation"
+#params["sh_pop_file_prefix"] = params["res"]+"sh_pop"           # containing the SH population averaged over TSH trajectories. File name is defined in the SE way. 
+#params["se_pop_ex_file_prefix"] = params["res"]+"se_pop_ex"   # containing the SE population averaged over initial geometries. File name is se_pop_ex"initial excitation" 
+#params["sh_pop_ex_file_prefix"] = params["res"]+"sh_pop_ex"   # containing the SH population averaged over initial geometries. File name is defined in the SE way.
 
 # flags for debugging
 params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
