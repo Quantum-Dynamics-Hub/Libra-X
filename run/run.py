@@ -30,8 +30,8 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 params = {}
 
-#  GAMESS variables
-# Supposed we invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
+# GAMESS variables
+# We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
 # Paths of SCR, USERSCR, GMSPATH in the rungms script will be defined by environmental variables later.
 # (Supposed TARGET is already defined as sockets or mpi.)
 
@@ -74,7 +74,7 @@ elif test==1:
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
-params["nconfig"] = 1                          # the number of initial nuclear/velocity geometry
+params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
@@ -92,19 +92,19 @@ if test==0:
 elif test==1:
     params["HOMO"] = 91 # not 92
 
-params["min_shift"] = -1                # e.g. -1 -> HOMO-1, HOMO
+params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["tsh_method"] = 1                  # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
+params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
-params["num_SH_traj"] = 3                     # number of excited states trajectories per initial nuclei geometry and excited states
+params["num_SH_traj"] = 3              # number of excited states trajectories per initial nuclei geometry and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
 # select directories where the results will be printed out.
-params["res"] = ""     # directory where the energies and trajectories files will be printed out
+params["res"] = ""     # directory where the all results will be printed out
 params["mo_ham"] = ""  # directory where MO basis vibronic hamiltonians will be printed out
 params["sd_ham"] = ""  # directory where SD basis vibronic hamiltonians will be printed out
 
@@ -145,6 +145,7 @@ params["check_tsh_probabilities"] = 1      # print the hopping probabilities if 
 # ***************************************************************
 
 from create_states import *
+
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
 #HOMO = params["HOMO"]

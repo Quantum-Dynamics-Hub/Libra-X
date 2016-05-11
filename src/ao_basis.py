@@ -12,9 +12,6 @@
 ## \file ao_basis.py
 # This module implements the functions that constructs atomic orbital basis
 # by n Gaussian Type Orbitals (nGTO)
-#
-# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-#        : main.py/main/initial_gamess_exe/unpack_file
 
 import os
 import sys
@@ -37,8 +34,7 @@ def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     # This function returns the list of atomic orbital type (s, px, py, pz, etc...) and the number
     # of orbitals of each type: S, P, D, L (S + P)
     #
-    # Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file/ao_basis
-    #        : main.py/main/initial_gamess_exe/unpack_file/ao_basis
+    # Used in: gamess_to_libra.py/gamess_to_libra/unpack_file/ao_basis
 
     orb_name = []
 

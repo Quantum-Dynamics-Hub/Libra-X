@@ -93,7 +93,7 @@ def gamess_to_libra(params, ao, E, C, suff):
     # molecular coefficients used for calculating time-averaged
     # molecular energies and Non-Adiabatic Couplings(NACs).
     #
-    # Used in: main.py/nve_MD/
+    # Used in: md.py/run_MD
 
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
