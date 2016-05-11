@@ -39,8 +39,7 @@ def exe_gamess(params):
     # This is a function that call GAMESS execution on the compute node
     # \param[in] params Input data containing all manual settings and some extracted data.
     #
-    # Used in main.py/main
-    #         main.py/main/nve_MD
+    # Used in main.py/main and md.py/run_MD
 
     inp = params["gms_inp"]
     out = params["gms_out"]
@@ -67,10 +66,12 @@ def init_files(params):
     # This function initializes files.(make empty files)
     # \param[in] params Input data containing all manual settings and some extracted data.
     #                   Here, file prefix names will be used.  
-
-    nconfig = params["Ngeo"]
+    #
+    # Used in md.py/run_MD 
+    
+    nconfig = params["nconfig"]
     nstates = len(params["excitations"])
-    Ntsh = params["Ntsh"]
+    num_SH_traj = params["num_SH_traj"]
 
     for i in xrange(nconfig):
         for i_ex in xrange(nstates):
@@ -82,8 +83,8 @@ def init_files(params):
             fel = open(sh_pop_file,"w"); fel.close();
 
             if params["print_aux_results"] == 1:
-                for itsh in xrange(Ntsh):
-                    index = index0+"_"+str(itsh)
+                for itraj in xrange(num_SH_traj):
+                    index = index0+"_"+str(itraj)
                     ene_file = params["ene_file_prefix"]+index+".txt"
                     traj_file = params["traj_file_prefix"]+index+".xyz"
                     mu_file = params["mu_file_prefix"]+index+".txt"
@@ -135,7 +136,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
         sys.exit(0)
     dt_elec = dt_nucl/float(el_mts)
 
-    nconfig = params["Ngeo"]
+    nconfig = params["nconfig"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
@@ -149,9 +150,9 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
         f_pot = 1
 
     # TSH trajectories
-    Ntsh = 1
+    num_SH_traj = 1
     if SH_type >= 1: # use SH potential                                                                                                                   
-        Ntsh = params["Ntsh"]
+        num_SH_traj = params["num_SH_traj"]
 
     #=============== Initialization =======================
 
@@ -194,11 +195,11 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
             for iconf in xrange(nconfig):
                 for i_ex in xrange(nstates):
-                    for itsh in xrange(Ntsh):
+                    for itraj in xrange(num_SH_traj):
 
-                        cnt = iconf*nstates*Ntsh + i_ex*Ntsh + itsh
+                        cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
 
-                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itsh)
+                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itraj)
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
@@ -274,7 +275,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
         # print out SE and SH populations
         se_pop, sh_pop = print_results.pops_ave_TSH_traj(i,el,params)
-        print_results.pops_ave_geometry(i,se_pop,sh_pop,params)
+        print_results.pops_ave_geometry(i,nstates,se_pop,sh_pop,params)
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:

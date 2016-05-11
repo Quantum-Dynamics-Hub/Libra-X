@@ -44,11 +44,11 @@ def main(params):
     # iteratively.
     # Parallelly, it executes TD-SE and SH calculation for simulating excited eletronic dynamics.
     #
-    # Used in:  main.py    
+    # Used in:  run.py
 
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
-    ninit = params["Ngeo"]  
+    ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
 
     num_SH_traj = 1

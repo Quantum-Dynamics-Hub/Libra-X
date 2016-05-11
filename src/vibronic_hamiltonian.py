@@ -30,6 +30,8 @@ def pyxaid_states(states, min_shift, max_shift):
     # nocc = 2
     # active_space_sz = 3
     # so: gs = [1,-1,2,-2]
+    #
+    # Used in: vibronic_hamiltonian.py/update_vibronic_hamiltonian
 
     active_space_sz = max_shift - min_shift + 1
     nstates = len(states)
@@ -70,8 +72,6 @@ def pyxaid_states(states, min_shift, max_shift):
     return res
       
 
-
-
 def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suffix):
     ##
     # This function transforms the 1-electron orbital energies matrix and the matrix of 
@@ -88,7 +88,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     #
     # This function returns the electronic and vibronic Hamiltonians, H_el, and Hvib
     #
-    # Used in: main.py/main/run_MD
+    # Used in: md.py/run_MD
 
     HOMO = params["HOMO"]
     min_shift = params["min_shift"]
