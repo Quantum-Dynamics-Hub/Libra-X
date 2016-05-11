@@ -11,10 +11,7 @@
 
 ## \file moment.py
 # This program implements the module that calculates and returns
-# the dipole moment matrixes at given space coordinates r like  <MO(t)| r |MO(t+dt)>.
-#
-# Used in: main.py/main/nve_MD/gamess_to_libra
-
+# the dipole moment matrixes at given space coordinates r like <MO(t)| r |MO(t+dt)>.
 
 import os
 import sys
@@ -32,7 +29,7 @@ def transition_dipole_moments(ao,C):
     # \param[in] ao : atomic orbital basis
     # \param[in] C  : MO-LCAO coefficients
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra
+    # Used in: gamess_to_libra.py/gamess_to_libra
 
     v = VECTOR(0.0,0.0,0.0) # 
     gx = PrimitiveG(1,0,0, 0.0, v) # = x

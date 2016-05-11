@@ -26,10 +26,6 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-# First, we add the location of the library to test to the PYTHON path
-sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-from libcontrol_parameters import *
-
 def create_states(Nmin,HOMO,Nmax,spin,flip):
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in]  Nmin  lowest molecular orbital taken for TD-SE calculation

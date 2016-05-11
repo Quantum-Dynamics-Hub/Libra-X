@@ -13,9 +13,6 @@
 # This module implements the functions that detect columns showing
 # gradients, molecular energies, molecular orbitals, and atomic basis information
 # written in the GAMESS output file.
-#
-# Used in: main.py/main/nve/nve_MD/gamess_to_libra/unpack_file
-#        : main.py/main/initial_gamess_exe/unpack_file
 
 import os
 import sys
@@ -28,8 +25,7 @@ def detect_columns(inp_lines):
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
     # info - The returned dictionary of descriptors of the given input lines.
     #
-    # Used in: main.py/main/nve/gamess_to_libra/unpack_file/detect
-    #        : main.py/main/unpack_file/detect
+    # Used in: detect.py/detect
 
     info = {}
 
@@ -92,7 +88,6 @@ def detect_columns(inp_lines):
     return info
 
 
-
 def show_outputs(inp_lines,info):
     ##
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
@@ -100,8 +95,7 @@ def show_outputs(inp_lines,info):
     # This function shows the positions of the data elements in the analyzed file and 
     # some other auxiliary information extracted from the file
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file/detect
-    #        : main.py/main/unpack_file/detect
+    # Used in: detect.py/detect
 
     print "******************************************"
     print "according to the %i th column," % (info["lele"]+1)
@@ -166,8 +160,7 @@ def detect(inp_lines,flag):
     # \param[in] flag Debug info printing: 1 - print, otherwise - don't 
     # info - is the returned dictionary of descriptors of the given input lines
     #
-    # Used in: main.py/main/nve_MD/gamess_to_libra/unpack_file
-    #        : main.py/main/unpack_file
+    # Used in: extract.py/extract
 
     info = detect_columns(inp_lines)
 
