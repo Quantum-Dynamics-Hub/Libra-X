@@ -95,22 +95,27 @@ def gamess_to_libra(params, ao, E, C, suff):
     #
     # Used in: md.py/run_MD
 
+    flag_ao = params["flag_ao"] 
+
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"],flag_ao)
 
     # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
+    P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"],flag_ao)
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
     # this is done for the "current" state only    
-    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,C2)
-    mu = [mu_x, mu_y, mu_z]
+    
+    mu = []
+    if flag_ao == 1:
+        mu_x, mu_y, mu_z = transition_dipole_moments(ao2,C2)
+        mu = [mu_x, mu_y, mu_z]
 
-    if params["debug_mu_output"]==1:
-        print "mu_x:";    mu_x.show_matrix()
-        print "mu_y:";    mu_y.show_matrix()
-        print "mu_z:";    mu_z.show_matrix()
+        if params["debug_mu_output"]==1:
+            print "mu_x:";    mu_x.show_matrix()
+            print "mu_y:";    mu_y.show_matrix()
+            print "mu_z:";    mu_z.show_matrix()
  
     if params["debug_densmat_output"]==1:
         print "P11 and P22 matrixes should show orthogonality"

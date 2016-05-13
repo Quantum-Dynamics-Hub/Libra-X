@@ -71,22 +71,26 @@ def MO_overlap(S,ao_i, ao_j, Ci, Cj, basis_option):
     return P
 
 
-def overlap(ao1,ao2,C1,C2,basis_sets):
+def overlap(ao1,ao2,C1,C2,basis_sets,flag_ao):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] ao1, ao2 : atomic orbital basis at different time step.
     # \param[in] C1, C2 : molecular coefficients at different time step.
     # \param[in] basis_option : "= 1" means ab initio and "= 2" semi empirical .
+    # \param[in] flag_ao : flag using atomic orbital basis
     # This function returns overlap matrix of atomic orbitals with different time step
     # like <MO(t)|MO(t+dt)>.
     #
     # Used in: gamess_to_libra.py/gamess_to_libra
     # this is mostly a test function
 
-    S11 = AO_overlap(ao1,ao1)
-    S22 = AO_overlap(ao2,ao2)
-    S12 = AO_overlap(ao1,ao2)
-    S21 = AO_overlap(ao2,ao1)
+    N = len(ao1)
+    S11 = MATRIX(N,N); S12 = MATRIX(N,N); S21 = MATRIX(N,N); S22 = MATRIX(N,N);
+    if flag_ao == 1:
+        S11 = AO_overlap(ao1,ao1)
+        S22 = AO_overlap(ao2,ao2)
+        S12 = AO_overlap(ao1,ao2)
+        S21 = AO_overlap(ao2,ao1)
 
     P11 = MO_overlap(S11,ao1,ao1,C1,C1,basis_sets)
     P22 = MO_overlap(S22,ao2,ao2,C2,C2,basis_sets)

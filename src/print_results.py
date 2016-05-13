@@ -43,6 +43,7 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
 
     kB = 3.166811429e-6 # Boltzmann constant in hartree unit                                                                                                 
     dt_nucl = params["dt_nucl"]
+    flag_ao = params["flag_ao"]
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
     nstates = el.nstates
@@ -82,13 +83,14 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     fe.close()
         
     # Dipole moment components
-    fm = open(mu_file,"a")
-    line = "t= %8.5f " % (ij*dt_nucl)
-    for k in xrange(len(ao)):
-        line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
-    line = line + "\n"
-    fm.write(line)
-    fm.close()
+    if flag_ao == 1:
+        fm = open(mu_file,"a")
+        line = "t= %8.5f " % (ij*dt_nucl)
+        for k in xrange(len(ao)):
+            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        line = line + "\n"
+        fm.write(line)
+        fm.close()
 
 
 def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
