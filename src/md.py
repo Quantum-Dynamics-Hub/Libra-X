@@ -100,7 +100,9 @@ def init_files(params):
 
                     fe = open(ene_file,"w"); fe.close();
                     ft = open(traj_file,"w"); ft.close();
-                    fm = open(mu_file,"w"); fm.close();
+
+                    if params["flag_ao"] == 1:
+                        fm = open(mu_file,"w"); fm.close();
 
     for i_ex in xrange(nstates):
 
@@ -146,6 +148,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     dt_elec = dt_nucl/float(el_mts)
 
     nconfig = params["nconfig"]
+    flag_ao = params["flag_ao"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
@@ -169,7 +172,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     # make them empty (to remove older info, in case we restart calculations)
 
     init_files(params)
-
+    
     # prepare objects for MD
     ntraj = len(syst)
     nnucl = 3*syst[0].Number_of_atoms
