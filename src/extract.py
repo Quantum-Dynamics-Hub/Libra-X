@@ -287,12 +287,12 @@ def extract_gradient(inp_str,flag):
     return grad
 
 
-def extract(filename,flag):
+def extract(filename,flag_deb,flag_ao):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # \param[in] flag : a flag for debugging detect module
+    # \param[in] filename : The list which contains the lines of the (GAMESS output) file.
+    # \param[in] flag_deb     : a flag for debugging detect module
+    # \param[in] flag_ao      : a flag for using atomic oribital basis 
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, in the form of dictionary
     #
@@ -303,16 +303,19 @@ def extract(filename,flag):
     f.close()
 
     # detect the lines including information from gamess output file
-    info = detect.detect(A,flag)
+    info = detect.detect(A,flag_deb,flag_ao)
 
     # extract information from gamess output file
-    label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
-    grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
-    E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
-    ao = extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
+    label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag_deb)
+    grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag_deb)
+    E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag_deb)
+
+    ao = []
+    if flag_ao == 1:
+        ao = extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag_deb)
 
     
-    if flag == 1:
+    if flag_deb == 1:
         print "********************************************"
         print "extract program ends"
         print "********************************************\n"

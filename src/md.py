@@ -73,30 +73,41 @@ def init_files(params):
     nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
+    # define prefixes
+    traj_file_prefix = params["res"]+"md"
+    ene_file_prefix = params["res"]+"ene"
+    mu_file_prefix = params["res"]+"mu"
+    se_pop_file_prefix = params["res"]+"se_pop"
+    sh_pop_file_prefix = params["res"]+"sh_pop"
+    se_pop_ex_file_prefix = params["res"]+"se_pop_ex"
+    sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
+
     for i in xrange(nconfig):
         for i_ex in xrange(nstates):
             index0 = "_"+str(i)+"_"+str(i_ex)
 
-            se_pop_file = params["se_pop_file_prefix"]+index0+".txt"
-            sh_pop_file = params["sh_pop_file_prefix"]+index0+".txt"
+            se_pop_file = se_pop_file_prefix+index0+".txt"
+            sh_pop_file = sh_pop_file_prefix+index0+".txt"
             fel = open(se_pop_file,"w"); fel.close();
             fel = open(sh_pop_file,"w"); fel.close();
 
             if params["print_aux_results"] == 1:
                 for itraj in xrange(num_SH_traj):
                     index = index0+"_"+str(itraj)
-                    ene_file = params["ene_file_prefix"]+index+".txt"
-                    traj_file = params["traj_file_prefix"]+index+".xyz"
-                    mu_file = params["mu_file_prefix"]+index+".txt"
+                    ene_file = ene_file_prefix+index+".txt"
+                    traj_file = traj_file_prefix+index+".xyz"
+                    mu_file = mu_file_prefix+index+".txt"
 
                     fe = open(ene_file,"w"); fe.close();
                     ft = open(traj_file,"w"); ft.close();
-                    fm = open(mu_file,"w"); fm.close();
+
+                    if params["flag_ao"] == 1:
+                        fm = open(mu_file,"w"); fm.close();
 
     for i_ex in xrange(nstates):
 
-        se_pop_file = params["se_pop_ex_file_prefix"]+str(i_ex)+".txt"
-        sh_pop_file = params["sh_pop_ex_file_prefix"]+str(i_ex)+".txt"
+        se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
+        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
         fel = open(se_pop_file,"w"); fel.close();
         fel = open(sh_pop_file,"w"); fel.close();
 
@@ -137,6 +148,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     dt_elec = dt_nucl/float(el_mts)
 
     nconfig = params["nconfig"]
+    flag_ao = params["flag_ao"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
@@ -160,7 +172,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     # make them empty (to remove older info, in case we restart calculations)
 
     init_files(params)
-
+    
     # prepare objects for MD
     ntraj = len(syst)
     nnucl = 3*syst[0].Number_of_atoms

@@ -43,10 +43,15 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
 
     kB = 3.166811429e-6 # Boltzmann constant in hartree unit                                                                                                 
     dt_nucl = params["dt_nucl"]
+    flag_ao = params["flag_ao"]
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
     nstates = el.nstates
     ij = i*params["Nsteps"]
+
+    traj_file_prefix = params["res"]+"md"
+    ene_file_prefix = params["res"]+"ene"
+    mu_file_prefix = params["res"]+"mu"
 
     # Re-compute energies, to print
     epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
@@ -63,9 +68,9 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
 
     # set file name
     num_tmp = "_"+str(iconf)+"_"+str(i_ex)+"_"+str(itraj)
-    ene_file = params["ene_file_prefix"]+num_tmp+".txt"
-    traj_file = params["traj_file_prefix"]+num_tmp+".xyz"
-    mu_file = params["mu_file_prefix"]+num_tmp+".txt"
+    ene_file = ene_file_prefix+num_tmp+".txt"
+    traj_file = traj_file_prefix+num_tmp+".xyz"
+    mu_file = mu_file_prefix+num_tmp+".txt"
 
     ##print 
     # Geometry
@@ -78,13 +83,14 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     fe.close()
         
     # Dipole moment components
-    fm = open(mu_file,"a")
-    line = "t= %8.5f " % (ij*dt_nucl)
-    for k in xrange(len(ao)):
-        line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
-    line = line + "\n"
-    fm.write(line)
-    fm.close()
+    if flag_ao == 1:
+        fm = open(mu_file,"a")
+        line = "t= %8.5f " % (ij*dt_nucl)
+        for k in xrange(len(ao)):
+            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        line = line + "\n"
+        fm.write(line)
+        fm.close()
 
 
 def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
@@ -136,6 +142,10 @@ def pops_ave_TSH_traj(i,el,params):
     dt_nucl = params["dt_nucl"]
     print_coherences = params["print_coherences"]
 
+    # define prefixes
+    se_pop_file_prefix = params["res"]+"se_pop"
+    sh_pop_file_prefix = params["res"]+"sh_pop"
+
     l_se_pop = []
     l_sh_pop = []
 
@@ -171,7 +181,7 @@ def pops_ave_TSH_traj(i,el,params):
 
             # set file name
             num_tmp = "_"+str(iconf)+"_"+str(i_ex)
-            se_pop_file = params["se_pop_file_prefix"]+num_tmp+".txt"
+            se_pop_file = se_pop_file_prefix+num_tmp+".txt"
 
             # Populations
             fel = open(se_pop_file,"a")
@@ -211,7 +221,7 @@ def pops_ave_TSH_traj(i,el,params):
 
                 # set file name
                 num_tmp = "_"+str(iconf)+"_"+str(i_ex)
-                sh_pop_file = params["sh_pop_file_prefix"]+num_tmp+".txt"
+                sh_pop_file = sh_pop_file_prefix+num_tmp+".txt"
 
                 # Populations     
                 fel1 = open(sh_pop_file,"a")
@@ -247,14 +257,19 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     ij = i*params["Nsteps"]
     dt_nucl = params["dt_nucl"]
 
+    # define prefixes
+    se_pop_ex_file_prefix = params["res"]+"se_pop_ex"
+    sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
+
+
     #print "length of se_pop is %d" %(len(se_pop))
     #print "length of sh_pop is %d" %(len(sh_pop))
 
     for i_ex in xrange(nstates):
 
         # set file name                                                                                                                               
-        se_pop_file = params["se_pop_ex_file_prefix"]+str(i_ex)+".txt"
-        sh_pop_file = params["sh_pop_ex_file_prefix"]+str(i_ex)+".txt"
+        se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
+        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
 
         # Populations                                                                                                            
         fse = open(se_pop_file,"a")
