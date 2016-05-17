@@ -68,7 +68,9 @@ def main(params):
     #sys.exit(0)
     exe_gamess(params)
 
-    label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
+    label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"],params["flag_ao"])
+
+    #print "end extract"; sys.exit(0);
 
     ao_list = []
     e_list = []
