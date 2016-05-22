@@ -57,6 +57,8 @@ def exe_gamess(params):
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
+    sys.exit(0) # debug
+
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")              
     os.system("rm -r %s/*" %(scr_dir)) 
