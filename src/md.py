@@ -186,16 +186,20 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
 
-    for i in xrange(Nsnaps):
+    for i in xrange(Nsnaps):   # number of printouts
 
         tot_ene = []; mu = []; # initialize lists
 
-        for j in xrange(Nsteps):
+        for j in xrange(Nsteps):   # number of integration steps per printout
             ij = i*Nsteps + j
 
-            for iconf in xrange(nconfig):
-                for i_ex in xrange(nstates):
-                    for itraj in xrange(num_SH_traj):
+            for iconf in xrange(nconfig):     # all initial nuclear configurations
+
+                for i_ex in xrange(nstates):  # consider initial excitations to be on all the basis
+                                              # states - this may be unnecessary for all cases, 
+                                              # so we may want to make this part customizable
+
+                    for itraj in xrange(num_SH_traj): # all stochastic SH realizations
 
                         cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
 
@@ -214,13 +218,33 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                         mol[cnt].propagate_p(0.5*dt_nucl)
                         mol[cnt].propagate_q(dt_nucl)
 
-                        # ======= Compute forces and energies using GAMESS ============
-                        write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
-                        exe_gamess(params)
-                    
-                        #sys.exit(0)
-                        # update AO and gradients
-                        tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij))
+
+                        # ======= Compute forces and energies using external package ============
+
+                        if params["interface"]=="GAMESS":
+                           
+                            write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
+                            exe_gamess(params)
+                       
+                            # update AO and gradients
+                            tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij))
+
+                        elif params["interface"]=="QE":
+
+                            for ex_st in xrange(nstates): # for each excited configuration 
+                                                          # run a separate set of QE calculations
+
+                                write_qe_input( ex_st,label[cnt],mol[cnt],params)
+                                exe_espresso( ex_st )
+
+                wfc["coeff_%i"%i] = read_qe_wfc("x%i.export/wfc.1"%i, "Kpoint.1", n_el, n_mo)
+                params["E%i" %i],label,R, params["Grad%i" %i] = unpack_file(params["qe_out%i" %i],params["qe_debug_print"],0)
+                params["epot%i" %i] = Ry_to_Ha*params["E%i" %i]    # total energy from QE, the potential energy acting on nuclei
+            epot = params["epot0"]
+            epot_ex = params["epot1"]  #to print first excited state energy
+
+
+               
                     
                         tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment 
                         #========= Update the matrices that are bound to the Hamiltonian =========

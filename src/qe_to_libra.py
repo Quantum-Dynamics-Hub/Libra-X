@@ -1,5 +1,5 @@
 #*********************************************************************************
-#* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
+#* Copyright (C) 2016 Ekadashi Pradhan, Kosuke Sato, Alexey V. Akimov
 #* 
 #* This file is distributed under the terms of the GNU General Public License
 #* as published by the Free Software Foundation, either version 2 of
@@ -24,63 +24,20 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-from extract_gms import *
+from extract import *
 from overlap import *
 from Ene_NAC import *
 from moment import *
 
 
 
-def reduce_matrix(M,min_shift,max_shift,HOMO_indx):
-    ##
-    # Extracts a sub-matrix M_sub of the original matrix M. The size of the extracted matrix is
-    # controlled by the input parameters
-    # \param[in] M The original input matrix
-    # \param[in] min_shift - is the index defining the minimal orbital in the active space
-    # to consider. This means that the lowest 1-electron state will be HOMO_indx + min_shift.
-    # \param[in] max_shift - is the index defining the maximal orbital in the active space
-    # to consider. This means that the highest 1-electron state will be HOMO_indx + max_shift.
-    # \param[in] HOMO_indx - the index of the HOMO orbital (indexing starts from 0)
-    # Example: if we have H2O system - 8 valence electrons, so 4 orbitals are occupied:
-    # occ = [0,1,2,3] and 2 more states are unoccupied virt = [4,5] Then if we
-    # use HOMO_indx = 3, min_shift = -1, max_shift = 1 will reduce the active space to the
-    # orbitals [2, 3, 4], where orbitals 2,3 are occupied and 4 is unoccupied.
-    # So we reduce the initial 6 x 6 matrix to the 3 x 3 matrix
-    # This function returns the reduced matrix "M_red".
-    #
-    # Used in: main.py/main/run_MD/gamess_to_libra
 
-
-    if(HOMO_indx+min_shift<0):
-        print "Error in reduce_matrix: The min_shift/HOMO_index combination result in the out-of-range error for the reduced matrix"
-        print "min_shift = ", min_shift
-        print "HOMO_index = ", HOMO_index
-        print "Exiting...\n"
-        sys.exit(0)
-
-    sz = max_shift - min_shift + 1
-    if(sz>M.num_of_cols):
-        print "Error in reduce_matrix: The size of the cropped matrix is larger than the size of the original matrix"
-        print "size of the corpped matrix = ", sz
-        print "size of the original matrix = ", M.num_of_cols
-        print "Exiting...\n"
-        sys.exit(0)
-
-    M_red = MATRIX(sz,sz)
-    pop_submatrix(M,M_red,range(HOMO_indx+min_shift,HOMO_indx+max_shift+1))
-
-
-    return M_red
-
-
-
-def gamess_to_libra(params, ao, E, C, suff):
+def qe_to_libra(params, E, C, suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
-    # \param[in,out] ao :  atomic orbital basis at "t" old
-    # \param[in,out] E  :  molecular energies at "t" old
-    # \param[in,out] C  :  molecular coefficients at "t" old
+    # \param[in,out] E  :  molecular energies at "t" old, will be updated
+    # \param[in,out] C  :  molecular coefficients at "t" old, will be updated
     # \param[in] suff : The suffix to add to the name of the output files
     # this suffix is now considered to be of a string type - so you can actually encode both the
     # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
@@ -96,7 +53,7 @@ def gamess_to_libra(params, ao, E, C, suff):
     # Used in: md.py/run_MD
 
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract_gms(params["gms_out"],params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
 
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])

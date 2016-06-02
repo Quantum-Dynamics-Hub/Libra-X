@@ -23,12 +23,92 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-
-#sys.path.insert(1,os.environ["libra_mmath_path"])
+#>>>>>>>>>>>>>>>> UNCOMMENT THE SECTION BELOW, if THERE IS A PROBLEM WITH PATH
+#cwd = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build"
+#print "Current working directory", cwd
+#sys.path.insert(1,cwd+"/src/mmath")
+#sys.path.insert(1,cwd+"/src/context")
+#print "\nTest 1: Importing the library and its content"
 #from libmmath import *
+#from libcontext import *
+#<<<<<<<<<<<<<<<<<<<<<<<<<
+
+def qe_extract_mo(filename, upper_tag, active_space):
+##
+# This function reads an ASCII/XML format file contaiing wavefunction
+# and returns the coefficients of the plane wave that constitute the
+# wavefunction
+#
+# \param[in] filename This is the name of the file we will be reading to construct MOs
+# \param[in] upper_tag  Currently it is just "Kpoint.1"
+# \param[in] active_space The list of indices for the MOs to consider in the calculations
+#            In this case, the indices start with 1, not 0
+#
+# \param[in] n_mo Number of molecular orbital basis used to construct electronic wave function
+# \param[in] n_el Number of electrons. e_el/2 is homo index here
+#
+#
+
+#    homo = n_el/2
+
+    ctx = Context(filename)
+    ctx.set_path_separator("/")
+    print "path=", ctx.get_path()
+    ctx.show_children(upper_tag)  # ("Kpoint.1") #
+
+    ngw = int(float(ctx.get("Info/<xmlattr>/ngw","n")))
+    nbnd = int(float(ctx.get("Info/<xmlattr>/nbnd","n")))
+    print ngw, nbnd
+
+    coeff = CMATRIX(ngw,n_mo)
+
+    k = 0
+#    for band in range(homo,homo+n_mo):   # [6,7,8]: #range(1,nbnd+1):
+    for band in active_space:
+
+        c = []
+        print "band=",band
+        all_coeff = ctx.get("Wfc."+str(band), "n").split(',')
+        sz = len(all_coeff)
+
+        for i in xrange(sz):
+            a = all_coeff[i].split()
+            for j in xrange(len(a)):
+                c.append(a[j])
+
+        sz = len(c)
+        n = sz/2  # this should be equal to ngw - the number of plane waves 
+                  # why /2 ? - because we first read all real and imaginary components
+                  # for all planewaves - as two numbers
+      
+        # Now, we organize the previousely read real and imaginary parts into n complex numbers
+        # these numbers are the coefficients with which all planewaves enter the expansion 
+        # of the MO with index k (local index) - the one listed as "band" in the global indices
+        # scheme. Note, "k" indexing now starts from 0, not 1
+        for i in xrange(n):
+            coeff.set(i, k, float(c[2*i]), float(c[2*i+1]))
+        k = k+1
+
+    nbnd = coeff.num_of_cols    # the number of MOs
+    ngw = coeff.num_of_rows     # the number of the planewaves
 
 
-def extract_qe_coordinates(inp_str, alat, flag):
+    # The read MOs (KS orbitals) are not orthonormal, strictly-speaking, - becasue 
+    # of the pseudopotentials. So we will normalize them, at least
+    for i in xrange(n_mo):
+        mo_i = coeff.col(n_mo)
+        nrm = (mo_i.H() * mo_i).real
+        nrm = (1.0/sqrt(nrm))
+
+        for pw in xrange(ngw):
+            coeff.set(pw,i,nrm*coeff.get(pw,i))
+
+    # This returns normalized coefficients of MO
+    return coeff
+
+                                 
+
+def qe_extract_coordinates(inp_str, alat, flag):
     ##
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
     # from the the list of input lines
@@ -69,7 +149,7 @@ def extract_qe_coordinates(inp_str, alat, flag):
     return label, R
 
 
-def extract_qe_gradients(inp_str,  flag):
+def qe_extract_gradients(inp_str,  flag):
     ##
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
     # from the the list of input lines
@@ -107,13 +187,13 @@ def extract_qe_gradients(inp_str,  flag):
 
 
 #def unpack_file(filename,params, flag): 
-def unpack_file(filename, flag,flag1): 
+
+def qe_extract(filename, flag): 
 ##
 # Function for reading and extracting Quantum Espresso
 # output. Extracted parameters are used in classical MD
 # calculation using LIBRA in the next step.
 # \param[in] filename The name of the QE output file which we unpack
-# \param[out] params The dictionary containing control parameters
 # \param[in] flag Controls the output: 0 - no additional printing, 1 - yes
 #
     
@@ -199,19 +279,19 @@ def unpack_file(filename, flag,flag1):
 
 
     # Reading atom names and xyz coordinates    
-    label, R = extract_qe_coordinates(A[icoord+1:icoord+1+nat], alat, flag)
+    label, R = qe_extract_coordinates(A[icoord+1:icoord+1+nat], alat, flag)
 
     # Get gradients
-    grads = extract_qe_gradients(A[iforce+4:iforce+4+nat], flag)
+    grads = qe_extract_gradients(A[iforce+4:iforce+4+nat], flag)
     param = {}
     param["nel"] = nel
     param["norb"]= norb
     param["nat"] = nat
     param["alat"]= alat    
     #print params
-    if flag1 == 1:
-        return tot_ene, label, R, grads, norb, nel, nat,alat
-    else:
-        return tot_ene, label, R, grads
 
+    # Read the wavefunction:
+    #wfc["coeff_%i"%i] = read_qe_wfc("x%i.export/wfc.1"%i, "Kpoint.1", n_el, n_mo)
+
+    return tot_ene, label, R, grads, norb, nel, nat,alat
 

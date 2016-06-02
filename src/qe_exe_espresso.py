@@ -34,3 +34,26 @@ def exe_espresso(inp, out):
     # Delete scratch directory and unecessary files
     #os.system("rm *.dat *.wfc* *.igk* *.mix*")
     #os.system("rm -r *.save") # not sure if we  need to remove this directory
+
+
+def exe_espresso(i):
+##
+# Function for executing calculations using Quantum Espresso
+# once the calculations are finished, all the temporary data are
+# deleted
+# \param[in] inp The name of the input file
+# \param[in] out The name of the output file
+#
+    inp = "x%i.scf_wrk.in" % i # e.g. "x0.scf_wrk.in"
+    out = "x%i.scf.out" % i    # e.g. "x0.scf.out"
+    inexp = "x%i.exp.in" % i   # e.g. "x0.exp.in"
+    outexp = "x%i.exp.out" % i # e.g "x0.exp.out"
+
+    os.system("srun pw.x < %s > %s" % (inp,out))
+    os.system("srun pw_export.x < %s > %s" % (inexp,outexp))
+
+    # Delete scratch directory and unecessary files
+    #os.system("rm *.dat *.wfc* *.igk* *.mix*")
+    #os.system("rm -r *.save") # not sure if we  need to remove this directory
+
+

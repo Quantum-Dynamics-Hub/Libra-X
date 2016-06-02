@@ -27,7 +27,7 @@ import detect
 import ao_basis
 
 
-def extract_ao_basis(inp_str, label, R, flag):
+def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
@@ -154,7 +154,7 @@ def extract_ao_basis(inp_str, label, R, flag):
     return ao
 
 
-def extract_mo(inp_str,Ngbf,flag):
+def gms_extract_mo(inp_str,Ngbf,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
     # assumed format is:
@@ -212,7 +212,7 @@ def extract_mo(inp_str,Ngbf,flag):
     return E, C
     
 
-def extract_coordinates(inp_str,flag):
+def gms_extract_coordinates(inp_str,flag):
     ##
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
     # from the the list of input lines
@@ -256,7 +256,7 @@ def extract_coordinates(inp_str,flag):
     return label, Q, R
 
 
-def extract_gradient(inp_str,flag):
+def gms_extract_gradient(inp_str,flag):
     ##
     # Extracts atomic gradients on all atoms from the the list of input lines
     # each input line is assumed to have the format:
@@ -287,16 +287,16 @@ def extract_gradient(inp_str,flag):
     return grad
 
 
-def extract(filename,flag):
+def gms_extract(filename,flag):
     ##
-    # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
+    # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 
+    # AOs, etc. ) from the GAMESS output.
+    # \param[in] filename The name of the GAMESS output file from which we will be getting info
     # \param[in] flag : a flag for debugging detect module
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
-    # and molecular orbitals extracted from the file, in the form of dictionary
+    # and molecular orbitals extracted from the file, as objects
     #
-    # Used in: gamess_to_libra.py/gamess_to_libra and main.py/main
+    # Used in: 
 
     f = open(filename,"r")
     A = f.readlines()
@@ -306,10 +306,10 @@ def extract(filename,flag):
     info = detect.detect(A,flag)
 
     # extract information from gamess output file
-    label, Q, R = extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
-    grad = extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
-    E, C = extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
-    ao = extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
+    label, Q, R = gms_extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
+    grad = gms_extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
+    E, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
+    ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
     
     if flag == 1:
