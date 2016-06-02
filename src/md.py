@@ -193,6 +193,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
 
                         # ======= Compute forces and energies using external package ============
+                        tot_ene0 = 0.0
 
                         if params["interface"]=="GAMESS":
                            
@@ -202,27 +203,27 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                             # update AO and gradients
                             tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij))
 
+                            tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
+                            # update forces
+                            for k in xrange(syst[cnt].Number_of_atoms):
+                                for st in xrange(nstates):
+                                    d1ham_adi[cnt][3*k+0].set(st,st,Grad[k].x)
+                                    d1ham_adi[cnt][3*k+1].set(st,st,Grad[k].y)
+                                    d1ham_adi[cnt][3*k+2].set(st,st,Grad[k].z)
+
+
                         elif params["interface"]=="QE":
 
-                            for ex_st in xrange(nstates): # for each excited configuration 
-                                                          # run a separate set of QE calculations
+                            E_mol, D_mol, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij))
 
-                                write_qe_input( ex_st,label[cnt],mol[cnt],params)
-                                exe_espresso( ex_st )
-
-                                #tot_ene, label, R, grads, MO, norb, nel, nat, alat = qe_to_libra()
-
-
-                wfc["coeff_%i"%i] = read_qe_wfc("x%i.export/wfc.1"%i, "Kpoint.1", n_el, n_mo)
-                params["E%i" %i],label,R, params["Grad%i" %i] = unpack_file(params["qe_out%i" %i],params["qe_debug_print"],0)
-                params["epot%i" %i] = Ry_to_Ha*params["E%i" %i]    # total energy from QE, the potential energy acting on nuclei
-            epot = params["epot0"]
-            epot_ex = params["epot1"]  #to print first excited state energy
+                            # update forces
+                            for k in xrange(syst[cnt].Number_of_atoms):
+                                for st in xrange(nstates):
+                                    d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
+                                    d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
+                                    d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
 
 
-               
-                    
-                        tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment 
                         #========= Update the matrices that are bound to the Hamiltonian =========
                         #Compose electronic and vibronic Hamiltonians
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,D_mol_red, str(ij))
@@ -235,7 +236,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                                 d1ham_adi[cnt][3*k+2].set(st,st,Grad[k].z)
            
                         # update potential energy
-                        epot = tot_ene0 + compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot = tot_ene0 + etot_compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
                         ekin = compute_kinetic_energy(mol[cnt])
                         etot = epot + ekin
           
