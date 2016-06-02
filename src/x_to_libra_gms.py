@@ -31,47 +31,32 @@ from moment import *
 
 
 
-def reduce_matrix(M,min_shift,max_shift,HOMO_indx):
+def exe_gamess(params):
     ##
-    # Extracts a sub-matrix M_sub of the original matrix M. The size of the extracted matrix is
-    # controlled by the input parameters
-    # \param[in] M The original input matrix
-    # \param[in] min_shift - is the index defining the minimal orbital in the active space
-    # to consider. This means that the lowest 1-electron state will be HOMO_indx + min_shift.
-    # \param[in] max_shift - is the index defining the maximal orbital in the active space
-    # to consider. This means that the highest 1-electron state will be HOMO_indx + max_shift.
-    # \param[in] HOMO_indx - the index of the HOMO orbital (indexing starts from 0)
-    # Example: if we have H2O system - 8 valence electrons, so 4 orbitals are occupied:
-    # occ = [0,1,2,3] and 2 more states are unoccupied virt = [4,5] Then if we
-    # use HOMO_indx = 3, min_shift = -1, max_shift = 1 will reduce the active space to the
-    # orbitals [2, 3, 4], where orbitals 2,3 are occupied and 4 is unoccupied.
-    # So we reduce the initial 6 x 6 matrix to the 3 x 3 matrix
-    # This function returns the reduced matrix "M_red".
+    # This is a function that call GAMESS execution on the compute node
+    # \param[in] params Input data containing all manual settings and some extracted data.
     #
-    # Used in: main.py/main/run_MD/gamess_to_libra
+    # Used in main.py/main and md.py/run_MD
 
+    inp = params["gms_inp"]
+    out = params["gms_out"]
+    nproc = params["nproc"]
 
-    if(HOMO_indx+min_shift<0):
-        print "Error in reduce_matrix: The min_shift/HOMO_index combination result in the out-of-range error for the reduced matrix"
-        print "min_shift = ", min_shift
-        print "HOMO_index = ", HOMO_index
-        print "Exiting...\n"
-        sys.exit(0)
+    scr_dir = params["scr_dir"]
+    rungms = params["rungms"]
+    VERNO = params["VERNO"]
 
-    sz = max_shift - min_shift + 1
-    if(sz>M.num_of_cols):
-        print "Error in reduce_matrix: The size of the cropped matrix is larger than the size of the original matrix"
-        print "size of the corpped matrix = ", sz
-        print "size of the original matrix = ", M.num_of_cols
-        print "Exiting...\n"
-        sys.exit(0)
+    # set environmental variables for GAMESS execution
+    os.environ["SCR"] = scr_dir
+    os.environ["USERSCR"] = scr_dir
+    os.environ["GMSPATH"] = params["GMSPATH"]
 
-    M_red = MATRIX(sz,sz)
-    pop_submatrix(M,M_red,range(HOMO_indx+min_shift,HOMO_indx+max_shift+1))
+    #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
+    os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
-
-    return M_red
-
+    # delete the files except input and output ones to do another GAMESS calculation.
+    os.system("rm *.dat")
+    os.system("rm -r %s/*" %(scr_dir))
 
 
 def gamess_to_libra(params, ao, E, C, suff):

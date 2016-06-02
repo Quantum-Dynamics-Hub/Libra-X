@@ -18,6 +18,8 @@
 import os
 import sys
 import math
+import numpy
+
 
 if sys.platform=="cygwin":
     from cyglibra_core import *
@@ -94,3 +96,64 @@ def overlap(ao1,ao2,C1,C2,basis_sets):
     P21 = MO_overlap(S21,ao2,ao1,C2,C1,basis_sets)
     
     return P11, P22, P12, P21
+
+
+def overlap_sd(MO1, MO2):
+##
+# \brief Compute the overlap of two determinants SD1 and SD2
+# \param[in] MO1 A first set of orbitals (determinant) - the CMATRIX object of dimensions: Npw x Norb
+# \param[in] MO2 A first set of orbitals (determinant) - the CMATRIX object of dimensions: Npw x Norb
+# Here, Norb - the number of MOs in the set, should be the same for each object
+# Npw - the number of basis functions (plane waves) used to represent the MO
+#
+
+    if MO1.num_of_rows != MO2.num_of_rows:
+        print "The vertical dimensions of the two matrices do not match"
+        sys.exit(0)
+
+    if MO1.num_of_cols != MO2.num_of_cols:
+        print "The horizontal dimensions of the two matrices do not match"
+        sys.exit(0)
+
+    Norb = MO1.num_of_cols  # the number of 1-el orbitals in each determinant
+
+    ovlp = CMATRIX(Norb, Norb)
+    ovlp = MO1.H()*MO2     # the overlap of the 1-el MOs
+
+    det = []
+    for i in xrange(Norb):
+        row_i = []
+        for j in xrange(Norb):
+            row_i.append(ovlp.get(i,j))
+        det.append(row_i)
+
+    OVLP = numpy.linalg.det(det)/FACTORIAL(Norb)
+
+    return OVLP # this is a complex number, in general
+
+
+def overlap_sd_basis(sd_basis1, sd_basis2):
+##
+# This function constructs an overlap matrix of different Slater determinants
+# from two sets: sd_basis1 and sd_basis2, which can be the same, but may be 
+# different (e.g. at different time steps)
+#
+# \param[in] sd_basis1 Is a list of length n, containing different Slater determinants (each
+# is represented by a CMATRIX object)
+# \param[in] sd_basis2  -- // -- similar to the above
+#
+
+    n = len(sd_basis1)    
+    m = len(sd_basis2)
+
+    ovlp = CMATRIX(n,m)
+ 
+    for i in xrange(n):
+        for j in xrange(m):
+            ovlp.set( i,j, overlap_sd(sd_basis1[i], sd_basis2[j]) )
+
+    return ovlp  # this is a complex-valued (in general) matrix
+
+
+
+
