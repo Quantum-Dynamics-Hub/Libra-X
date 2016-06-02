@@ -188,15 +188,20 @@ def qe_extract_gradients(inp_str,  flag):
 
 #def unpack_file(filename,params, flag): 
 
-def qe_extract(filename, flag): 
+def qe_extract(filename, flag, active_space, ex_st): 
 ##
 # Function for reading and extracting Quantum Espresso
 # output. Extracted parameters are used in classical MD
 # calculation using LIBRA in the next step.
 # \param[in] filename The name of the QE output file which we unpack
 # \param[in] flag Controls the output: 0 - no additional printing, 1 - yes
+# \param[in] active_space The list of indices (starting from 1) of the MOs to include in
+# calculations (and to read from the QE output files)
+# \param[in] ex_st The index of the currently computing electronic state. This index is
+# also used in as a part of the corresponding input/output files
 #
-    
+    Ry_to_Ha = 0.5
+  
     f_qe = open(filename, "r")
     A = f_qe.readlines()
     f_qe.close()
@@ -248,7 +253,7 @@ def qe_extract(filename, flag):
         # example:
         # !    total energy              =     -27.62882078 Ry
         if len(s) > 0 and s[0] == "!" and s[1] == "total" and s[2] == "energy":
-            tot_ene = float(s[4])
+            tot_ene = Ry_to_Ha*float(s[4]) # so convert energy into atomic units
 
 
     if alat<0.0:
@@ -283,6 +288,8 @@ def qe_extract(filename, flag):
 
     # Get gradients
     grads = qe_extract_gradients(A[iforce+4:iforce+4+nat], flag)
+
+
     param = {}
     param["nel"] = nel
     param["norb"]= norb
@@ -290,8 +297,9 @@ def qe_extract(filename, flag):
     param["alat"]= alat    
     #print params
 
-    # Read the wavefunction:
-    #wfc["coeff_%i"%i] = read_qe_wfc("x%i.export/wfc.1"%i, "Kpoint.1", n_el, n_mo)
+    # Read the wavefunctions:
+    MO = qe_extract_mo("x%i.export/wfc.1" % , "Kpoint.1", active_space)
 
-    return tot_ene, label, R, grads, norb, nel, nat,alat
+
+    return tot_ene, label, R, grads, MO, norb, nel, nat, alat
 

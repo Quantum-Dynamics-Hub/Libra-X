@@ -20,57 +20,30 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-def pyxaid_states(states, min_shift, max_shift):
-    ##
-    # This function converts our Libra type states into Pyxaid convention
-    # E.g.
-    # HOMO = 3, min_shift = -1, max_shift = 1
-    # [0,1,2,3,4,5,6,7]  <- original set
-    #     [0,1,2]        <- reduced set
-    # nocc = 2
-    # active_space_sz = 3
-    # so: gs = [1,-1,2,-2]
-    #
-    # Used in: vibronic_hamiltonian.py/update_vibronic_hamiltonian
 
-    active_space_sz = max_shift - min_shift + 1
-    nstates = len(states)
+def compute_Hvib(H_el,NAC):
+##
+# Compute the vibronic Hamiltonian
+# \param[in] H_el Electronic Hamiltonian matrix (diagonal) - of type MATRIX: nstates x nstates
+# \param[in] NAC Nonadiabatic couplings matrix - of type CMATRIX: nstates x nstates
+# Here, nstates - is the number of excited states included into consideration
+# Assume atomic units: hbar = 1
 
-    nocc = -min_shift + 1 # the number of double occupied orbitals
+    nstates = H_el.num_of_cols
 
-    gs = [] # ground states
-    for i in xrange(nocc): 
-        indx = i + 1  # +1 so we can distinguish 0 and -0
-        gs.append(indx)
-        gs.append(-indx)
+    H_vib = CMATRIX(nstates,nstates)
 
-    # Now lets create all excitations from the reference state
-    res = []
-    print "All generated configurations (pyxaid indexing)\n"
-    for i in xrange(nstates):        
-        es = list(gs)
-        print "Configuration ", i, es
-     
-        # Here +1 is needed to be consistent with Pyxiad indexing convention
-        a = states[i].from_orbit[0] - min_shift + 1
-        a_s = states[i].from_spin[0]  # +1 for alp, -1 for bet
-        b = states[i].to_orbit[0] - min_shift + 1
-        b_s = states[i].to_spin[0]  # +1 for alp, -1 for bet
+    for i in xrange(nstates):
+            H_vib.set(i,i,H_el.get(i,i))
 
-        # orbital indices with sign = spin-orbit indices
-        A = a * a_s  
-        B = b * b_s
+    for i in xrange(nstates):
+        for j in xrange(nstates):
+            if j != i:
+                H_vib.set(i,j,(-1.0j+0.0)*NAC.get(i,j))
 
-        # Replace A with B
-        indx = es.index(A)
-        es[indx] = B
+    return H_vib
 
-        #print "Replace orbital ",A, " at position ",indx," with orbital ",B
-   
-        res.append(es)
 
-    return res
-      
 
 def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suffix):
     ##

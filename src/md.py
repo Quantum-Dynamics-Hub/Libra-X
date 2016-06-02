@@ -34,33 +34,6 @@ from libra_py import *
 
 ##############################################################
 
-def exe_gamess(params):
-    ##
-    # This is a function that call GAMESS execution on the compute node
-    # \param[in] params Input data containing all manual settings and some extracted data.
-    #
-    # Used in main.py/main and md.py/run_MD
-
-    inp = params["gms_inp"]
-    out = params["gms_out"]
-    nproc = params["nproc"]
-
-    scr_dir = params["scr_dir"]
-    rungms = params["rungms"]
-    VERNO = params["VERNO"]
-
-    # set environmental variables for GAMESS execution
-    os.environ["SCR"] = scr_dir
-    os.environ["USERSCR"] = scr_dir
-    os.environ["GMSPATH"] = params["GMSPATH"]
-
-    #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
-    os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
-
-    # delete the files except input and output ones to do another GAMESS calculation.
-    os.system("rm *.dat")              
-    os.system("rm -r %s/*" %(scr_dir)) 
-
 def init_files(params):
     ## 
     # This function initializes files.(make empty files)
@@ -236,6 +209,9 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
                                 write_qe_input( ex_st,label[cnt],mol[cnt],params)
                                 exe_espresso( ex_st )
+
+                                #tot_ene, label, R, grads, MO, norb, nel, nat, alat = qe_to_libra()
+
 
                 wfc["coeff_%i"%i] = read_qe_wfc("x%i.export/wfc.1"%i, "Kpoint.1", n_el, n_mo)
                 params["E%i" %i],label,R, params["Grad%i" %i] = unpack_file(params["qe_out%i" %i],params["qe_debug_print"],0)

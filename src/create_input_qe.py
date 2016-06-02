@@ -33,6 +33,47 @@ from libra_py import *
 
 
 
+
+#
+def read_qe_inp_templ(inp_filename):
+##
+# Reading and storing template input file for QE calculations. The input file is essentially a
+# normal input file, but we store only the constant section (control option), not the
+# coordinates. The latter will be updated at each iteration using the propagated objects
+#
+# \param[in] inp_filename The name of the initial input file, which will serve as a template
+#
+
+    f = open(inp_filename,"r")
+    templ = f.readlines()
+    f.close()
+
+    for a in templ:
+        s = a.split()
+        if len(s) > 0 and s[0] == "celldm(1)" and s[1] == "=":
+            sa = s[2].split(',')
+            cell_dm = float(sa[0])
+            break
+
+    # Find the line preceeding the actual atomic coordinates
+    for a in templ:
+        s = a.split()
+        if len(s) > 0 and s[0] == "ATOMIC_POSITIONS":
+            ikeep = templ.index(a)
+            break
+
+    N = len(templ)
+    # Blank space for the atomic positions
+    templ[ikeep+1:N] = []
+    for i in xrange(ikeep+1):
+        print templ[i]
+
+
+    return  templ
+
+
+
+
 def excitation_to_qe_occ(params, state):
 ##
 # This function converts the Libra "excitation" object to the QE occupation scheme

@@ -31,13 +31,36 @@ from moment import *
 
 
 
+def exe_espresso(i):
+##
+# Function for executing calculations using Quantum Espresso
+# once the calculations are finished, all the temporary data are
+# deleted
+# \param[in] inp The name of the input file
+# \param[in] out The name of the output file
+#
+    inp = "x%i.scf_wrk.in" % i # e.g. "x0.scf_wrk.in"
+    out = "x%i.scf.out" % i    # e.g. "x0.scf.out"
+    inexp = "x%i.exp.in" % i   # e.g. "x0.exp.in"
+    outexp = "x%i.exp.out" % i # e.g "x0.exp.out"
 
-def qe_to_libra(params, E, C, suff):
+    os.system("srun pw.x < %s > %s" % (inp,out))
+    os.system("srun pw_export.x < %s > %s" % (inexp,outexp))
+
+    # Delete scratch directory and unecessary files
+    #os.system("rm *.dat *.wfc* *.igk* *.mix*")
+    #os.system("rm -r *.save") # not sure if we  need to remove this directory
+
+
+
+def qe_to_libra(params, E, sd_basis, label, mol, suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
-    # \param[in,out] E  :  molecular energies at "t" old, will be updated
-    # \param[in,out] C  :  molecular coefficients at "t" old, will be updated
+    # \param[in] E  :  molecular energies at "t" old, will be updated (MATRIX object)
+    # \param[in] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object)
+    # \param[in] label : the list of atomic names 
+    # \param[in] mol : the object of Nuclear type - contains the info about molecular geometry
     # \param[in] suff : The suffix to add to the name of the output files
     # this suffix is now considered to be of a string type - so you can actually encode both the
     # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
@@ -52,30 +75,42 @@ def qe_to_libra(params, E, C, suff):
     #
     # Used in: md.py/run_MD
 
-    # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
+#    qe_extract(filename, flag, active_space, ex_st)
 
-    # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
+    nstate = len(params["excitations"])
 
-    # calculate transition dipole moment matrices in the MO basis:
-    # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
-    # this is done for the "current" state only    
-    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,C2)
-    mu = [mu_x, mu_y, mu_z]
+    active_space = []
+    # need to define it based on params["excitations"]
 
-    if params["debug_mu_output"]==1:
-        print "mu_x:";    mu_x.show_matrix()
-        print "mu_y:";    mu_y.show_matrix()
-        print "mu_z:";    mu_z.show_matrix()
+    sd_basis2 = []    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
+    all_grads = [] # this will be a list of lists of VECTOR objects
+    E2 = MATRIX(nstate,nstate)
+
+
+    #======== Run QE calculations and get the info at time step t+dt ========
+
+    for ex_st in xrange(nstates): # for each excited configuration
+                                  # run a separate set of QE calculations
+
+        write_qe_input(ex_st,label,mol,params)
+        exe_espresso(ex_st)
+
+        flag = 0
+        tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
  
-    if params["debug_densmat_output"]==1:
-        print "P11 and P22 matrixes should show orthogonality"
-        print "P11 is";    P11.show_matrix()
-        print "P22 is";    P22.show_matrix()
-        print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
-        print "P12 is";    P12.show_matrix()
-        print "P21 is";    P21.show_matrix()
+        sd_basis2.append(sd_ex)
+        all_grads.append(grads)
+        
+        E2.set(ex_st, ex_st, tot_ene)
+
+
+
+    # calculate overlap matrix of Slater determinant basis states
+    P11 = overlap_sd_basis(sd_basis,  sd_basis)
+    P22 = overlap_sd_basis(sd_basis2, sd_basis2)
+    P12 = overlap_sd_basis(sd_basis,  sd_basis2)
+    P21 = overlap_sd_basis(sd_basis2, sd_basis)
+
 
 
     ### TO DO: In the following section, we need to avoid computing NAC matrices in the full
@@ -96,19 +131,20 @@ def qe_to_libra(params, E, C, suff):
         E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
         D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
 
+
     # store "t+dt"(new) parameters on "t"(old) ones
-    for i in range(0,len(ao2)):
-        ao[i] = AO(ao2[i])
     E = MATRIX(E2)
-    C = MATRIX(C2)
+    MO = MATRIX(MO2)
 
     # Returned data:
+    # 
     # Grad: Grad[k][i] - i-th projection of the gradient w.r.t. to k-th nucleus (i = 0, 1, 2)
     # data: a dictionary containing transition dipole moments
-    # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
-    # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
-    # E_mol_red: the matrix of the 1-el orbital energies in the reduced (active) space
-    # D_mol_red: the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
+    # E_mol: the matrix of N-el orbital (total) energies at t+dt/2 in the reduced (active) space
+    # D_mol: the matrix of the NACs computed with SD orbitals at t+dt/2 in the reduced (active) space
+    # E2: the matrix of the N-el energies at t+dt (present state)
+    # sd_basis2: the list of reduced SD (active space orbitals), representing all computed states
+    # all_grads: the gradients on all atoms for all excited states, such that all_grads[i][n] is a VECTOR object containing the gradient on the atom n for the i-th excited state
 
-    return tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red
+    return E_mol, D_mol, E2, sd_basis2, all_grads
 

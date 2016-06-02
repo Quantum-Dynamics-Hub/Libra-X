@@ -26,6 +26,60 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
+
+def pyxaid_states(states, min_shift, max_shift):
+    ##
+    # This function converts our Libra type states into Pyxaid convention
+    # E.g.
+    # HOMO = 3, min_shift = -1, max_shift = 1
+    # [0,1,2,3,4,5,6,7]  <- original set
+    #     [0,1,2]        <- reduced set
+    # nocc = 2
+    # active_space_sz = 3
+    # so: gs = [1,-1,2,-2]
+    #
+    # Used in: vibronic_hamiltonian.py/update_vibronic_hamiltonian
+
+    active_space_sz = max_shift - min_shift + 1
+    nstates = len(states)
+
+    nocc = -min_shift + 1 # the number of double occupied orbitals
+
+    gs = [] # ground states
+    for i in xrange(nocc):
+        indx = i + 1  # +1 so we can distinguish 0 and -0
+        gs.append(indx)
+        gs.append(-indx)
+
+    # Now lets create all excitations from the reference state
+    res = []
+    print "All generated configurations (pyxaid indexing)\n"
+    for i in xrange(nstates):
+        es = list(gs)
+        print "Configuration ", i, es
+
+        # Here +1 is needed to be consistent with Pyxiad indexing convention
+        a = states[i].from_orbit[0] - min_shift + 1
+        a_s = states[i].from_spin[0]  # +1 for alp, -1 for bet
+        b = states[i].to_orbit[0] - min_shift + 1
+        b_s = states[i].to_spin[0]  # +1 for alp, -1 for bet
+
+        # orbital indices with sign = spin-orbit indices
+        A = a * a_s
+        B = b * b_s
+
+        # Replace A with B
+        indx = es.index(A)
+        es[indx] = B
+
+        #print "Replace orbital ",A, " at position ",indx," with orbital ",B
+
+        res.append(es)
+
+    return res
+
+
+
 def create_states(Nmin,HOMO,Nmax,spin,flip):
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in]  Nmin  lowest molecular orbital taken for TD-SE calculation

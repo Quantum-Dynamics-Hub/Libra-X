@@ -22,6 +22,28 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 
+def compute_nac_sd(MO_old, MO_cur, dt):
+##
+# \param[in] MO_old A list of MO sets, each defining SD for a given electronic state: at time t-dt
+# \param[in] MO_cur A list of MO sets, each defining SD for a given electronic state: at time t
+# \param[in] dt nuclear time step
+# Returned result: NAC non-adiabatic coupling matrix
+
+# Although the sets MO1 and MO2 are not mutually-orthogonal, so there would be a dS/dt contribution,
+# we compute only the Hermitian part, since the non-Hermitian will cancel out in the solving TD-SE
+
+    nstates = len(MO_cur)  # the number of electronic states
+    NAC = CMATRIX(nstates,nstates)
+
+    for i in xrange(nstates):
+        for j in xrange(nstates):
+            s_01 = overlap_sd(MO_old[i],MO_cur[j])   # <SD_i(t-dt)|SD_j(t)>
+            s_10 = overlap_sd(MO_cur[i],MO_old[j])   # <SD_i(t)|SD_j(t-dt)>
+            NAC.set(i,j,(s_01 - s_10)/(2.0*dt))
+
+    return NAC
+
+
 def NAC(P12,P21,dt_nucl):
     ##
     # Finds the keywords and their patterns and extracts the parameters
