@@ -1,0 +1,10 @@
+&inputpp
+  prefix = 'x1',
+  outdir = './',
+  pseudo_dir = '/projects/academic/alexeyak/Software/PSEUDO/SSSP/SSSP_acc_PBE/',
+  psfile(1) = 'C_pbe_v1.2.uspp.F.UPF',
+  psfile(2) = 'H.pbe-kjpaw_psl.0.1.UP',
+  single_file = .FALSE.,
+  ascii = .TRUE.,
+  uspp_spsi = .FALSE.,
+/
