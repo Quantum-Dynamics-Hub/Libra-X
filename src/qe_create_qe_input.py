@@ -120,15 +120,19 @@ def print_occupations(occ):
 
 
 
-def write_qe_input(qe_inp, label, mol, excitation, params):
+def write_qe_input(ex_st, label, mol, params):
 ##
 # Creates the Quantum Espresso input using the data provided
-# \param[in] qe_inp The name of the input file we prepare
+# \param[in] ex_st The index of the excited state we want to compute - so it controls which input file
+# to create and how to do this
 # \param[in] label Element symbols for all atoms in the system (list of strings)
 # \param[in] mol The object containing nuclear DOF
-# \param[in] excitation The object of the "excitation" type, defining the SD configuration
 # \param[in] params The general control parameters (dictionary)
 #
+
+    excitation = params["excitations"][ex_st]
+    qe_inp = "x%i.scf_wrk.in" % ex_st
+
 
     qe_inp_templ = params["qe_inp_templ"]
     cell_dm = params["alat"]
