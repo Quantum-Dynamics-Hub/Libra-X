@@ -175,7 +175,7 @@ def write_qe_input(ex_st, label, mol, params):
     qe_inp = "x%i.scf_wrk.in" % ex_st
 
 
-    qe_inp_templ = params["qe_inp_templ"]
+    qe_inp_templ = params["qe_inp_templ"][ex_st]
     cell_dm = params["alat"]
     pp = qe_inp.split('.')
     pfx = pp[0]
