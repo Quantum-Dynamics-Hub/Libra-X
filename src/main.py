@@ -77,12 +77,20 @@ def main(params):
 
 
     #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
+
+    # Initialize variables for a single trajectory first!
+    label, Q, R, ao, tot_ene = None, None, None, None, None
+    sd_basis = []
+    all_grads = []
+    e = MATRIX(nstates,nstates)
     
     if params["interface"]=="GAMESS":
 
         params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
         exe_gamess(params)
-        label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
+        label, Q, R, grads, e, c, ao, tot_ene = gms_extract(params["gms_out"],params["debug_gms_unpack"])
+        sd_basis.append(c)
+        all_grads.append(grads)
 
 
     elif params["interface"]=="QE":
@@ -93,16 +101,17 @@ def main(params):
             flag = 0
             tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
 
-#            sd_basis2.append(sd_ex)
-#            all_grads.append(grads)
-
-#            E2.set(ex_st, ex_st, tot_ene)
-
+            sd_basis.append(sd_ex)
+            all_grads.append(grads)
+            e.set(ex_st, ex_st, tot_ene)
 
 
+    # Now, clone the single-trajectory variables, to initialize the bunch of such parameters
+    # for all trajectories
+    sd_basis_list = []
+    ham_el_list = []    
     ao_list = []
     e_list = []
-    c_list = []
     grad_list = []
     label_list = []
     Q_list = []
@@ -117,13 +126,24 @@ def main(params):
 
         # E and C
         e_list.append(MATRIX(e))
-        c_list.append(MATRIX(c))        
+
+        # Slater determinants
+        # eventually, the ordering is this: sd_basis_list[traj][ex_st] - type CMATRIX
+        sd_basis_tr = []
+        for sd in sd_basis:        
+            sd_basis_tr.append(CMATRIX(sd))
+        sd_basis_list.append(sd_basis_tr)
 
         # Gradients
-        grd = []
-        for g in grad:
-            grd.append(VECTOR(g))
-        grad_list.append(grd)
+        # eventually, the ordering is this: grad_list[traj][ex_st][n_atom] - type VECTOR
+        grd2 = []
+        for grad in all_grads: # over all excited states
+            grd1 = []
+            for g in grad:     # over all atoms
+                grd1.append(VECTOR(g))
+            grd2.append(grd1)
+        grad_list.append(grd2)
+    
 
         # Coords
         rr = []
@@ -157,7 +177,8 @@ def main(params):
                 print "Create a copy of a system"  
                 df = 0 # debug flag
                 # Here we use libra_py module!
-                x = init_system.init_system(label_list[i], R_list[i], grad_list[i], rnd, params["Temperature"], params["sigma_pos"], df, "elements.txt")
+                # Utilize the gradients on the ground (0) excited state
+                x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, params["Temperature"], params["sigma_pos"], df, "elements.txt")
                 syst.append(x)    
 
                 print "Create an electronic object"
@@ -166,7 +187,7 @@ def main(params):
     # set list of SH state trajectories
 
     print "run MD"
-    run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list, active_space)
+    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
     #return data, test_data
