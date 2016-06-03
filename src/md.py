@@ -75,7 +75,7 @@ def init_files(params):
 
 
 
-def run_MD(syst,el,ao,E,C,params,label,Q):
+def run_MD(syst,el,ao,E,sd_basis,params,label,Q):
     ##
     # This function handles a swarm of trajectories.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
@@ -89,7 +89,8 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
     # 
     # \param[in,out] ao   list pf Atomic orbital basis
     # \param[in,out] E    list of Molecular orbital energies
-    # \param[in,out] C    list of MO-LCAO coefficients
+    # \param[in,out] sd_basis list of lists of MO-LCAO coefficients, such that 
+    # sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i. Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
     # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
     # \param[in] Q        list of atomic charges
 
@@ -205,7 +206,7 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients
-                            tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, nac = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij) )
+                            tot_ene0, Grad, mu0, E_mol_red, sd_basis[cnt], nac = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
                             tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):
