@@ -83,7 +83,17 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
 
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, C2, ao2, tot_ene = extract_gms(params["gms_out"],params["debug_gms_unpack"])
-    sd_basis2 = [C2]
+
+    # Gradients
+    # in this implementation (CPA), the gradients on all excited states are the same
+    nstates = len(params["excitations"])
+    all_grads = []
+    for i in xrange(nstates):
+        grd = []
+        for g in Grad:
+            grd.append(VECTOR(g))
+        all_grads.append(grd)
+    
 
     # calculate overlap matrix of atomic and molecular orbitals
     P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],C2,params["basis_option"])
@@ -129,22 +139,24 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
-    E = MATRIX(E2)
-#    C = MATRIX(C2)
+    E = MATRIX(E2)  # at time t+dt
+
+    sd_basis2 = [C2]
 
     CMATRIX nac(D_mol_red.num_of_rows, D_mol_red.num_of_cols)
     for i in xrange(D_mol_red.num_of_rows):
         for j xrange(D_mol_red.num_of_cols):
             nac.set(i,j,D_mol_red.get(i,j),0.0)
 
+    
     # Returned data:
-    # Grad: Grad[k][i] - i-th projection of the gradient w.r.t. to k-th nucleus (i = 0, 1, 2)
+    # Grad: Grad[k] - the gradient w.r.t. to k-th nucleus
     # data: a dictionary containing transition dipole moments
     # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
     # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
     # E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
-    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation
     # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
+    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
 
-    return tot_ene, Grad, mu, E_mol_red, sd_basis2, nac
+    return E_mol_red, nac, sd_basis2, all_grads, tot_ene, mu
 
