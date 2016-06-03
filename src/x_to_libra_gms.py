@@ -59,13 +59,13 @@ def exe_gamess(params):
     os.system("rm -r %s/*" %(scr_dir))
 
 
-def gamess_to_libra(params, ao, E, C, suff):
+def gamess_to_libra(params, ao, E, sd_basis, suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
     # \param[in,out] ao :  atomic orbital basis at "t" old
     # \param[in,out] E  :  molecular energies at "t" old
-    # \param[in,out] C  :  molecular coefficients at "t" old
+    # \param[in] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
     # \param[in] suff : The suffix to add to the name of the output files
     # this suffix is now considered to be of a string type - so you can actually encode both the
     # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
@@ -82,9 +82,10 @@ def gamess_to_libra(params, ao, E, C, suff):
 
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, C2, ao2, tot_ene = extract_gms(params["gms_out"],params["debug_gms_unpack"])
+    sd_basis2 = [C2]
 
     # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,C,C2,params["basis_option"])
+    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],C2,params["basis_option"])
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
@@ -128,7 +129,7 @@ def gamess_to_libra(params, ao, E, C, suff):
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
     E = MATRIX(E2)
-    C = MATRIX(C2)
+#    C = MATRIX(C2)
 
     CMATRIX nac(D_mol_red.num_of_rows, D_mol_red.num_of_cols)
     for i in xrange(D_mol_red.num_of_rows):
@@ -141,7 +142,8 @@ def gamess_to_libra(params, ao, E, C, suff):
     # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
     # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
     # E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
+    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation
     # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
 
-    return tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, nac
+    return tot_ene, Grad, mu, E_mol_red, sd_basis2, nac
 
