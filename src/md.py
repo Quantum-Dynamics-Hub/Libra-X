@@ -201,6 +201,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # ======= Compute forces and energies using external package ============
                         tot_ene0 = 0.0
                         nac = CMATRIX()
+                        all_grads = []
                         opt = 0 # default
 
                         if params["interface"]=="GAMESS":
@@ -210,15 +211,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients
-                            tot_ene0, Grad, mu0, E_mol_red, sd_basis[cnt], nac = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
+                            E_mol_red, nac, sd_basis[cnt], all_grads, tot_ene0, mu0 = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
                             tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
-                            # update forces
-                            for k in xrange(syst[cnt].Number_of_atoms):
-                                for st in xrange(nstates):
-                                    d1ham_adi[cnt][3*k+0].set(st,st,Grad[k].x)
-                                    d1ham_adi[cnt][3*k+1].set(st,st,Grad[k].y)
-                                    d1ham_adi[cnt][3*k+2].set(st,st,Grad[k].z)
-
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
@@ -226,17 +220,19 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             # update MO and gradients
                             E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
 
-                            # update forces
-                            for k in xrange(syst[cnt].Number_of_atoms):
-                                for st in xrange(nstates):
-                                    d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
-                                    d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
-                                    d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
+
+                        # ============== Common blocks ==================
 
 
+                        # update forces
+                        for k in xrange(syst[cnt].Number_of_atoms):
+                            for st in xrange(nstates):
+                                d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
+                                d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
+                                d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
 
-                        #========= Update the matrices that are bound to the Hamiltonian =========
-                        #Compose electronic and vibronic Hamiltonians
+                        # Update the matrices that are bound to the Hamiltonian 
+                        # Compose electronic and vibronic Hamiltonians
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,nac, str(ij), opt)
 
            
