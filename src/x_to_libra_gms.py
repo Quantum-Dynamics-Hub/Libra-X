@@ -26,8 +26,9 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 from extract_gms import *
 from overlap import *
-from Ene_NAC import *
+from hamiltonian_el import *
 from moment import *
+from misc import *
 
 
 

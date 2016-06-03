@@ -14,11 +14,6 @@
 # Nose-Hoover thermostat, execute TD-SE and SH calculations, and set initial system.
 #
 
-from create_gamess_input import *
-from gamess_to_libra import *
-from vibronic_hamiltonian import *
-import print_results
-
 import os
 import sys
 import math
@@ -28,8 +23,14 @@ if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
-
 from libra_py import *
+
+from create_input_gms import *
+from create_input_qe import *
+from x_to_libra_gms import *
+from x_to_libra_qe import *
+from hamiltonian_vib import *
+import print_results
 
 
 ##############################################################
@@ -75,7 +76,7 @@ def init_files(params):
 
 
 
-def run_MD(syst,el,ao,E,sd_basis,params,label,Q):
+def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ##
     # This function handles a swarm of trajectories.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
@@ -93,6 +94,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q):
     # sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i. Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
     # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
     # \param[in] Q        list of atomic charges
+    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in
+    # calculations (and to read from the QE output files)
+
 
     # This function executes classical MD in Libra and electronic structure calculation
     # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
@@ -220,7 +224,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q):
                             opt = 1 # use true SD wavefunctions
 
                             # update MO and gradients
-                            E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij))
+                            E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
 
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):

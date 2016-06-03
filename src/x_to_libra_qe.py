@@ -53,7 +53,7 @@ def exe_espresso(i):
 
 
 
-def qe_to_libra(params, E, sd_basis, label, mol, suff):
+def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
@@ -65,6 +65,9 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff):
     # this suffix is now considered to be of a string type - so you can actually encode both the
     # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
     # related information
+    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in
+    # calculations (and to read from the QE output files)
+
     #
     # This function outputs the files for excited electron dynamics
     # in "res" directory.
@@ -78,9 +81,6 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff):
 #    qe_extract(filename, flag, active_space, ex_st)
 
     nstate = len(params["excitations"])
-
-    active_space = []
-    # need to define it based on params["excitations"]
 
     sd_basis2 = []    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
     all_grads = [] # this will be a list of lists of VECTOR objects
@@ -133,8 +133,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff):
 
 
     # store "t+dt"(new) parameters on "t"(old) ones
-    E = MATRIX(E2)
-    MO = MATRIX(MO2)
+    E = MATRIX(E2)  # update energy
+                    # the returned energy E_mol is at t+dt/2
 
     # Returned data:
     # 

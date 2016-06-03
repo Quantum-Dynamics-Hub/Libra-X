@@ -24,11 +24,14 @@ if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
-
 from libra_py import *
-from gamess_to_libra import *
+
+
+from create_input_gms import *
+from create_input_qe import *
+from x_to_libra_gms import *
+from x_to_libra_qe import *
 from md import *
-from create_gamess_input import *
 
 
 def main(params):
@@ -57,18 +60,45 @@ def main(params):
 
     ntraj = nstates*ninit*num_SH_traj
 
+    #######
+    active_space = [1,2]
+    print "Implement the algorithm to define the active space"
+    sys.exit(0)
+    ######
+
     ################# Step 0: Use the initial file to create a working input file ###############
- 
-    os.system("cp %s %s" %(params["gms_inp0"], params["gms_inp"]))
 
-    ################# Step 1: Read initial input and run first GMS calculation ##################    
+    if params["interface"]=="GAMESS": 
+        os.system("cp %s %s" %(params["gms_inp0"], params["gms_inp"]))
+
+    elif params["interface"]=="QE":
+        for ex_st in xrange(nstates):
+            os.system("cp x%i.scf.in x%i.scf_wrk.in" % (ex_st, ex_st))
+
+
+    #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
     
-    params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
+    if params["interface"]=="GAMESS":
 
-    #sys.exit(0)
-    exe_gamess(params)
+        params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
+        exe_gamess(params)
+        label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
 
-    label, Q, R, grad, e, c, ao, tot_ene = extract(params["gms_out"],params["debug_gms_unpack"])
+
+    elif params["interface"]=="QE":
+        for ex_st in xrange(nstates):
+
+            params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
+            exe_espresso(ex_st)
+            flag = 0
+            tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+
+#            sd_basis2.append(sd_ex)
+#            all_grads.append(grads)
+
+#            E2.set(ex_st, ex_st, tot_ene)
+
+
 
     ao_list = []
     e_list = []
@@ -111,6 +141,7 @@ def main(params):
         Q_list.append(qq)
         
 
+
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
     print "Initializing nuclear configuration and electronic variables..."
@@ -135,8 +166,7 @@ def main(params):
     # set list of SH state trajectories
 
     print "run MD"
-    run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list)
+    run_MD(syst,el,ao_list,e_list,c_list,params,label_list, Q_list, active_space)
     print "MD is done"
-    sys.exit(0)
 
     #return data, test_data
