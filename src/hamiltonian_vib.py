@@ -45,9 +45,11 @@ def compute_Hvib(H_el,NAC):
 
 
 
-def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suffix):
+
+def update_vibronic_hamiltonian_gms(ham_el, ham_vib, params,E_mol_red,D_mol_red,suffix, opt):
     ##
-    # This function transforms the 1-electron orbital energies matrix and the matrix of 
+    #
+    # This function transforms the 1- or N- electron energies matrix and the matrix of 
     # nonadiabatic couplings into the matrix of excitation energies and corresponding couplings
     # between the considered excited Slater determinants (SD). In doing this, it will return 
     # the vibronic and electronic (in SD basis) Hamiltonians.
@@ -55,11 +57,20 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     # \param[out] ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
     # \param[out] ham_vib Vibronic Hamiltonian (CMATRIX)
     # \param[in] params  contains the dictionary of the input parameters
-    # \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space
+    # \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
     # \param[in] D_mol_red   the matrix of the NACs computed with the 1-electon MOs, in reduced space
+    # (CMATRIX)
     # \param[in] suffix the suffix to add to the file names for the files created in this function
+    # \param[in] opt The option that defines what kind of electronic approximation has been utilized
+    # opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case D_mol_red is typically 
+    # a real matrix
+    # opt == 1 (or any other value) - N-electron (SD, multielectronic wavefunction), in this case
+    # D_mol_red may be a complex
     #
-    # This function returns the electronic and vibronic Hamiltonians, H_el, and Hvib
+    # This function does not return anything - it merely modifies the already existing matrices
+    # VERY IMPORTANT: we should modify the existing matrices (bound to the hamiltonian object), not
+    # create the new ones. In the latter case we loose the binding of the previousely allocated 
+    # matrices with the hamiltonian object!!!
     #
     # Used in: md.py/run_MD
 
@@ -70,7 +81,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     states = params["excitations"]
     nstates = len(states)  
     H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
-    D_el = MATRIX(nstates,nstates)  # nonadiabatic couplings
+    D_el = CMATRIX(nstates,nstates)  # nonadiabatic couplings
     flag = params["print_sd_ham"]
 
     # Excitation energy : 
@@ -93,7 +104,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
         h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
         e_indx = states[i].to_orbit[0] - min_shift  # --- same, only for the electron orbital
 
-        EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx)
+        EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx) # excitation energy
        
         H_el.set(i,i,EX_ene)
         ham_el.set(i,i,EX_ene)
@@ -107,6 +118,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
 
     #============== Couplings =================
     print "Do couplings"
+     
     for I in xrange(nstates):
         for J in xrange(nstates):
 
@@ -115,20 +127,28 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
                 st_J = Py2Cpp_int(pyx_st[J])
                 print "st_I= ", pyx_st[I] # show_vector(st_I)
                 print "st_J= ", pyx_st[J] # show_vector(st_J)
-                coupled,a,b = delta(st_I, st_J)
-                print "delta returns ", coupled, a, b
-            
-                if coupled:
-                    i = abs(a) - 1
-                    j = abs(b) - 1
-                    print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
-                    D_el.set(I,J, -D_mol_red.get(i,j))
-                    ham_vib.set(I,J,0.0, -D_mol_red.get(i,j))
-                else:
-                    D_el.set(I,J, 0.0)
-                    ham_vib.set(I,J, 0.0, 0.0)
-                print "\n"
 
+                if opt == 0: # 1-electron approximation - then need to transform KS couplings
+                             # into SD space
+
+                    coupled,a,b = delta(st_I, st_J)
+                    print "delta returns ", coupled, a, b
+            
+                    if coupled:
+                        i = abs(a) - 1
+                        j = abs(b) - 1
+                        print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
+                        D_el.set(I,J, (-1.0j+0.0)*D_mol_red.get(i,j))
+                        ham_vib.set(I,J,(-1.0j+0.0)*D_mol_red.get(i,j))
+                    else:
+                        D_el.set(I,J, 0.0, 0.0)
+                        ham_vib.set(I,J, 0.0, 0.0)
+                    print "\n"
+
+                else:  # N-electron approximation - coupling is alreay there
+                    D_el.set(I,J, (-1.0j+0.0)*D_mol_red.get(I,J))
+                    ham_vib.set(I,J,(-1.0j+0.0)*D_mol_red.get(I,J))
+                    print "\n"
       
     if params["print_sd_ham"] == 1:
         H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)

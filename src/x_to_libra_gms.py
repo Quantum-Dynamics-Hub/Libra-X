@@ -130,13 +130,18 @@ def gamess_to_libra(params, ao, E, C, suff):
     E = MATRIX(E2)
     C = MATRIX(C2)
 
+    CMATRIX nac(D_mol_red.num_of_rows, D_mol_red.num_of_cols)
+    for i in xrange(D_mol_red.num_of_rows):
+        for j xrange(D_mol_red.num_of_cols):
+            nac.set(i,j,D_mol_red.get(i,j),0.0)
+
     # Returned data:
     # Grad: Grad[k][i] - i-th projection of the gradient w.r.t. to k-th nucleus (i = 0, 1, 2)
     # data: a dictionary containing transition dipole moments
     # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
     # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
-    # E_mol_red: the matrix of the 1-el orbital energies in the reduced (active) space
-    # D_mol_red: the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
+    # E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
+    # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
 
-    return tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, D_mol_red
+    return tot_ene, Grad, mu, E_mol, D_mol, E_mol_red, nac
 

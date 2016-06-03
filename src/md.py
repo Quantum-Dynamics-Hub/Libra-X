@@ -74,6 +74,7 @@ def init_files(params):
         fel = open(sh_pop_file,"w"); fel.close();
 
 
+
 def run_MD(syst,el,ao,E,C,params,label,Q):
     ##
     # This function handles a swarm of trajectories.
@@ -194,15 +195,17 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
                         # ======= Compute forces and energies using external package ============
                         tot_ene0 = 0.0
+                        nac = CMATRIX()
+                        opt = 0 # default
 
                         if params["interface"]=="GAMESS":
+                            opt = 0 # use 1-electron wavefunctions
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
                        
-                            # update AO and gradients
-                            tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, D_mol_red = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij))
-
+                            # update AO, MO, and gradients
+                            tot_ene0, Grad, mu0, E_mol, D_mol, E_mol_red, nac = gamess_to_libra(params, ao[cnt], E[cnt], C[cnt], str(ij) )
                             tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):
@@ -213,8 +216,10 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
 
 
                         elif params["interface"]=="QE":
+                            opt = 1 # use true SD wavefunctions
 
-                            E_mol, D_mol, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij))
+                            # update MO and gradients
+                            E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij))
 
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):
@@ -224,16 +229,11 @@ def run_MD(syst,el,ao,E,C,params,label,Q):
                                     d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
 
 
+
                         #========= Update the matrices that are bound to the Hamiltonian =========
                         #Compose electronic and vibronic Hamiltonians
-                        update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,D_mol_red, str(ij))
+                        update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,nac, str(ij), opt)
 
-                        # update forces
-                        for k in xrange(syst[cnt].Number_of_atoms):
-                            for st in xrange(nstates):
-                                d1ham_adi[cnt][3*k+0].set(st,st,Grad[k].x)
-                                d1ham_adi[cnt][3*k+1].set(st,st,Grad[k].y)
-                                d1ham_adi[cnt][3*k+2].set(st,st,Grad[k].z)
            
                         # update potential energy
                         epot = tot_ene0 + etot_compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
