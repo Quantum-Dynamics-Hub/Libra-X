@@ -69,7 +69,7 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     num_tmp = "_"+str(iconf)+"_"+str(i_ex)+"_"+str(itraj)
     ene_file = params["ene_file_prefix"]+num_tmp+".txt"
     traj_file = params["traj_file_prefix"]+num_tmp+".xyz"
-    #mu_file = params["mu_file_prefix"]+num_tmp+".txt"
+    mu_file = params["mu_file_prefix"]+num_tmp+".txt"
 
     ##print 
     # Geometry
@@ -82,7 +82,6 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     fe.close()
     
     if params["interface"] == "GAMESS":       
-        mu_file = params["mu_file_prefix"]+num_tmp+".txt"
         # Dipole moment components
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
@@ -121,10 +120,10 @@ def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
             for itraj in xrange(num_SH_traj):
 
                 cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
-                if params["interface"] == "GAMESS":
-                    ao1 = ao[cnt]
-                    mu1 = mu[cnt]
-                one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao1,therm[cnt],mu1,tot_ene[cnt],f_pot,params)
+                if params["interface"] == "QE":
+                    ao.append(0.0)
+                    mu.append(0.0)
+                one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
 
 def pops_ave_TSH_traj(i,el,params):
     # This function prints out SE and SH populations averaged over TSH trajectories (only one trajectory without SH calculation);
