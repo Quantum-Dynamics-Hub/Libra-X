@@ -81,7 +81,7 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
     
-    if params[""] == "GAMESS":       
+    if params["interface"] == "GAMESS":       
         mu_file = params["mu_file_prefix"]+num_tmp+".txt"
         # Dipole moment components
         fm = open(mu_file,"a")
