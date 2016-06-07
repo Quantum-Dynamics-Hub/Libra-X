@@ -97,8 +97,8 @@ def qe_extract_mo(filename, upper_tag, active_space):
     # of the pseudopotentials. So we will normalize them, at least
     for i in xrange(n_mo):
         mo_i = coeff.col(n_mo)
-        nrm = (mo_i.H() * mo_i).real
-        nrm = (1.0/sqrt(nrm))
+        nrm = (mo_i.H() * mo_i).get(0,0).real
+        nrm = (1.0/math.sqrt(nrm))
 
         for pw in xrange(ngw):
             coeff.set(pw,i,nrm*coeff.get(pw,i))
@@ -298,7 +298,7 @@ def qe_extract(filename, flag, active_space, ex_st):
     #print params
 
     # Read the wavefunctions:
-    MO = qe_extract_mo("x%i.export/wfc.1" % , "Kpoint.1", active_space)
+    MO = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
 
 
     return tot_ene, label, R, grads, MO, norb, nel, nat, alat
