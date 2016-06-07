@@ -45,7 +45,11 @@ def extract_ao_basis(inp_str, label, R, flag):
         spline = inp_str[i].split()
         if len(spline) == 1:
             l_atom_spec.append(i)
-            atom_spec.append(spline[0])
+            # atom labels
+            atom = spline[0]
+            if len(atom) > 1:
+                atom = atom[0] + atom[1].lower()
+            atom_spec.append(atom)
 
 
     # atomic basis sets
@@ -157,8 +161,7 @@ def extract_ao_basis(inp_str, label, R, flag):
 def extract_mo(inp_str,Ngbf,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
-    # assumed format is:
-    # ???
+    # 
     # \param[in] inp_str  Strings containing the info for all orbitals
     # E - returned MATRIX object, containing the eigenvalues
     # C - returned MATRIX object, containing the eigenvectors:
@@ -166,48 +169,50 @@ def extract_mo(inp_str,Ngbf,flag):
     #
     # Used in: extract.py/extract
 
-    stat_span = 4 + Ngbf
+    stat_span = Ngbf + 4 # period for beginning of coefficient lines
 
-    mol_ene = []
+    #mol_ene = []
     l_tmp = []
     mol_coef = []
     sz = len(inp_str) 
- 
-    for i in xrange(sz):
-        spline = inp_str[i].split() 
 
-        # molecular energy
-        if i % stat_span == 1 :
-            l_tmp.append(i+2)
-            for j in range(0,len(spline)):
-                mol_ene.append(float(spline[j]))
-
-    # molecular coefficients
-    for i in l_tmp:
-        for j in range(i,i+Ngbf):
-            coef_tmp = []
-            spline = inp_str[j].split() #l_gam[j].split()
-            if len(mol_coef) < Ngbf:
-                for k in range(4,len(spline)):
-                    coef_tmp.append(float(spline[k]))
-                mol_coef.append(coef_tmp)
-            else:
-                for k in range(4,len(spline)):
-                    mol_coef[j-i].append(float(spline[k]))
-
-    # create objects of MATRIX type, containing eigenvalues and eigenvectors
+    # create objects of MATRIX type, containing eigenvalues and eigenvectors 
     E = MATRIX(Ngbf,Ngbf)
     C = MATRIX(Ngbf,Ngbf)
 
-    for i in range(0,Ngbf):
-        E.set(i,i,mol_ene[i])
-        for j in range(0,Ngbf):
-            C.set(i,j,mol_coef[i][j])
+    for i in xrange(sz):
+
+        if i % stat_span == 0 :
+            ind_of_eig = inp_str[i].split() # split lines for indexes of eigenvalues
+
+            # eigenvalues
+            eig_val = inp_str[i+1].split() # split lines for eigenvalues
+            for j in range(0,len(ind_of_eig)):
+                k = int(ind_of_eig[j]) - 1           # python index start from 0
+                E.set(k,k,float(eig_val[j]))
+
+            # molecular coefficients
+            ic = i + 3                              # beginning of coefficient lines
+            for j in range(ic,ic+Ngbf):             # loop for AO basis
+                eig_vec = inp_str[j].split()        # split lines for eigenvectors
+                for k in range(0,len(ind_of_eig)):  
+                    ja = int(eig_vec[0]) - 1            # index of AO basis
+                    ke = int(ind_of_eig[k]) - 1         # index of eigenvectors
+                    if len(eig_vec[1]) == 4:        # continuous word like "CL44"
+                        kvec = k + 3
+                    else:                           # discontinuous word like "H 20" 
+                        kvec = k + 4
+                    C.set(ja,ke,float(eig_vec[kvec]))
 
     if flag == 1:
-        print "E Matrix is"; E.show_matrix()
-        print "C Matrix is"; C.show_matrix()
-
+        #print "E Matrix is"; E.show_matrix()
+        #print "C Matrix is"; C.show_matrix()
+        print "E(0,0) is",E.get(0,0)
+        print "E(Ngbf-1,Ngbf-1) is",E.get(Ngbf-1,Ngbf-1)
+        print "C(0,0) is",C.get(0,0) 
+        print "C(Ngbf-1,0) is",C.get(Ngbf-1,0)
+        print "C(0,Ngbf-1) is",C.get(0,Ngbf-1)
+        print "C(Ngbf-1,Ngbf-1) is",C.get(Ngbf-1,Ngbf-1)
 
     return E, C
     
@@ -233,7 +238,10 @@ def extract_coordinates(inp_str,flag):
         spline = a.split() 
 
         # atom labels
-        label.append(spline[0])
+        atom = spline[0]
+        if len(atom) > 1:
+            atom = atom[0] + atom[1].lower()
+        label.append(atom)
 
         # atomic charges
         Q.append(float(spline[1]))
