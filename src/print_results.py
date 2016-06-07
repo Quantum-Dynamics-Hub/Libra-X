@@ -122,9 +122,9 @@ def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
 
                 cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
                 if params["interface"] == "GAMESS":
-                    ao = ao[cnt]
-                    mu = mu[cnt]
-                one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao,therm[cnt],mu,tot_ene[cnt],f_pot,params)
+                    ao1 = ao[cnt]
+                    mu1 = mu[cnt]
+                one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao1,therm[cnt],mu1,tot_ene[cnt],f_pot,params)
 
 def pops_ave_TSH_traj(i,el,params):
     # This function prints out SE and SH populations averaged over TSH trajectories (only one trajectory without SH calculation);
