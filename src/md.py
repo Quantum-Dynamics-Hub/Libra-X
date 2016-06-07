@@ -31,6 +31,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
+import print_results_qe
 
 
 ##############################################################
@@ -219,7 +220,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                             # update MO and gradients
                             E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-
+                            tot_ene.append(E[cnt])
 
                         # ============== Common blocks ==================
 
@@ -237,7 +238,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
            
                         # update potential energy
-                        epot = tot_ene0 + etot_compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot = tot_ene0 + compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
                         ekin = compute_kinetic_energy(mol[cnt])
                         etot = epot + ekin
           
@@ -274,14 +275,16 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
         #************ end of j loop - all steps for this snap
 
         ################### Printing results ############################
-
         # print out SE and SH populations
         se_pop, sh_pop = print_results.pops_ave_TSH_traj(i,el,params)
         print_results.pops_ave_geometry(i,nstates,se_pop,sh_pop,params)
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:
-            print_results.auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
+            if params["interface"]=="GAMESS":
+                print_results.auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
+            elif params["interface"]=="QE":
+                print_results_qe.auxiliary(i,mol,el,ham,syst,therm,tot_ene,f_pot,params)
 
         print "       ********* %i snap ends ***********" % i
         print 
