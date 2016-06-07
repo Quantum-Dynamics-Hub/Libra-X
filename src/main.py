@@ -61,9 +61,9 @@ def main(params):
     ntraj = nstates*ninit*num_SH_traj
 
     #######
-    active_space = [1,2]
+    active_space = [6,7]  # For C2H4 
     print "Implement the algorithm to define the active space"
-    sys.exit(0)
+    #sys.exit(0)
     ######
 
     ################# Step 0: Use the initial file to create a working input file ###############
@@ -79,7 +79,7 @@ def main(params):
     #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
 
     # Initialize variables for a single trajectory first!
-    label, Q, R, ao, tot_ene = None, None, None, None, None
+    label, Q, R, ao, tot_ene = None, [], None, [], None
     sd_basis = []
     all_grads = []
     e = MATRIX(nstates,nstates)
