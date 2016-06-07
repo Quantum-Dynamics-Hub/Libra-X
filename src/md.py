@@ -281,10 +281,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:
-            if params["interface"]=="GAMESS":
-                print_results.auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
-            elif params["interface"]=="QE":
-                print_results_qe.auxiliary(i,mol,el,ham,syst,therm,tot_ene,f_pot,params)
+            print_results.auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
 
         print "       ********* %i snap ends ***********" % i
         print 
