@@ -41,7 +41,9 @@ ATOMIC_SPECIES
  H  1.008  H.pbe-rrkjus_psl.0.1.UPF
 
 
-K_POINTS gamma                  
+K_POINTS automatic
+1 1 1  0 0 0
+ 
                                
 CELL_PARAMETERS
     15.0000000    0.0000000    0.0000000
