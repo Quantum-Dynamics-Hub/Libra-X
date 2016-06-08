@@ -145,7 +145,7 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
 
     CMATRIX nac(D_mol_red.num_of_rows, D_mol_red.num_of_cols)
     for i in xrange(D_mol_red.num_of_rows):
-        for j xrange(D_mol_red.num_of_cols):
+        for j in xrange(D_mol_red.num_of_cols):
             nac.set(i,j,D_mol_red.get(i,j),0.0)
 
     

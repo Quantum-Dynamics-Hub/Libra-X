@@ -49,7 +49,11 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     ij = i*params["Nsteps"]
 
     # Re-compute energies, to print
-    epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
+    if params["interface"] == "GAMESS":
+        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
+    elif params["interface"] == "QE":
+        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
+
     print "epot = ", epot
     
     ekin = compute_kinetic_energy(mol)
@@ -76,15 +80,16 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     fe = open(ene_file,"a")
     fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
-        
-    # Dipole moment components
-    fm = open(mu_file,"a")
-    line = "t= %8.5f " % (ij*dt_nucl)
-    for k in xrange(len(ao)):
-        line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
-    line = line + "\n"
-    fm.write(line)
-    fm.close()
+    
+    if params["interface"] == "GAMESS":       
+        # Dipole moment components
+        fm = open(mu_file,"a")
+        line = "t= %8.5f " % (ij*dt_nucl)
+        for k in xrange(len(ao)):
+            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        line = line + "\n"
+        fm.write(line)
+        fm.close()
 
 
 def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
@@ -115,8 +120,10 @@ def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
             for itraj in xrange(num_SH_traj):
 
                 cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                if params["interface"] == "QE":
+                    ao.append(0.0)
+                    mu.append(0.0)
                 one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
-
 
 def pops_ave_TSH_traj(i,el,params):
     # This function prints out SE and SH populations averaged over TSH trajectories (only one trajectory without SH calculation);

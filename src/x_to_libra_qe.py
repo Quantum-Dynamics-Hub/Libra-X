@@ -24,10 +24,11 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-from extract import *
+from extract_qe import *
 from overlap import *
-from Ene_NAC import *
-from moment import *
+from hamiltonian_el import *
+from create_input_qe import *
+from misc import *
 
 
 
@@ -57,7 +58,7 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
-    # \param[in] E  :  molecular energies at "t" old, will be updated (MATRIX object)
+    # \param[in, out] E  :  molecular energies at "t" old, will be updated (MATRIX object)
     # \param[in] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object)
     # \param[in] label : the list of atomic names 
     # \param[in] mol : the object of Nuclear type - contains the info about molecular geometry
@@ -80,11 +81,11 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
 
 #    qe_extract(filename, flag, active_space, ex_st)
 
-    nstate = len(params["excitations"])
+    nstates = len(params["excitations"])
 
     sd_basis2 = []    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
     all_grads = [] # this will be a list of lists of VECTOR objects
-    E2 = MATRIX(nstate,nstate)
+    E2 = MATRIX(nstates,nstates)
 
 
     #======== Run QE calculations and get the info at time step t+dt ========
@@ -121,15 +122,15 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     D_mol = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
-    E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-    D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    #D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
     ### END TO DO
 
     if params["print_mo_ham"]==1:
         E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
         D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
-        E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
-        D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
+        #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
+        #D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
 
 
     # store "t+dt"(new) parameters on "t"(old) ones
