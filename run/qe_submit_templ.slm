@@ -29,5 +29,5 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
 
 #srun pw.x < x.md.in > x.md.out
-python run.py
+python qe_run.py
 
