@@ -311,6 +311,16 @@ def gms_extract(filename,flag):
     E, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
     ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
+
+#   Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao
+#   list. This will allow us make further computations faster and in consistent with those adopted
+#   in QE
+
+    # Convert the KS excitation energies and the ground state potential energy into
+    # the total energies of excited states (1-electron basis)
+#    nstates = E.num_of_cols
+#    for i in xrange(nstates)
+
     
     if flag == 1:
         print "********************************************"

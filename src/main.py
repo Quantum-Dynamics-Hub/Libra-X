@@ -82,7 +82,7 @@ def main(params):
     label, Q, R, ao, tot_ene = None, [], None, [], None
     sd_basis = []
     all_grads = []
-    e = MATRIX(nstates,nstates)
+    e = MATRIX(nstates,nstates)  # contains total energy of excited states!
     
     if params["interface"]=="GAMESS":
 

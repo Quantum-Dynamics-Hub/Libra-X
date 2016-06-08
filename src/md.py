@@ -165,10 +165,19 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #=============== Propagation =======================
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
+    ens_sz = nconfig * nstates * num_SH_traj
+    epot = [0.0]*ens_sz
+    ekin = [0.0]*ens_sz
+    etot = [0.0]*ens_sz
+    eext = [0.0]*ens_sz
+    mu = []
+    for i in xrange(ens_sz):
+        mu.append(MATRIX())
+
 
     for i in xrange(Nsnaps):   # number of printouts
 
-        tot_ene = []; mu = []; # initialize lists
+#        tot_ene = []; mu = []; # initialize lists
 
         for j in xrange(Nsteps):   # number of integration steps per printout
             ij = i*Nsteps + j
@@ -200,7 +209,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
 
                         # ======= Compute forces and energies using external package ============
-                        tot_ene0 = 0.0
+                        #tot_ene0 = 0.0
                         nac = CMATRIX()
                         all_grads = []
                         opt = 0 # default
@@ -212,15 +221,15 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients
-                            E_mol_red, nac, sd_basis[cnt], all_grads, tot_ene0, mu0 = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
-                            tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
+                            E_mol_red, nac, sd_basis[cnt], all_grads, tot_ene0, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
+                            #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
 
                             # update MO and gradients
                             E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-                            tot_ene.append(E[cnt])
+                            #tot_ene.append(E[cnt])
 
                         # ============== Common blocks ==================
 
@@ -238,9 +247,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
            
                         # update potential energy
-                        epot = tot_ene0 + compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
-                        ekin = compute_kinetic_energy(mol[cnt])
-                        etot = epot + ekin
+                        # according to new convention (yet to be implemented for GMS and need to
+                        # check for QE - the Hamiltonians will contain the total energies of 
+                        # excited stes, so no need for reference energy)
+                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])
+                        etot[cnt] = epot[cnt] + ekin[cnt]
+                        eext[cnt] = etot[cnt]
           
                         if MD_type == 1:
                             therm[cnt].propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
@@ -251,6 +264,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         if MD_type == 1: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
+
+                            eext[cnt] = eext[cnt] + therm[cnt].energy() 
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
@@ -281,7 +296,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:
-            print_results.auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params)
+            print_results.print_ens_traj(i,mol,syst,mu,epot,ekin,etot,eext,params)
 
         print "       ********* %i snap ends ***********" % i
         print 

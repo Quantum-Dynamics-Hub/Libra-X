@@ -21,22 +21,20 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-def print_one_traj(isnap, iconf, i_ex, itraj, mol, el, ham, syst, ao, therm,mu, epot,f_pot,params):
+def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, eext, params):
     # This function prints out the results for only one trajectory.
     #
     # \param[in] isnap   snap index 
     # \param[in] iconf   initial geometry index
     # \param[in] i_ex    initial excitation index
     # \param[in] itraj   TSH trajectory index
-    # \param[in] mol     contains nuclear DOFs of a single trajectory
-    # \param[in] el      contains electronic DOFs of a single trajectory
-    # \param[in] ham     Hamiltonian of a single trajectory
-    # \param[in] syst    molecular system of a single trajectory
-    # \param[in] ao      contains Atomic Orbital basis (list of AOs) of a single trajectory
-    # \param[in] therm   thermostat of a single trajectory
+    # \param[in] mol     list of objects containing Nuclear DOF's whose size is nconfig*nstates*num_SH_traj. Lists below have the same size as this.
+    # \param[in] syst    list of objects containing atomic system information
     # \param[in] mu      is a transition dipole moment matrix (MATRIX object) of a single trajectory
     # \param[in] epot    current electronic state potential energy for one trajectory, so this is a floating point value
-    # \param[in] f_pot      flag for potential energy : option 0 - Ehrenfest, 1 - TSH 
+    # \param[in] ekin
+    # \param[in] etot
+    # \param[in] eext
     # \param[in] params     list of input parameters from run.py
     #                                                                                                                                                        
     # Used in:  print_results.py/auxiliary
@@ -54,17 +52,10 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, el, ham, syst, ao, therm,mu, 
 #        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
 #    elif params["interface"] == "QE":
 #        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
+#    print "epot = ", epot    
+#    ekin = compute_kinetic_energy(mol)
 
-    print "epot = ", epot
-    
-    ekin = compute_kinetic_energy(mol)
-    etot = ekin + epot
-
-    ebath = 0.0
-    if MD_type == 1:
-        ebath = therm.energy()
-    eext = etot + ebath
-    curr_T = 2.0*ekin/(3*syst.Number_of_atoms*kB)
+    curr_T = 2.0*ekin/(3.0*syst.Number_of_atoms*kB)
 
     # set file name
     num_tmp = "_"+str(iconf)+"_"+str(i_ex)+"_"+str(itraj)
@@ -81,6 +72,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, el, ham, syst, ao, therm,mu, 
     fe = open(ene_file,"a")
     fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
+
     
     if params["interface"] == "GAMESS":       
         # Dipole moment components
@@ -93,21 +85,19 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, el, ham, syst, ao, therm,mu, 
         fm.close()
 
 
-def print_ens_traj(isnap,mol,el,ham,syst,ao,therm,mu,epot,f_pot,params):
+def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
     # This function prints out auxiliary results for an ensemble of trajectories:
     # one trajctory contains the index of initial geometry, initial excitation state
     # (TSH trajectory, optionally)
     #
     # \param[in] isnap   snap index
     # \param[in] mol     list of objects containing Nuclear DOF's whose size is nconfig*nstates*num_SH_traj. Lists below have the same size as this.
-    # \param[in] el      list of objects containing Electronic DOF's 
-    # \param[in] ham     list of objects containing Nuclear and Electornic DOF's (hamiltonian in this system)
     # \param[in] syst    list of objects containing atomic system information
-    # \param[in] ao      list of objects containing Atomic Orbital basis (AO objects)
-    # \param[in] therm   list of objects containing thermostat variables
     # \param[in] mu      list of transition dipole moments (MATRIX objects)
     # \param[in] epot    list of the current electronic state potential energies for each trajectory in the ensemble, so this is a list of N floating point values
-    # \param[in] f_pot   flag for potential energy : option 0 - Ehrenfest, 1 - TSH
+    # \param[in] ekin
+    # \param[in] etot   
+    # \param[in] eext
     # \param[in] params  list of input parameters from run.py
     #
     # Used in:  md.py/run_MD 
@@ -121,7 +111,7 @@ def print_ens_traj(isnap,mol,el,ham,syst,ao,therm,mu,epot,f_pot,params):
             for itraj in xrange(num_SH_traj):
 
                 cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
-                print_one_traj(isnap,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
+                print_one_traj(isnap,iconf,i_ex,itraj,mol[cnt],syst[cnt],mu[cnt],epot[cnt], ekin[cnt], etot[cnt], eext[cnt],params)
 
 
 
