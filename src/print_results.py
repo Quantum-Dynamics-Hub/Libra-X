@@ -21,21 +21,21 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
-    # This function prints out the auxiliary results for only one trajectory.
+def print_one_traj(isnap, iconf, i_ex, itraj, mol, el, ham, syst, ao, therm,mu, epot,f_pot,params):
+    # This function prints out the results for only one trajectory.
     #
-    # \param[in] i          snap index 
-    # \param[in] iconf      initial geometry index
-    # \param[in] i_ex       initial excitation index
-    # \param[in] itraj      TSH trajectory index
-    # \param[in] mol[n]     contains the nuclear configuration of n-th trajectory
-    # \param[in] el[n]      contains electronic DOFs of n-th trajectory
-    # \param[in] ham[n]     hamiltonian in n-th trajectory
-    # \param[in] syst[n]    System in n-th trajectory
-    # \param[in] ao[n]      contains Atomic Orbital basis of n-th trajectory
-    # \param[in] therm[n]   thermostat in n-th trajectory
-    # \param[in] mu[n]      contains dipole moment of n-th trajectory
-    # \param[in] tot_ene[n] total energy from GAMESS output in n-th trajectory
+    # \param[in] isnap   snap index 
+    # \param[in] iconf   initial geometry index
+    # \param[in] i_ex    initial excitation index
+    # \param[in] itraj   TSH trajectory index
+    # \param[in] mol     contains nuclear DOFs of a single trajectory
+    # \param[in] el      contains electronic DOFs of a single trajectory
+    # \param[in] ham     Hamiltonian of a single trajectory
+    # \param[in] syst    molecular system of a single trajectory
+    # \param[in] ao      contains Atomic Orbital basis (list of AOs) of a single trajectory
+    # \param[in] therm   thermostat of a single trajectory
+    # \param[in] mu      is a transition dipole moment matrix (MATRIX object) of a single trajectory
+    # \param[in] epot    current electronic state potential energy for one trajectory, so this is a floating point value
     # \param[in] f_pot      flag for potential energy : option 0 - Ehrenfest, 1 - TSH 
     # \param[in] params     list of input parameters from run.py
     #                                                                                                                                                        
@@ -46,13 +46,14 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
     nstates = el.nstates
-    ij = i*params["Nsteps"]
+    ij = isnap*params["Nsteps"]
 
     # Re-compute energies, to print
-    if params["interface"] == "GAMESS":
-        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
-    elif params["interface"] == "QE":
-        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
+# WE DON'T WANT TO CALL compute_potential_energy here!
+#    if params["interface"] == "GAMESS":
+#        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
+#    elif params["interface"] == "QE":
+#        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
 
     print "epot = ", epot
     
@@ -92,20 +93,20 @@ def one_trajectory(i,iconf,i_ex,itraj,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,
         fm.close()
 
 
-def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
-    # This function prints out auxiliary results for a bunch of trajectories:
+def print_ens_traj(isnap,mol,el,ham,syst,ao,therm,mu,epot,f_pot,params):
+    # This function prints out auxiliary results for an ensemble of trajectories:
     # one trajctory contains the index of initial geometry, initial excitation state
     # (TSH trajectory, optionally)
     #
-    # \param[in] i       snap index
+    # \param[in] isnap   snap index
     # \param[in] mol     list of objects containing Nuclear DOF's whose size is nconfig*nstates*num_SH_traj. Lists below have the same size as this.
     # \param[in] el      list of objects containing Electronic DOF's 
     # \param[in] ham     list of objects containing Nuclear and Electornic DOF's (hamiltonian in this system)
     # \param[in] syst    list of objects containing atomic system information
-    # \param[in] ao      list of objects containing Atomic Orbital basis 
+    # \param[in] ao      list of objects containing Atomic Orbital basis (AO objects)
     # \param[in] therm   list of objects containing thermostat variables
-    # \param[in] mu      list of dipole moments
-    # \param[in] tot_ene list of total energies from GAMESS outputs
+    # \param[in] mu      list of transition dipole moments (MATRIX objects)
+    # \param[in] epot    list of the current electronic state potential energies for each trajectory in the ensemble, so this is a list of N floating point values
     # \param[in] f_pot   flag for potential energy : option 0 - Ehrenfest, 1 - TSH
     # \param[in] params  list of input parameters from run.py
     #
@@ -120,10 +121,9 @@ def auxiliary(i,mol,el,ham,syst,ao,therm,mu,tot_ene,f_pot,params):
             for itraj in xrange(num_SH_traj):
 
                 cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
-                if params["interface"] == "QE":
-                    ao.append(0.0)
-                    mu.append(0.0)
-                one_trajectory(i,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
+                print_one_traj(isnap,iconf,i_ex,itraj,mol[cnt],el[cnt],ham[cnt],syst[cnt],ao[cnt],therm[cnt],mu[cnt],tot_ene[cnt],f_pot,params)
+
+
 
 def pops_ave_TSH_traj(i,el,params):
     # This function prints out SE and SH populations averaged over TSH trajectories (only one trajectory without SH calculation);
