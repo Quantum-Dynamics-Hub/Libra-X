@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file gamess_to_libra.py 
+## \file x_to_libra_gms.py 
 # This module implements the functions that extract parameters from the gamess output file:
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information.
 # The forces are used for simulating Classical MD on Libra 

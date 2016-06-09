@@ -21,7 +21,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/install/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
@@ -29,6 +29,8 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 ########## Setup all manual parameters here ####################
 
 params = {}
+
+params["interface"] = "GAMESS"
 
 # GAMESS variables
 # We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
@@ -144,7 +146,7 @@ params["check_tsh_probabilities"] = 1      # print the hopping probabilities if 
 
 # ***************************************************************
 
-from create_states import *
+#from states import *
 
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 

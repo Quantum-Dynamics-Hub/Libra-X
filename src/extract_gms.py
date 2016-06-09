@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file extract.py
+## \file extract_gms.py
 # This module implements the functions that extract
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information
 # written in gamess output file.
@@ -25,7 +25,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 import detect
 import ao_basis
-
+import misc
 
 def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
@@ -41,11 +41,17 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
     atom_spec = []
     sz = len(inp_str)
 
+    # atom labels
     for i in xrange(sz):
         spline = inp_str[i].split()
         if len(spline) == 1:
             l_atom_spec.append(i)
-            atom_spec.append(spline[0])
+            # **** Here, atomic names are changed *****
+            atom = spline[0]
+            if len(atom) > 1:
+                atom = atom[0] + atom[1].lower()
+            atom_spec.append(atom)
+            # *****************************************
 
 
     # atomic basis sets
@@ -166,52 +172,54 @@ def gms_extract_mo(inp_str,Ngbf,flag):
     #
     # Used in: extract.py/extract
 
-    stat_span = 4 + Ngbf
+    # **************  moved code from devel branch starts ****************
 
-    mol_ene = []
-    l_tmp = []
-    mol_coef = []
+    stat_span = Ngbf + 4 # period for beginning of coefficient lines
+
     sz = len(inp_str) 
- 
-    for i in xrange(sz):
-        spline = inp_str[i].split() 
 
-        # molecular energy
-        if i % stat_span == 1 :
-            l_tmp.append(i+2)
-            for j in range(0,len(spline)):
-                mol_ene.append(float(spline[j]))
-
-    # molecular coefficients
-    for i in l_tmp:
-        for j in range(i,i+Ngbf):
-            coef_tmp = []
-            spline = inp_str[j].split() #l_gam[j].split()
-            if len(mol_coef) < Ngbf:
-                for k in range(4,len(spline)):
-                    coef_tmp.append(float(spline[k]))
-                mol_coef.append(coef_tmp)
-            else:
-                for k in range(4,len(spline)):
-                    mol_coef[j-i].append(float(spline[k]))
-
-    # create objects of MATRIX type, containing eigenvalues and eigenvectors
+    # create objects of MATRIX type, containing eigenvalues and eigenvectors 
     E = MATRIX(Ngbf,Ngbf)
     C = MATRIX(Ngbf,Ngbf)
 
-    for i in range(0,Ngbf):
-        E.set(i,i,mol_ene[i])
-        for j in range(0,Ngbf):
-            C.set(i,j,mol_coef[i][j])
+    for i in xrange(sz):
+
+        if i % stat_span == 0 :
+            ind_of_eig = inp_str[i].split() # split lines for indexes of eigenvalues
+
+            # eigenvalues
+            eig_val = inp_str[i+1].split() # split lines for eigenvalues
+            for j in range(0,len(ind_of_eig)):
+                k = int(ind_of_eig[j]) - 1           # python index start from 0
+                E.set(k,k,float(eig_val[j]))
+
+            # molecular coefficients
+            ic = i + 3                              # beginning of coefficient lines
+            for j in range(ic,ic+Ngbf):             # loop for AO basis
+                eig_vec = inp_str[j].split()        # split lines for eigenvectors
+                for k in range(0,len(ind_of_eig)):  
+                    ja = int(eig_vec[0]) - 1            # index of AO basis
+                    ke = int(ind_of_eig[k]) - 1         # index of eigenvectors
+                    if len(eig_vec[1]) == 4:        # continuous word like "CL44"
+                        kvec = k + 3
+                    else:                           # discontinuous word like "H 20" 
+                        kvec = k + 4
+                    C.set(ja,ke,float(eig_vec[kvec]))
 
     if flag == 1:
         print "E Matrix is"; E.show_matrix()
         print "C Matrix is"; C.show_matrix()
+        #print "E(0,0) is",E.get(0,0)
+        #print "E(Ngbf-1,Ngbf-1) is",E.get(Ngbf-1,Ngbf-1)
+        #print "C(0,0) is",C.get(0,0) 
+        #print "C(Ngbf-1,0) is",C.get(Ngbf-1,0)
+        #print "C(0,Ngbf-1) is",C.get(0,Ngbf-1)
+        #print "C(Ngbf-1,Ngbf-1) is",C.get(Ngbf-1,Ngbf-1)
 
+    # ******************* moved code ends *******************************
 
     return E, C
     
-
 def gms_extract_coordinates(inp_str,flag):
     ##
     # Extracts atomic labels, nuclear charges, and coordinates of all atoms
@@ -287,12 +295,15 @@ def gms_extract_gradient(inp_str,flag):
     return grad
 
 
-def gms_extract(filename,flag):
+def gms_extract(filename,flag,HOMO_indx,min_shift,max_shift):
     ##
     # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 
     # AOs, etc. ) from the GAMESS output.
     # \param[in] filename The name of the GAMESS output file from which we will be getting info
     # \param[in] flag : a flag for debugging detect module
+    # \param[in] HOMO_indx : HOMO index in Python way (start from 0)
+    # \param[in] min_shift : shift from HOMO to lowest orbital in active space
+    # \param[in] max_shift : shift from HOMO to highest orbital in active space
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, as objects
     #
@@ -308,25 +319,27 @@ def gms_extract(filename,flag):
     # extract information from gamess output file
     label, Q, R = gms_extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
     grad = gms_extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
-    E, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
+    E_full, C_full = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
     ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
 
-#   Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao
-#   list. This will allow us make further computations faster and in consistent with those adopted
-#   in QE
+    #   Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao
+    #   list. This will allow us make further computations faster and in consistent with those adopted
+    #   in QE
+    E = misc.reduce_matrix(E_full,min_shift,max_shift,HOMO_indx) # E_full -> E
+    C = misc.reduce_matrix(C_full,min_shift,max_shift,HOMO_indx) # C_full -> C
 
     # Convert the KS excitation energies and the ground state potential energy into
     # the total energies of excited states (1-electron basis)
-#    nstates = E.num_of_cols
-#    for i in xrange(nstates)
-
+    #    nstates = E.num_of_cols
+    #    for i in xrange(nstates)
+    
     
     if flag == 1:
         print "********************************************"
         print "extract program ends"
         print "********************************************\n"
-
+    
     return label, Q, R, grad, E, C, ao, info["tot_ene"]
 
 

@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file ao_basis.py
+## \file ao_basis_gms.py
 # This module implements the functions that constructs atomic orbital basis
 # by n Gaussian Type Orbitals (nGTO)
 
