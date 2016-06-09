@@ -9,11 +9,8 @@
 #*
 #*********************************************************************************/
 
-## \file gamess_to_libra.py
-# This module implements the functions that extract parameters from the gamess output file:
-# atomic forces , molecular energies, molecular orbitals, and atomic basis information.
-# The forces are used for simulating Classical MD on Libra
-# and the others for calculating time-averaged energies and Non-Adiabatic Couplings(NACs).
+## \file misc.py
+# This module implements a function reducing matrix sizes.
 
 import os
 import sys

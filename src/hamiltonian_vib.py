@@ -8,7 +8,7 @@
 #* or <http://www.gnu.org/licenses/>.
 #*
 #*********************************************************************************/
-## \file vibronic_hamiltonian.py
+## \file hamiltonian_vib.py
 # This module implements the function which creates vibronic hamiltonian object.
 
 import os

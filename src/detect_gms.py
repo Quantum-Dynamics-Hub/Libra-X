@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file detect.py
+## \file detect_gms.py
 # This module implements the functions that detect columns showing
 # gradients, molecular energies, molecular orbitals, and atomic basis information
 # written in the GAMESS output file.
@@ -19,10 +19,11 @@ import sys
 import math
 
 
-def detect_columns(inp_lines):
+def detect_columns(inp_lines,flag_ao):
     ##
     # Finds the keywords and their patterns and extracts the descriptors info
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
+    # \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - The returned dictionary of descriptors of the given input lines.
     #
     # Used in: detect.py/detect
@@ -39,6 +40,11 @@ def detect_columns(inp_lines):
             info["lele"] = i
             info["Nele"] = int(spline[4])
 
+        # the number of atoms
+        if len(spline) == 6 and spline[0] == "TOTAL" and spline[3]== "ATOMS":
+            info["latoms"] = i
+            info["Natoms"] = int(spline[5])
+
         # the number of occupied orbitals (alpha and beta)
         if len(spline) == 7 and spline[4] == "(ALPHA)":
             info["locc_alp"] = i
@@ -53,13 +59,12 @@ def detect_columns(inp_lines):
             info["Ngbf"] = int(spline[7])
 
         # the atomic basis sets
-        if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
-            info["ab_start"] = i + 7
-        if len(spline) == 8 and spline[5] == "SHELLS":
-            info["ab_end"] = i - 2
-
-        #***********   single point calculation  ************
-
+        if flag_ao == 1:
+            if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
+                info["ab_start"] = i + 7
+            if len(spline) == 8 and spline[5] == "SHELLS":
+                info["ab_end"] = i - 2
+        
         # eigenvectors
         if len(spline) > 0 and spline[0] == "EIGENVECTORS":
             info["mo_start"] = i + 3
@@ -69,15 +74,11 @@ def detect_columns(inp_lines):
         # the coordinates of the atoms (in Bohr)
         if len(spline) == 4 and spline[2] == "COORDINATES" and spline[3] == "(BOHR)":
             info["coor_start"] = i + 2
-        if len(spline) == 3 and spline[0] == "INTERNUCLEAR" and spline[1] == "DISTANCES":
-            info["coor_end"] = i -2
-            info["Natoms"] = info["coor_end"] - info["coor_start"] + 1
 
         # the gradients(in Hartree/Bohr)
 
         if len(spline) == 4 and spline[0] == "GRADIENT" and spline[3] == "ENERGY":
             info["grad_start"] = i + 4
-            info["grad_end"] = info["grad_start"] + info["Natoms"] -1
 
         # total energy
 
@@ -85,23 +86,36 @@ def detect_columns(inp_lines):
             info["ltot_ene"] = i
             info["tot_ene"] = float(spline[4])
 
+    # end index of Coordinates and Gradients
+
+    info["coor_end"] = info["Natoms"] + info["coor_start"] - 1
+    info["grad_end"] = info["Natoms"] + info["grad_start"] - 1 
+    
     return info
 
 
-def show_outputs(inp_lines,info):
+def show_outputs(inp_lines,info,flag_ao):
     ##
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
     # \param[in] info The dictionary of descriptors of the given input lines.
+    # \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # This function shows the positions of the data elements in the analyzed file and 
     # some other auxiliary information extracted from the file
     #
     # Used in: detect.py/detect
 
     print "******************************************"
+    print "according to the %i th column," % (info["latoms"]+1)
+    print inp_lines[info["latoms"]]
+    print "Natoms = %i" % info["Natoms"]
+    print "*******************************************"
+    print 
+    print "******************************************"
     print "according to the %i th column," % (info["lele"]+1)
     print inp_lines[info["lele"]]
     print "Nele = %i" % info["Nele"]
     print "*******************************************"
+    print 
     print "******************************************"
     print "according to the %i th column," % (info["locc_alp"]+1)
     print inp_lines[info["locc_alp"]]
@@ -117,12 +131,15 @@ def show_outputs(inp_lines,info):
     print "Ngbf = %i" % info["Ngbf"]
     print "*******************************************"
     print
-    print "******************************************"
-    print "ATOMIC BASIS SET is within %i - %i th lines." % (info["ab_start"]+1, info["ab_end"]+1)
-    for i in range(info["ab_start"],info["ab_end"]+1):
-        print inp_lines[i]
-    print "******************************************"
-    print
+
+    if flag_ao == 1:
+        print "******************************************"
+        print "ATOMIC BASIS SET is within %i - %i th lines." % (info["ab_start"]+1, info["ab_end"]+1)
+        for i in range(info["ab_start"],info["ab_end"]+1):
+            print inp_lines[i]
+        print "******************************************"
+        print
+
     print "******************************************"
     print "MOLECULAR ORBITALS is within %i - %i th lines." % (info["mo_start"]+1,info["mo_end"]+1)
     for i in range(info["mo_start"],info["mo_end"]+1):
@@ -133,7 +150,6 @@ def show_outputs(inp_lines,info):
     print "COORDINATES OF ATOMS (in Bohr) is within %i - %i th lines." %(info["coor_start"]+1,info["coor_end"]+1)
     for i in range(info["coor_start"],info["coor_end"]+1):
         print inp_lines[i]
-    print "And the number of atoms is ",info["Natoms"]
     print "******************************************"
     print
     print "******************************************"
@@ -150,22 +166,23 @@ def show_outputs(inp_lines,info):
     print
 
 
-def detect(inp_lines,flag):
+def detect(inp_lines,flag_deb,flag_ao):
     ## 
     # This function detects the positions of the valuable data in a file represented as a  
     # list of lines. It does not return the data itself, only the descriptors of where to
     # get the info about: atomic basis sets, molecular energies , molecular orbitals,
     # atomic gradients, coordinates, and labels.
     # \param[in] inp_lines The list of lines containing the file to be unpacked
-    # \param[in] flag Debug info printing: 1 - print, otherwise - don't 
+    # \param[in] flag_deb Debug info printing: 1 - print, otherwise - don't 
+    # \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - is the returned dictionary of descriptors of the given input lines
     #
     # Used in: extract.py/extract
 
-    info = detect_columns(inp_lines)
-
-    if flag == 1:
-        show_outputs(inp_lines,info)
+    info = detect_columns(inp_lines,flag_ao)
+    
+    if flag_deb == 1:
+        show_outputs(inp_lines,info,flag_ao)
 
         print "*********************************************"
         print "detect program ends"
