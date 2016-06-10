@@ -61,8 +61,13 @@ def main(params):
     ntraj = nstates*ninit*num_SH_traj
 
     #######
-    active_space = [6,7]  # For C2H4 
-    print "Implement the algorithm to define the active space"
+    #active_space = [6,7]  # For C2H4 
+    #print "Implement the algorithm to define the active space"
+    #********** active space is defined here *****************
+    active_space = []
+    for i in range(params["min_shift"],params["max_shift"]+1):
+        active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
+    #*********************************************************
     #sys.exit(0)
     ######
 
@@ -74,7 +79,6 @@ def main(params):
     elif params["interface"]=="QE":
         for ex_st in xrange(nstates):
             os.system("cp x%i.scf.in x%i.scf_wrk.in" % (ex_st, ex_st))
-
 
     #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
 
@@ -88,10 +92,15 @@ def main(params):
 
         params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
         exe_gamess(params)
-        label, Q, R, grads, e, c, ao, tot_ene = gms_extract(params["gms_out"],params["debug_gms_unpack"])
-        sd_basis.append(c)
-        all_grads.append(grads)
-
+        label, Q, R, grads, E, c, ao = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],\
+                                                            active_space,params["debug_gms_unpack"])
+        e = MATRIX(E)
+        for ex_st in xrange(nstates):
+            sd_basis.append(CMATRIX(c))
+            all_grads.append(copy.deepcopy(grads))
+        #print "sd_basis=",sd_basis
+        #print "all_grads=",all_grads
+        #sys.exit(0)
 
     elif params["interface"]=="QE":
         for ex_st in xrange(nstates):
@@ -185,8 +194,8 @@ def main(params):
                 el.append(Electronic(nstates,i_ex))
     
     # set list of SH state trajectories
-
-    print "run MD"
+    #sys.exit(0)
+    print "run MD" # added 2 inputs on the last part.
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
