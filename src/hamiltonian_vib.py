@@ -15,6 +15,8 @@ import os
 import sys
 import math
 
+from states import *
+
 if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
@@ -46,7 +48,7 @@ def compute_Hvib(H_el,NAC):
 
 
 
-def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suffix, opt):
+def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     ##
     #
     # This function transforms the 1- or N- electron energies matrix and the matrix of 
@@ -57,9 +59,9 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
     # \param[out] ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
     # \param[out] ham_vib Vibronic Hamiltonian (CMATRIX)
     # \param[in] params  contains the dictionary of the input parameters
-    # \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
-    # \param[in] D_mol_red   the matrix of the NACs computed with the 1-electon MOs, in reduced space
-    # (CMATRIX)
+    # \param[in] E_SD matrix of total excitation energy 
+    ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
+    # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
     # \param[in] suffix the suffix to add to the file names for the files created in this function
     # \param[in] opt The option that defines what kind of electronic approximation has been utilized
     # opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case D_mol_red is typically 
@@ -98,22 +100,25 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
 
     pyx_st = pyxaid_states(states, min_shift, max_shift)
 
-    #============ EX energies ================
+    #============ EX energies ===============    
     for i in xrange(nstates):
 
-        h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
-        e_indx = states[i].to_orbit[0] - min_shift  # --- same, only for the electron orbital
+        #h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
+        #e_indx = states[i].to_orbit[0] - min_shift  # --- same, only for the electron orbital
 
-        EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx) # excitation energy
-       
-        H_el.set(i,i,EX_ene)
-        ham_el.set(i,i,EX_ene)
-        ham_vib.set(i,i,EX_ene, 0.0)
+        #EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx) # excitation energy
+        H_el.set(i,i,E_SD.get(i,i))
+        ham_el.set(i,i,E_SD.get(i,i))
+        ham_vib.set(i,i,E_SD.get(i,i), 0.0)
 
-        if flag==1:
-            print "excitation ", i, " h_indx = ", h_indx, " e_indx = ", e_indx, " EX_ene = ", EX_ene
-            print "source orbital energy = ",E_mol_red.get(h_indx,h_indx)
-            print "target orbital energy = ",E_mol_red.get(e_indx,e_indx)
+        #H_el.set(i,i,EX_ene)
+        #ham_el.set(i,i,EX_ene)
+        #ham_vib.set(i,i,EX_ene, 0.0)
+
+        #if flag==1:
+        #    print "excitation ", i, " h_indx = ", h_indx, " e_indx = ", e_indx, " EX_ene = ", EX_ene
+        #    print "source orbital energy = ",E_mol_red.get(h_indx,h_indx)
+        #    print "target orbital energy = ",E_mol_red.get(e_indx,e_indx)
 
 
     #============== Couplings =================
@@ -138,22 +143,22 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_mol_red,D_mol_red,suff
                         i = abs(a) - 1
                         j = abs(b) - 1
                         print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
-                        D_el.set(I,J, (-1.0j+0.0)*D_mol_red.get(i,j))
-                        ham_vib.set(I,J,(-1.0j+0.0)*D_mol_red.get(i,j))
+                        D_el.set(I,J,(-1.0j+0.0)*nac.get(i,j))
+                        ham_vib.set(I,J,(-1.0j+0.0)*nac.get(i,j))
                     else:
                         D_el.set(I,J, 0.0, 0.0)
                         ham_vib.set(I,J, 0.0, 0.0)
                     print "\n"
 
                 else:  # N-electron approximation - coupling is alreay there
-                    D_el.set(I,J, (-1.0j+0.0)*D_mol_red.get(I,J))
-                    ham_vib.set(I,J,(-1.0j+0.0)*D_mol_red.get(I,J))
+                    D_el.set(I,J, (-1.0j+0.0)*nac.get(I,J))
+                    ham_vib.set(I,J,(-1.0j+0.0)*nac.get(I,J))
                     print "\n"
       
     if params["print_sd_ham"] == 1:
         H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)
-        D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
-
+        #D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
+        # ********** "CMATRIX.show_matrix(filename)" is not defined here ******
 
     # Returned values - actually we just update matrices ham_el and ham_vib 
     # 
