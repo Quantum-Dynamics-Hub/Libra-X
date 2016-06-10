@@ -6,7 +6,7 @@ import os
 import sys
 import math
 
-user = 0 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -30,6 +30,7 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 params = {}
 
+# Of course, here we use GAMESS
 params["interface"] = "GAMESS"
 
 # GAMESS variables
@@ -59,7 +60,7 @@ elif user==1:
     params["GMSPATH"] = "/home/e1667/install/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work_NAMD/gamess_scratch"
+    params["scr_dir"] = "/home/e1667/work/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
@@ -146,7 +147,7 @@ params["check_tsh_probabilities"] = 1      # print the hopping probabilities if 
 
 # ***************************************************************
 
-#from states import *
+from states import *
 
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
