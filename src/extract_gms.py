@@ -23,8 +23,8 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-import detect
-import ao_basis
+import detect_gms
+import ao_basis_gms
 import misc
 
 def gms_extract_ao_basis(inp_str, label, R, flag):
@@ -136,7 +136,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         coef_d.append(coef_dtmp)
 
 
-    orb_name, scount, pcount, dcount, lcount = ao_basis.input_AO_name(label, atom_spec, basis_type, flag)
+    orb_name, scount, pcount, dcount, lcount = ao_basis_gms.input_AO_name(label, atom_spec, basis_type, flag)
 
     ao_data = {}
     ao_data["expo_s"] = expo_s
@@ -155,32 +155,33 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         print "coef_d=",ao_data["coef_d"]
 
 
-    ao = ao_basis.construct_ao_basis(ao_data,label,R,scount,orb_name)
+    ao = ao_basis_gms.construct_ao_basis(ao_data,label,R,scount,orb_name)
 
     return ao
 
 
-def gms_extract_mo(inp_str,Ngbf,flag):
+def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
     # assumed format is:
     # ???
     # \param[in] inp_str  Strings containing the info for all orbitals
-    # E - returned MATRIX object, containing the eigenvalues
-    # C - returned MATRIX object, containing the eigenvectors:
+    # \param[in] Ngbf   Number of Gaussian Basis Functions
+    # \param[in] active_space molecular orbital considered during the calculation
+    # \param[in] flag for debugging
+    # E - returned MATRIX object, containing the reduced eigenvalues
+    # C - returned MATRIX object, containing the reduced eigenvectors:
     # C.get(a,i) - is the coefficient of AO with index a in the MO with index i
     #
     # Used in: extract.py/extract
-
-    # **************  moved code from devel branch starts ****************
 
     stat_span = Ngbf + 4 # period for beginning of coefficient lines
 
     sz = len(inp_str) 
 
     # create objects of MATRIX type, containing eigenvalues and eigenvectors 
-    E = MATRIX(Ngbf,Ngbf)
-    C = MATRIX(Ngbf,Ngbf)
+    E_full = MATRIX(Ngbf,Ngbf)
+    C_full = MATRIX(Ngbf,Ngbf)
 
     for i in xrange(sz):
 
@@ -191,7 +192,7 @@ def gms_extract_mo(inp_str,Ngbf,flag):
             eig_val = inp_str[i+1].split() # split lines for eigenvalues
             for j in range(0,len(ind_of_eig)):
                 k = int(ind_of_eig[j]) - 1           # python index start from 0
-                E.set(k,k,float(eig_val[j]))
+                E_full.set(k,k,float(eig_val[j]))
 
             # molecular coefficients
             ic = i + 3                              # beginning of coefficient lines
@@ -204,19 +205,40 @@ def gms_extract_mo(inp_str,Ngbf,flag):
                         kvec = k + 3
                     else:                           # discontinuous word like "H 20" 
                         kvec = k + 4
-                    C.set(ja,ke,float(eig_vec[kvec]))
+                    C_full.set(ja,ke,float(eig_vec[kvec]))
+
+    #Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao list. 
+    #This will allow us make further computations faster and in consistent with those adopted in QE 
+
+    # ***********Here, reduce E_full and C_full ***************
+    sz = len(active_space)
+    if sz > 1:
+        E = MATRIX(sz,sz)
+        C = CMATRIX(Ngbf,sz)
+        for i in xrange(sz):
+            imo = active_space[i]-1
+            E.set(i,i,E_full.get(imo,imo))
+
+        for i in xrange(Ngbf):
+            for j in xrange(sz):
+                jmo = active_space[j]-1
+                C.set(i,j,C_full.get(i,jmo),0.0)
+    else:
+        print "active space is not defined correctly, exit....."
+        sys.exit(0)
 
     if flag == 1:
+        print "*** full matrix ****"
+        print "E_full(0,0) is",E_full.get(0,0)
+        print "E_full(Ngbf-1,Ngbf-1)",E_full.get(Ngbf-1,Ngbf-1)
+        print "C_full(0,0) is",C_full.get(0,0)
+        print "C_full(Ngbf-1,0) is",C_full.get(Ngbf-1,0)
+        print "C_full(0,Ngbf-1) is",C_full.get(0,Ngbf-1)
+        print "C_full(Ngbf-1,Ngbf-1) is",C_full.get(Ngbf-1,Ngbf-1)
+        print "*** reduced matrix ****"
+        print "active_space=",active_space
         print "E Matrix is"; E.show_matrix()
         print "C Matrix is"; C.show_matrix()
-        #print "E(0,0) is",E.get(0,0)
-        #print "E(Ngbf-1,Ngbf-1) is",E.get(Ngbf-1,Ngbf-1)
-        #print "C(0,0) is",C.get(0,0) 
-        #print "C(Ngbf-1,0) is",C.get(Ngbf-1,0)
-        #print "C(0,Ngbf-1) is",C.get(0,Ngbf-1)
-        #print "C(Ngbf-1,Ngbf-1) is",C.get(Ngbf-1,Ngbf-1)
-
-    # ******************* moved code ends *******************************
 
     return E, C
     
@@ -295,15 +317,15 @@ def gms_extract_gradient(inp_str,flag):
     return grad
 
 
-def gms_extract(filename,flag,HOMO_indx,min_shift,max_shift):
+def gms_extract(filename,states,min_shift,active_space,flag):
     ##
     # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 
     # AOs, etc. ) from the GAMESS output.
     # \param[in] filename The name of the GAMESS output file from which we will be getting info
-    # \param[in] flag : a flag for debugging detect module
-    # \param[in] HOMO_indx : HOMO index in Python way (start from 0)
-    # \param[in] min_shift : shift from HOMO to lowest orbital in active space
-    # \param[in] max_shift : shift from HOMO to highest orbital in active space
+    # \param[in] states excitation states
+    # \param[in] min_shift -1 -> includes HOMO-1, HOMO
+    # \param[in] active_space molecular orbital considered during the calculation 
+    # \param[in] flag  a flag for debugging detect module
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, as objects
     #
@@ -314,32 +336,32 @@ def gms_extract(filename,flag,HOMO_indx,min_shift,max_shift):
     f.close()
 
     # detect the lines including information from gamess output file
-    info = detect.detect(A,flag)
+    info = detect_gms.detect(A,flag)
 
     # extract information from gamess output file
     label, Q, R = gms_extract_coordinates(A[info["coor_start"]:info["coor_end"]+1], flag)
     grad = gms_extract_gradient(A[info["grad_start"]:info["grad_end"]+1], flag)
-    E_full, C_full = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"], flag)
+    E_MO, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"],active_space,flag)
     ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
+    # ***********************************************************
+    # Convert the KS excitation energies and the ground state potential energy into 
+    # the total energies of excited states (1-electron basis)                                                                                               
+    nstates = len(states)
+    E = MATRIX(nstates,nstates)
+    for i in xrange(nstates):
+        h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
+        e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
+        EX_ene = info["tot_ene"] + E_MO.get(e_indx,e_indx) - E_MO.get(h_indx,h_indx) # excitation energy
+        E.set(i,i,EX_ene)
 
-    #   Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao
-    #   list. This will allow us make further computations faster and in consistent with those adopted
-    #   in QE
-    E = misc.reduce_matrix(E_full,min_shift,max_shift,HOMO_indx) # E_full -> E
-    C = misc.reduce_matrix(C_full,min_shift,max_shift,HOMO_indx) # C_full -> C
-
-    # Convert the KS excitation energies and the ground state potential energy into
-    # the total energies of excited states (1-electron basis)
-    #    nstates = E.num_of_cols
-    #    for i in xrange(nstates)
-    
-    
     if flag == 1:
+        print "ground states energy is",info["tot_ene"]
+        print "Excitation Energy E is",E.show_matrix()
         print "********************************************"
         print "extract program ends"
         print "********************************************\n"
     
-    return label, Q, R, grad, E, C, ao, info["tot_ene"]
+    return label, Q, R, grad, E, C, ao
 
 
