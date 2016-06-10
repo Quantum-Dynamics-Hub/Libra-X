@@ -21,7 +21,7 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, eext, params):
+def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, eext, params):
     # This function prints out the results for only one trajectory.
     #
     # \param[in] isnap   snap index 
@@ -43,7 +43,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, e
     dt_nucl = params["dt_nucl"]
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
-    nstates = el.nstates
+    nstates = len(params["excitations"])
     ij = isnap*params["Nsteps"]
 
     # Re-compute energies, to print
@@ -66,7 +66,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, e
     ##print 
     # Geometry
     syst.set_atomic_q(mol.q)
-    syst.print_xyz(traj_file,i)
+    syst.print_xyz(traj_file,ij)
 
     # Energy
     fe = open(ene_file,"a")
@@ -78,8 +78,12 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, e
         # Dipole moment components
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
-        for k in xrange(len(ao)):
-            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        #**************modified here**************
+        Nao = mu[0].num_of_rows
+        #for k in xrange(Nao):
+        #    line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        # Now, mu is complex number, real an imaginary part will be printed separately.
+        # *****************************************
         line = line + "\n"
         fm.write(line)
         fm.close()
@@ -103,7 +107,7 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
     # Used in:  md.py/run_MD 
 
     nconfig = params["nconfig"]
-    nstates = el[0].nstates
+    nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
     for iconf in xrange(nconfig):
