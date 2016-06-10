@@ -31,7 +31,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
-import print_results_qe
+#import print_results_qe
 
 
 ##############################################################
@@ -93,6 +93,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     # \param[in,out] E    list of Molecular orbital energies
     # \param[in,out] sd_basis list of lists of MO-LCAO coefficients, such that 
     # sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i. Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
+    # \param[in,out] params list of input parameters from (gms/qe)_run.py , which will get some changes here.
     # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
     # \param[in] Q        list of atomic charges
     # \param[in] active_space The list of indices (starting from 1) of the MOs to include in
@@ -221,7 +222,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients
-                            E_mol_red, nac, sd_basis[cnt], all_grads, tot_ene0, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], str(ij) )
+                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], \
+                                                                                                              sd_basis[cnt], active_space,str(ij) )
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
                         elif params["interface"]=="QE":
@@ -243,7 +245,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
-                        update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params,E_mol_red,nac, str(ij), opt)
+                        update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
 
            
                         # update potential energy
@@ -256,7 +258,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         eext[cnt] = etot[cnt]
           
                         if MD_type == 1:
-                            therm[cnt].propagate_nhc(dt_nucl, ekin, 0.0, 0.0)
+                            therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
                         mol[cnt].propagate_p(0.5*dt_nucl)
 
