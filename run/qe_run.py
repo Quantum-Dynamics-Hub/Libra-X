@@ -98,9 +98,10 @@ if user==0:
 
 if user==1:
     # For Ekadashi
-    params["res"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/res/"
-    params["mo_ham"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/mo_ham/"
-    params["sd_ham"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/sd_ham/"
+    cwd = os.getcwd()
+    params["res"] = cwd+"/res/"
+    params["mo_ham"] = cwd+"/mo_ham/"
+    params["sd_ham"] = cwd+"/sd_ham/"
 
 
 # output file
