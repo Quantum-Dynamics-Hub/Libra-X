@@ -15,7 +15,7 @@ if user==0:
 elif user==1:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
-    libra_qe_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/src"
+    libra_qe_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
     #res_dir = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/res/"
 
 
@@ -78,6 +78,7 @@ for i in range(0,len(params["excitations"])):
 
 
 # Flags and Debugging
+params["flag_ao"] = 0   # flag for atomic orbital basis : option 1 -> yes. otherwise -> no.
 params["print_coherences"] = 1
 params["print_aux_results"] = 1
 params["print_mo_ham"] = 0
