@@ -21,7 +21,7 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, eext, params):
+def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, eext, params):
     # This function prints out the results for only one trajectory.
     #
     # \param[in] isnap   snap index 
@@ -41,10 +41,15 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, e
 
     kB = 3.166811429e-6 # Boltzmann constant in hartree unit                                                                                                 
     dt_nucl = params["dt_nucl"]
+    flag_ao = params["flag_ao"]
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
-    nstates = el.nstates
+    nstates = len(params["excitations"])
     ij = isnap*params["Nsteps"]
+
+    traj_file_prefix = params["res"]+"md"
+    ene_file_prefix = params["res"]+"ene"
+    mu_file_prefix = params["res"]+"mu"
 
     # Re-compute energies, to print
 # WE DON'T WANT TO CALL compute_potential_energy here!
@@ -59,27 +64,30 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, epot, e
 
     # set file name
     num_tmp = "_"+str(iconf)+"_"+str(i_ex)+"_"+str(itraj)
-    ene_file = params["ene_file_prefix"]+num_tmp+".txt"
-    traj_file = params["traj_file_prefix"]+num_tmp+".xyz"
-    mu_file = params["mu_file_prefix"]+num_tmp+".txt"
+    ene_file = ene_file_prefix+num_tmp+".txt"
+    traj_file = traj_file_prefix+num_tmp+".xyz"
+    mu_file = mu_file_prefix+num_tmp+".txt"
 
     ##print 
     # Geometry
     syst.set_atomic_q(mol.q)
-    syst.print_xyz(traj_file,i)
+    syst.print_xyz(traj_file,ij)
 
     # Energy
     fe = open(ene_file,"a")
     fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
-
     
     if params["interface"] == "GAMESS":       
         # Dipole moment components
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
-        for k in xrange(len(ao)):
+        #**************modified here************************************************************
+        Nao = mu[0].num_of_rows
+        for k in xrange(Nao):
             line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        # **************************************************************************************
+
         line = line + "\n"
         fm.write(line)
         fm.close()
@@ -103,7 +111,7 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
     # Used in:  md.py/run_MD 
 
     nconfig = params["nconfig"]
-    nstates = el[0].nstates
+    nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
     for iconf in xrange(nconfig):
@@ -132,6 +140,10 @@ def pops_ave_TSH_traj(i,el,params):
     ij = i*params["Nsteps"]
     dt_nucl = params["dt_nucl"]
     print_coherences = params["print_coherences"]
+
+    # define prefixes
+    se_pop_file_prefix = params["res"]+"se_pop"
+    sh_pop_file_prefix = params["res"]+"sh_pop"
 
     l_se_pop = []
     l_sh_pop = []
@@ -168,7 +180,7 @@ def pops_ave_TSH_traj(i,el,params):
 
             # set file name
             num_tmp = "_"+str(iconf)+"_"+str(i_ex)
-            se_pop_file = params["se_pop_file_prefix"]+num_tmp+".txt"
+            se_pop_file = se_pop_file_prefix+num_tmp+".txt"
 
             # Populations
             fel = open(se_pop_file,"a")
@@ -208,7 +220,7 @@ def pops_ave_TSH_traj(i,el,params):
 
                 # set file name
                 num_tmp = "_"+str(iconf)+"_"+str(i_ex)
-                sh_pop_file = params["sh_pop_file_prefix"]+num_tmp+".txt"
+                sh_pop_file = sh_pop_file_prefix+num_tmp+".txt"
 
                 # Populations     
                 fel1 = open(sh_pop_file,"a")
@@ -244,14 +256,19 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     ij = i*params["Nsteps"]
     dt_nucl = params["dt_nucl"]
 
+    # define prefixes
+    se_pop_ex_file_prefix = params["res"]+"se_pop_ex"
+    sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
+
+
     #print "length of se_pop is %d" %(len(se_pop))
     #print "length of sh_pop is %d" %(len(sh_pop))
 
     for i_ex in xrange(nstates):
 
         # set file name                                                                                                                               
-        se_pop_file = params["se_pop_ex_file_prefix"]+str(i_ex)+".txt"
-        sh_pop_file = params["sh_pop_ex_file_prefix"]+str(i_ex)+".txt"
+        se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
+        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
 
         # Populations                                                                                                            
         fse = open(se_pop_file,"a")

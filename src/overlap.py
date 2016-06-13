@@ -85,6 +85,9 @@ def overlap(ao1,ao2,C1,C2,basis_sets):
     # Used in: gamess_to_libra.py/gamess_to_libra
     # this is mostly a test function
 
+    N = len(ao1)
+    S11 = MATRIX(N,N); S12 = MATRIX(N,N); S21 = MATRIX(N,N); S22 = MATRIX(N,N);
+
     S11 = AO_overlap(ao1,ao1)
     S22 = AO_overlap(ao2,ao2)
     S12 = AO_overlap(ao1,ao2)

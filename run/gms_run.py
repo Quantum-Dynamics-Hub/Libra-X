@@ -6,7 +6,7 @@ import os
 import sys
 import math
 
-user = 0 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -21,7 +21,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/install/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
@@ -29,6 +29,9 @@ sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 ########## Setup all manual parameters here ####################
 
 params = {}
+
+# Of course, here we use GAMESS
+params["interface"] = "GAMESS"
 
 # GAMESS variables
 # We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
@@ -57,7 +60,7 @@ elif user==1:
     params["GMSPATH"] = "/home/e1667/install/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work_NAMD/gamess_scratch"
+    params["scr_dir"] = "/home/e1667/work/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
@@ -75,6 +78,7 @@ params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
+#params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
@@ -120,15 +124,6 @@ elif user==1:
     params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
     params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
 
-# output file
-params["traj_file_prefix"] = params["res"]+"md"       # containing MD trajectories
-params["ene_file_prefix"] = params["res"]+"ene"       # containing kinetic, potential, system, and thermostat-coupled system energies 
-params["mu_file_prefix"] = params["res"]+"mu"         # containing dipole moment matrices
-params["se_pop_file_prefix"] = params["res"]+"se_pop"           # containing the SE population (if velocity rescaling is applied, this is averaged over TSH trajectories). File name is defined as se_pop_"initial geometry"_"initial excitation"
-params["sh_pop_file_prefix"] = params["res"]+"sh_pop"           # containing the SH population averaged over TSH trajectories. File name is defined in the SE way. 
-params["se_pop_ex_file_prefix"] = params["res"]+"se_pop_ex"   # containing the SE population averaged over initial geometries. File name is se_pop_ex"initial excitation" 
-params["sh_pop_ex_file_prefix"] = params["res"]+"sh_pop_ex"   # containing the SH population averaged over initial geometries. File name is defined in the SE way.
-
 # flags for debugging
 params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
 params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
@@ -144,7 +139,7 @@ params["check_tsh_probabilities"] = 1      # print the hopping probabilities if 
 
 # ***************************************************************
 
-from create_states import *
+from states import *
 
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 
