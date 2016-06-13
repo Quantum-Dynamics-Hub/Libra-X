@@ -31,7 +31,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
-#import print_results_qe
+#import print_results_qe # This module isn't defined yet.
 
 
 ##############################################################
@@ -234,8 +234,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients
-                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], \
-                                                                                                              sd_basis[cnt], active_space,str(ij) )
+                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
                         elif params["interface"]=="QE":

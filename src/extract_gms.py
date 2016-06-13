@@ -25,7 +25,6 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 import detect_gms
 import ao_basis_gms
-import misc
 
 def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
@@ -227,6 +226,8 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         print "active space is not defined correctly, exit....."
         sys.exit(0)
 
+    # ************************************************************
+
     if flag == 1:
         print "*** full matrix ****"
         print "E_full(0,0) is",E_full.get(0,0)
@@ -348,9 +349,10 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     E_MO, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"],active_space,flag)
     ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
-    # ***********************************************************
     # Convert the KS excitation energies and the ground state potential energy into 
-    # the total energies of excited states (1-electron basis)                                                                                               
+    # the total energies of excited states (1-electron basis)
+
+    # *********Here, KS excitation energy -> total excitation energy***************
     nstates = len(states)
     E = MATRIX(nstates,nstates)
     for i in xrange(nstates):
@@ -358,6 +360,8 @@ def gms_extract(filename,states,min_shift,active_space,flag):
         e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
         EX_ene = info["tot_ene"] + E_MO.get(e_indx,e_indx) - E_MO.get(h_indx,h_indx) # excitation energy
         E.set(i,i,EX_ene)
+
+    # ******************************************************************************
 
     if flag == 1:
         print "ground states energy is",info["tot_ene"]

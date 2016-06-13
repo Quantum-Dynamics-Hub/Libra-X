@@ -19,11 +19,10 @@ import sys
 import math
 
 
-def detect_columns(inp_lines,flag_ao):
+def detect_columns(inp_lines):
     ##
     # Finds the keywords and their patterns and extracts the descriptors info
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
-    # \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - The returned dictionary of descriptors of the given input lines.
     #
     # Used in: detect.py/detect
@@ -95,11 +94,11 @@ def detect_columns(inp_lines,flag_ao):
     return info
 
 
-def show_outputs(inp_lines,info,flag_ao):
+def show_outputs(inp_lines,info):
     ##
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
     # \param[in] info The dictionary of descriptors of the given input lines.
-    ### \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
+
     # This function shows the positions of the data elements in the analyzed file and 
     # some other auxiliary information extracted from the file
     #
@@ -167,14 +166,14 @@ def show_outputs(inp_lines,info,flag_ao):
     print
 
 
-def detect(inp_lines,flag_deb):
+def detect(inp_lines,flag):
     ## 
     # This function detects the positions of the valuable data in a file represented as a  
     # list of lines. It does not return the data itself, only the descriptors of where to
     # get the info about: atomic basis sets, molecular energies , molecular orbitals,
     # atomic gradients, coordinates, and labels.
     # \param[in] inp_lines The list of lines containing the file to be unpacked
-    # \param[in] flag_deb Debug info printing: 1 - print, otherwise - don't 
+    # \param[in] flag Debug info printing: 1 - print, otherwise - don't 
     ### \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - is the returned dictionary of descriptors of the given input lines
     #
@@ -182,7 +181,7 @@ def detect(inp_lines,flag_deb):
 
     info = detect_columns(inp_lines)
     
-    if flag_deb == 1:
+    if flag == 1:
         show_outputs(inp_lines,info)
 
         print "*********************************************"

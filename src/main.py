@@ -97,7 +97,7 @@ def main(params):
         e = MATRIX(E)
         for ex_st in xrange(nstates):
             sd_basis.append(CMATRIX(c))
-            all_grads.append(copy.deepcopy(grads))
+            all_grads.append(copy.deepcopy(grads)) # newly defined
         #print "sd_basis=",sd_basis
         #print "all_grads=",all_grads
         #sys.exit(0)
@@ -195,8 +195,8 @@ def main(params):
     
     # set list of SH state trajectories
     #sys.exit(0)
-    print "run MD" # added 2 inputs on the last part.
-    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
+    print "run MD"
+    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space) # 2 inputs have been added
     print "MD is done"
 
     #return data, test_data
