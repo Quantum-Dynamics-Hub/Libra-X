@@ -19,10 +19,11 @@ import sys
 import math
 
 
-def detect_columns(inp_lines):
+def detect_columns(inp_lines,flag_ao):
     ##
     # Finds the keywords and their patterns and extracts the descriptors info
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
+    # \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - The returned dictionary of descriptors of the given input lines.
     #
     # Used in: detect.py/detect
@@ -58,6 +59,7 @@ def detect_columns(inp_lines):
             info["Ngbf"] = int(spline[7])
 
         # the atomic basis sets
+
         #if flag_ao == 1:
         if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
             info["ab_start"] = i + 7
@@ -93,7 +95,7 @@ def detect_columns(inp_lines):
     return info
 
 
-def show_outputs(inp_lines,info):
+def show_outputs(inp_lines,info,flag_ao):
     ##
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
     # \param[in] info The dictionary of descriptors of the given input lines.

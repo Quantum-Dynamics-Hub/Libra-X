@@ -83,6 +83,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #
     # Used in: md.py/run_MD
 
+    flag_ao = params["flag_ao"] 
+
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, sd_basis2, ao2 = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
 
