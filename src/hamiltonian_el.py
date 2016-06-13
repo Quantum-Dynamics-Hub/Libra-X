@@ -8,7 +8,7 @@
 #* or <http://www.gnu.org/licenses/>.
 #*
 #*********************************************************************************/
-## \file Ene_NAC.py
+## \file hamiltonian_el.py
 # This module defines the functions that return time-averaged energy and
 # the Non-Adiabatic couplings (NACs).
 
