@@ -41,7 +41,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
 
     kB = 3.166811429e-6 # Boltzmann constant in hartree unit                                                                                                 
     dt_nucl = params["dt_nucl"]
-    flag_ao = params["flag_ao"]
+    #flag_ao = params["flag_ao"]
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
     nstates = len(params["excitations"])
@@ -82,10 +82,12 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
         # Dipole moment components
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
-        #**************modified here************************************************************
-        Nao = mu[0].num_of_rows
-        for k in xrange(Nao):
-            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+
+        # *************************************************************************************
+        #Nao = mu[0].num_of_rows
+        #for k in xrange(Nao):
+        #    line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        # commented out temporarily because mu[k] is a complex number; will be modified later
         # **************************************************************************************
 
         line = line + "\n"
