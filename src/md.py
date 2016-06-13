@@ -76,8 +76,8 @@ def init_files(params):
                     fe = open(ene_file,"w"); fe.close();
                     ft = open(traj_file,"w"); ft.close();
 
-                    if params["flag_ao"] == 1:
-                        fm = open(mu_file,"w"); fm.close();
+                    #if params["flag_ao"] == 1:
+                    fm = open(mu_file,"w"); fm.close();
 
     for i_ex in xrange(nstates):
 
@@ -129,7 +129,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     dt_elec = dt_nucl/float(el_mts)
 
     nconfig = params["nconfig"]
-    flag_ao = params["flag_ao"]
+    #flag_ao = params["flag_ao"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])

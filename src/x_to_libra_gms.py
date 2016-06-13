@@ -138,7 +138,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
-    # ********** "CMATRIX.show_matrix(filename)" is not defined here ****** 
+    # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
@@ -160,9 +160,9 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ### E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
     # E_ave : the matrix of the total excitation energy averaged over energies at "t" and "t+dt"
     # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
-    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
+    # sd_basis : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
     # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
     # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_ave, nac, sd_basis2, all_grads, mu
+    return E_ave, nac, sd_basis, all_grads, mu
 
