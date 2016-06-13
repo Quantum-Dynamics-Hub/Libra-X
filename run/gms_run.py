@@ -75,10 +75,10 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"] = 1                        # the number of MD rounds
+params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
-params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
+#params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
