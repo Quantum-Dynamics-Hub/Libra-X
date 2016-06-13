@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file gamess_to_libra.py 
+## \file x_to_libra_gms.py 
 # This module implements the functions that extract parameters from the gamess output file:
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information.
 # The forces are used for simulating Classical MD on Libra 
@@ -18,6 +18,7 @@
 import os
 import sys
 import math
+import copy
 
 if sys.platform=="cygwin":
     from cyglibra_core import *
@@ -60,13 +61,14 @@ def exe_gamess(params):
     os.system("rm -r %s/*" %(scr_dir))
 
 
-def gamess_to_libra(params, ao, E, sd_basis, suff):
+def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params :  contains input parameters , in the directory form
     # \param[in,out] ao :  atomic orbital basis at "t" old
-    # \param[in,out] E  :  molecular energies at "t" old
-    # \param[in] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
+    # \param[in,out] E  :  total excitation energies at "t" old
+    # \param[in,out] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
+    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
     # \param[in] suff : The suffix to add to the name of the output files
     # this suffix is now considered to be of a string type - so you can actually encode both the
     # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
@@ -82,7 +84,7 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
     # Used in: md.py/run_MD
 
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, C2, ao2, tot_ene = extract_gms(params["gms_out"],params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, sd_basis2, ao2 = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
 
     # Gradients
     # in this implementation (CPA), the gradients on all excited states are the same
@@ -96,13 +98,13 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
     
 
     # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],C2,params["basis_option"])
+    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
     # this is done for the "current" state only    
-    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,C2)
-    mu = [mu_x, mu_y, mu_z]
+    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,sd_basis2)
+    mu = [mu_x, mu_y, mu_z] # now mu is defined as a CMATRIX list.
 
     if params["debug_mu_output"]==1:
         print "mu_x:";    mu_x.show_matrix()
@@ -122,41 +124,45 @@ def gamess_to_libra(params, ao, E, sd_basis, suff):
     # basis. We will need the information on cropping, in order to avoid computations that 
     # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
-    E_mol = average_E(E,E2)
-    D_mol = NAC(P12,P21,params["dt_nucl"])
+    E_ave = average_E(E,E2)
+    nac = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
-    E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-    D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+    #D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
+
     ### END TO DO
 
-    if params["print_mo_ham"]==1:
-        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
-        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
-        E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
-        D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
+    #if params["print_mo_ham"]==1:
+    #E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
+    #D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+    #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
+    #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
+    # ********** "CMATRIX.show_matrix(filename)" is not defined here ****** 
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
     E = MATRIX(E2)  # at time t+dt
+    sd_basis = [sd_basis2] #******* modified ******
 
-    sd_basis2 = [C2]
+    # useless lines: nac is already defined as CMATRIX.
+    #nac = CMATRIX(D_mol.num_of_rows, D_mol.num_of_cols)
+    #for i in xrange(D_mol.num_of_rows):
+    #    for j in xrange(D_mol.num_of_cols):
+    #        nac.set(i,j,D_mol.get(i,j),0.0)
 
-    CMATRIX nac(D_mol_red.num_of_rows, D_mol_red.num_of_cols)
-    for i in xrange(D_mol_red.num_of_rows):
-        for j in xrange(D_mol_red.num_of_cols):
-            nac.set(i,j,D_mol_red.get(i,j),0.0)
-
-    
     # Returned data:
-    # Grad: Grad[k] - the gradient w.r.t. to k-th nucleus
-    # data: a dictionary containing transition dipole moments
-    # E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
-    # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
-    # E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
+    ### Grad: Grad[k] - the gradient w.r.t. to k-th nucleus
+    ### data: a dictionary containing transition dipole moments
+    ### E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
+    ### D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
+    ### E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
+    # E_ave : the matrix of the total excitation energy averaged over energies at "t" and "t+dt"
     # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
     # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
+    # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
+    # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_mol_red, nac, sd_basis2, all_grads, tot_ene, mu
+    return E_ave, nac, sd_basis2, all_grads, mu
 
