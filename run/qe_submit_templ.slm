@@ -1,8 +1,8 @@
 #!/bin/sh
-##SBATCH --partition=valhalla
-#SBATCH --partition=scavenger
+#SBATCH --partition=valhalla
+##SBATCH --partition=scavenger
 #SBATCH --clusters=chemistry
-#SBATCH --time=00:08:00
+#SBATCH --time=00:40:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem=2000

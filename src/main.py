@@ -103,12 +103,13 @@ def main(params):
         #sys.exit(0)
 
     elif params["interface"]=="QE":
+        params["qe_inp_templ"] = []
         for ex_st in xrange(nstates):
 
             params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
             exe_espresso(ex_st)
             flag = 0
-            tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+            tot_ene, label, R, grads, sd_ex, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
 
             sd_basis.append(sd_ex)
             all_grads.append(grads)
@@ -160,15 +161,18 @@ def main(params):
             rr.append(VECTOR(r))
         R_list.append(rr)
 
-        # Labels and Q
+        # Labels
         lab = []
-        qq  = []
         for i in xrange(len(label)):
             lab.append(label[i])
-            qq.append(Q[i])
         label_list.append(lab)
+
+        # Q
+        qq  = []
+        for q in Q:
+            qq.append(q)
         Q_list.append(qq)
-        
+
 
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
