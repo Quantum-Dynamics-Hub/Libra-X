@@ -241,8 +241,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             opt = 1 # use true SD wavefunctions
 
                             # update MO and gradients
-                            E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-                            #tot_ene.append(E[cnt])
+                            E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            #tot_ene.append(E[cnt]), E_mol_red --> E_SD
 
                         # ============== Common blocks ==================
 
