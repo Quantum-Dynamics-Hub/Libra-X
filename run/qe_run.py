@@ -15,7 +15,7 @@ if user==0:
 elif user==1:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
-    libra_qe_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/src"
+    libra_qe_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
     #res_dir = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/res/"
 
 
@@ -33,9 +33,9 @@ params = {}
 params["qe_debug_print"] = 0
 params["nproc"] = 1              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=5      # the number of MD rounds
+params["Nsnaps"]=3      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
-params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
+#params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
 #params["S_mat"] = params["res"]+"s_mat"
@@ -44,7 +44,7 @@ params["nspin"] = 1
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["tsh_method"] = 1     # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["num_SH_traj"] = 3
+params["num_SH_traj"] = 2
 params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
@@ -78,6 +78,7 @@ for i in range(0,len(params["excitations"])):
 
 
 # Flags and Debugging
+params["flag_ao"] = 0   # flag for atomic orbital basis : option 1 -> yes. otherwise -> no.
 params["print_coherences"] = 1
 params["print_aux_results"] = 1
 params["print_mo_ham"] = 0
@@ -98,9 +99,10 @@ if user==0:
 
 if user==1:
     # For Ekadashi
-    params["res"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/res/"
-    params["mo_ham"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/mo_ham/"
-    params["sd_ham"] = "/projects/academic/alexeyak/ekadashi/devel/libra-qe_interface/run/sd_ham/"
+    cwd = os.getcwd()
+    params["res"] = cwd+"/res/"
+    params["mo_ham"] = cwd+"/mo_ham/"
+    params["sd_ham"] = cwd+"/sd_ham/"
 
 
 # output file
