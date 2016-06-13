@@ -10,7 +10,7 @@
 #*********************************************************************************/
 
 ## \file misc.py
-# This module implements a function reducing matrix sizes.
+# This module implements a function reducing matrix sizes according to active_space.
 
 import os
 import sys

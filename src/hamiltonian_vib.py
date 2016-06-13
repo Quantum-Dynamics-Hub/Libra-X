@@ -158,7 +158,8 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     if params["print_sd_ham"] == 1:
         H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)
         #D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
-        # ********** "CMATRIX.show_matrix(filename)" is not defined here ******
+        # ********** "CMATRIX.show_matrix(filename)" is not exported from Libra
+        # **********  now it is commented out
 
     # Returned values - actually we just update matrices ham_el and ham_vib 
     # 
