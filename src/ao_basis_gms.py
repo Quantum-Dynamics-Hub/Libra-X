@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file ao_basis.py
+## \file ao_basis_gms.py
 # This module implements the functions that constructs atomic orbital basis
 # by n Gaussian Type Orbitals (nGTO)
 
@@ -26,7 +26,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     ##
-    # \param[in] l_atom The list of all atom labels (e.g. C, C, C, H, H, ..)
+    # \param[in] l_atoms The list of all atom labels (e.g. C, C, C, H, H, ..)
     # \param[in] atom_spec A list of distinct atomic species (e.g. C, H)
     # \param[in] basis_type A list of AO types coming with the atom of each distinct type
     # (e.g. basis_type[i] = ["S","P"] implies that the atom of type i (e.g. C) has S and P orbitals) 

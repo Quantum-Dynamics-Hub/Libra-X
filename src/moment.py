@@ -38,8 +38,10 @@ def transition_dipole_moments(ao,C):
     g = [gx,gy,gz]
 
     Norb = len(ao)
-    mu = [MATRIX(Norb, Norb)]*3
+    #mu = [MATRIX(Norb, Norb)]*3
     d = MATRIX(Norb,Norb)
+
+    mu = [CMATRIX(Norb, Norb)]*3
 
     for k in xrange(3): # all components
 
@@ -47,6 +49,9 @@ def transition_dipole_moments(ao,C):
         for i in xrange(Norb): # all orbitals
             for j in xrange(Norb):
                 d.set(i,j,gaussian_moment(ao[i], g[k], ao[j]) )
-        mu[k] = C.T() * d * C
+
+        dd = CMATRIX(d)
+        mu[k] = C.T() * dd * C
+        #mu[k] = C.T() * d * C
     
     return mu[0], mu[1], mu[2]

@@ -10,4 +10,4 @@ echo "LSB_QUEUE="$LSB_QUEUE
 echo "LS_SUBCWD="$LS_SUBCWD
 #echo "LSB_PROCS="$LSB_PROCS
 
-python run.py
+python gms_run.py
