@@ -109,7 +109,7 @@ def main(params):
             params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
             exe_espresso(ex_st)
             flag = 0
-            tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+            tot_ene, label, R, grads, sd_ex, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
 
             sd_basis.append(sd_ex)
             all_grads.append(grads)
