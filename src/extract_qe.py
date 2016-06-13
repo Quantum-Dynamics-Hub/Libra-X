@@ -60,6 +60,8 @@ def qe_extract_mo(filename, upper_tag, active_space):
     nbnd = int(float(ctx.get("Info/<xmlattr>/nbnd","n")))
     print ngw, nbnd
 
+    n_mo = len(active_space)
+
     coeff = CMATRIX(ngw,n_mo)
 
     k = 0
