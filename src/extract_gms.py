@@ -47,6 +47,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         if len(spline) == 1:
             l_atom_spec.append(i)
             # **** Here, atomic names are changed *****
+            # atom labels
             atom = spline[0]
             if len(atom) > 1:
                 atom = atom[0] + atom[1].lower()
@@ -163,8 +164,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
 def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
-    # assumed format is:
-    # ???
+    # 
     # \param[in] inp_str  Strings containing the info for all orbitals
     # \param[in] Ngbf   Number of Gaussian Basis Functions
     # \param[in] active_space molecular orbital considered during the calculation
@@ -263,7 +263,10 @@ def gms_extract_coordinates(inp_str,flag):
         spline = a.split() 
 
         # atom labels
-        label.append(spline[0])
+        atom = spline[0]
+        if len(atom) > 1:
+            atom = atom[0] + atom[1].lower()
+        label.append(atom)
 
         # atomic charges
         Q.append(float(spline[1]))
@@ -326,6 +329,7 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     # \param[in] min_shift -1 -> includes HOMO-1, HOMO
     # \param[in] active_space molecular orbital considered during the calculation 
     # \param[in] flag  a flag for debugging detect module
+
     # This function returns the coordinates of atoms, gradients, atomic orbital basis,
     # and molecular orbitals extracted from the file, as objects
     #

@@ -27,9 +27,9 @@ def read_gms_inp_templ(inp_filename):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] inp_filename : The name of GAMESS input file used as template
-    # This function returns the format of GAMESS information before 
-    # coordinates of atoms.
-    #
+    # This function returns 
+    # templ : the format of GAMESS information before $DATA line.
+    # 
     # Used in:  main.py/main
 
     f = open(inp_filename,"r")
@@ -37,8 +37,10 @@ def read_gms_inp_templ(inp_filename):
     f.close()
 
     N = len(templ)
+
     for i in range(0,N):
         s = templ[i].split()
+
         if len(s) > 0 and s[0] == "$DATA":
             ikeep = i + 2
             break
