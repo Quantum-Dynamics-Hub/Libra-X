@@ -16,7 +16,7 @@ user = 1  # 0 - Alexey, 1 - Ekadashi
 if user==0:
     # For Alexey
     libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" # set the path name to the source files in libracode
-    libra_qe_int_path = "/user/alexeyak/Programming/libra-qe_interface/src"
+    libra_qe_int_path = "/user/alexeyak/Programming/libra-gamess_interface/src"
     #res_dir =  "/user/alexeyak/Programming/libra-qe_interface/run/res/"
 
 elif user==1:
@@ -40,7 +40,7 @@ params = {}
 params["qe_debug_print"] = 0
 params["nproc"] = 1              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=3      # the number of MD rounds
+params["Nsnaps"]=5      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"

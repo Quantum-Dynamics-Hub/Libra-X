@@ -16,6 +16,8 @@ import os
 import sys
 import math
 
+from overlap import *
+
 if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
@@ -23,14 +25,18 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 
 def compute_nac_sd(MO_old, MO_cur, dt):
-##
-# \param[in] MO_old A list of MO sets, each defining SD for a given electronic state: at time t-dt
-# \param[in] MO_cur A list of MO sets, each defining SD for a given electronic state: at time t
-# \param[in] dt nuclear time step
-# Returned result: NAC non-adiabatic coupling matrix
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] MO_old A list of MO sets, each defining SD for a given electronic state: at time t-dt
+    # \param[in] MO_cur A list of MO sets, each defining SD for a given electronic state: at time t
+    # \param[in] dt nuclear time step
+    # NAC - non-adiabatic coupling matrix
+    #
+    # Used in: x_to_libra.py/gamess_to_libra
 
-# Although the sets MO1 and MO2 are not mutually-orthogonal, so there would be a dS/dt contribution,
-# we compute only the Hermitian part, since the non-Hermitian will cancel out in the solving TD-SE
+    # Although the sets MO1 and MO2 are not mutually-orthogonal, so there would be a dS/dt contribution,
+    # we compute only the Hermitian part, since the non-Hermitian will cancel out in the solving TD-SE
+
 
     nstates = len(MO_cur)  # the number of electronic states
     NAC = CMATRIX(nstates,nstates)
@@ -51,7 +57,7 @@ def NAC(P12,P21,dt_nucl):
     # \param[in] dt_nucl  : time step width of nuclear motion
     # This function returns Non-Adiabatic Couplings(NACs)
     #
-    # Used in: gamess_to_libra.py/gamess_to_libra
+    ##### Used in: x_to_libra_gms.py/gamess_to_libra
 
     Norb = P12.num_of_rows
     D = MATRIX(Norb,Norb)
@@ -66,7 +72,7 @@ def average_E(E1,E2):
     # \param[in] E1, E2 : molecular energies at different time step.
     # This function returns the time-averaged molecular energies.
     #
-    # Used in: gamess_to_libra.py/gamess_to_libra
+    # Used in: x_to_libra.py/gamess_to_libra
 
     Norb = E1.num_of_rows
     E = MATRIX(Norb,Norb)
