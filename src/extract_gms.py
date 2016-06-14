@@ -157,7 +157,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         print "coef_d=",ao_data["coef_d"]
 
 
-    ao = ao_basis_gms.construct_ao_basis(ao_data,label,R,scount,orb_name)
+    ao = ao_basis.construct_ao_basis(ao_data,label,R,scount,orb_name)
 
     return ao
 
