@@ -82,7 +82,6 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
         # Dipole moment components
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
-
         # *************************************************************************************
         #Nao = mu[0].num_of_rows
         #for k in xrange(Nao):

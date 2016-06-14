@@ -91,6 +91,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     
 
     # calculate overlap matrix of atomic and molecular orbitals
+    #P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
     P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
 
     # calculate transition dipole moment matrices in the MO basis:
@@ -138,7 +139,12 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
     E = MATRIX(E2)  # at time t+dt
-    sd_basis = [sd_basis2] #******* modified ******
+
+
+    #sd_basis = [sd_basis2] #******* modified ******
+    sd_basis = []
+    for ex_st in xrange(nstates):
+            sd_basis.append(CMATRIX(sd_basis2))
 
     # useless lines: nac is already defined as CMATRIX.
     #nac = CMATRIX(D_mol.num_of_rows, D_mol.num_of_cols)

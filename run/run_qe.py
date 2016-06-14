@@ -2,8 +2,15 @@ import os
 import sys
 import math
 
+if sys.platform=="cygwin":
+    from cyglibra_core import *
+elif sys.platform=="linux" or sys.platform=="linux2":
+    from liblibra_core import *
+from libra_py import *
 
-user = 0  # 0 - Alexey, 1 - Ekadashi
+
+
+user = 1  # 0 - Alexey, 1 - Ekadashi
 
 ################ System-specific settings ########################
 if user==0:
@@ -22,8 +29,8 @@ elif user==1:
 os.environ["src_path"] = libra_qe_int_path   # Path to the source code
 sys.path.insert(1,os.environ["src_path"])    # Path to the source code
 
-from path_libra_lib import * # import path_libra_lib module
-path_libra_lib(libra_bin_path)               # Path to the libra libraries
+#from path_libra_lib import * # import path_libra_lib module
+#path_libra_lib(libra_bin_path)               # Path to the libra libraries
 
 import main # import main module of the libra-QE-interface code
 
@@ -63,8 +70,8 @@ params["thermostat_type"] = "Nose-Hoover"
 params["sigma_pos"] = 0.01  #Displace atomic position randomly
 
 ########### Now start actual calculations ###########################
-sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
-from libcontrol_parameters import *
+#sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
+#from libcontrol_parameters import *
 
 #params["num_MO"] = 3  # number of MO basis used in constructing electronic wavefunction
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
