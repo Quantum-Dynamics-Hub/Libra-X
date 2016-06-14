@@ -24,7 +24,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 import detect_gms
-import ao_basis_gms
+import ao_basis
 
 def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
