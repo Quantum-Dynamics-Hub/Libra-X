@@ -10,7 +10,8 @@
 #*********************************************************************************/
 
 ## \create_gamess_input.py
-#  This module defines the functions to create a GAMESS input files as JOB.inp.
+#  This module defines the functions storing the template of GAMESS input file
+#  and creating a GAMESS input file as JOB.inp.
 
 
 import os
@@ -53,14 +54,13 @@ def read_gms_inp_templ(inp_filename):
 def write_gms_inp(label, Q, params, mol):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_atoms   A list of atoms
-    # \param[in] l_charges A list of atomic charges
-    # \param[in] l_gam_for includes the template of GAMESS input file 
-    # \param[in] mol The object containing nuclear DOF
-    # \param[in] inp_filename The name of GAMESS input file
-    # This function returns the GAMESS input file
+    # \param[in] label   A list of atomic labels (e.g. C,H,O)
+    # \param[in] Q       A list of atomic charges (e.g. 6.0,1.0,8.0)
+    # \param[in] params  A list of input parameters from gms_run.py 
+    # \param[in] mol     An object containing nuclear DOF
+    # This function returns the GAMESS input file (gms_inp)
     #
-    # Used in:  main.py/main/nve/nve_MD
+    # Used in:  md.py/run_MD
 
     gms_inp_templ = params["gms_inp_templ"]
     gms_inp = params["gms_inp"]

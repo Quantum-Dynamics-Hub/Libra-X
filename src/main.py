@@ -37,15 +37,13 @@ from md import *
 def main(params):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params  the input data from "submit_templ.slm", in the form of dictionary
-    # Returned data:
-    # test_data - the output data for debugging, in the form of dictionary
-    # data - the data extracted from gamess output file, in the form of dictionary
+    # \param[in] params  A list of  input parameters from {gms,qe}_run.py 
+    #### Returned data:
+    #### test_data - the output data for debugging, in the form of dictionary
+    #### data - the data extracted from gamess output file, in the form of dictionary
     #
-    # This function prepares initial parameters from GAMESS output file
-    # and executes classical MD in Libra and Electronic Structure Calculation in GAMESS 
-    # iteratively.
-    # Parallelly, it executes TD-SE and SH calculation for simulating excited eletronic dynamics.
+    # This function prepares lists of initial parameters from GAMESS output file
+    # and executes run_MD function where NA-MD calculation is done.
     #
     # Used in:  run.py
 
