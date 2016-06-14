@@ -10,9 +10,8 @@
 #*********************************************************************************/
 
 ## \file path_libra_lib.py
-# This module defines the function which paths the libra libraries.
-#
-# Used in: run.py
+# This module defines the function which makes paths to the libra libraries.
+# (If you can import {cyg,lib}libra_core, you don't need to use this.)
 
 import os
 
@@ -20,7 +19,7 @@ def path_libra_lib(librapath):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] librapath  the path to the source directory containing libra libraries.
-    # This function paths the libra libraries.
+    # This returns the paths to libra modules using environmetal variables.
     #
     # Used in: run.py
 
