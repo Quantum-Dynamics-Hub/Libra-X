@@ -29,11 +29,13 @@ import ao_basis_gms
 def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
+    # \param[in] inp_str A list containing info. for atomic orbital basis.
+    # \param[in] label   A list of atomic labels (e.g. C,H,O)
+    # \param[in] R       A list of atomic coordinates (R[i] =[R[i].x, R[i].y, R[i].z]
+    # \param[in] flag    debugging info: option 1-> print, otherwise -> don't 
+    # ao - returned lists of atomic orbital basis sets 
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     # atomic species
     l_atom_spec = []
@@ -164,15 +166,15 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
     # 
-    # \param[in] inp_str  Strings containing the info for all orbitals
-    # \param[in] Ngbf   Number of Gaussian Basis Functions
-    # \param[in] active_space molecular orbital considered during the calculation
-    # \param[in] flag for debugging
-    # E - returned MATRIX object, containing the reduced eigenvalues
-    # C - returned MATRIX object, containing the reduced eigenvectors:
+    # \param[in] inp_str      Strings containing the info for molecular orbitals
+    # \param[in] Ngbf         Number of Gaussian Basis Functions
+    # \param[in] active_space A list of molecular orbitals considered during the calculation
+    # \param[in] flag         debugging info: option 1-> print, otherwise -> don't
+    # E - returned MATRIX object, containing the total excitation energies
+    # C - returned MATRIX object, containing the eigenvectors:
     # C.get(a,i) - is the coefficient of AO with index a in the MO with index i
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     stat_span = Ngbf + 4 # period for beginning of coefficient lines
 
@@ -249,14 +251,14 @@ def gms_extract_coordinates(inp_str,flag):
     # from the the list of input lines
     # each input line is assumed to have the format:
     # label  Q  ....  x y z
-
-    # \param[in] inp_str  Strings containing the info for all atoms
+    #
+    # \param[in] inp_str  Strings containing the info for all atomic coordinates
+    # \param[in] flag     debugging info: option 1-> print, otherwise -> don't
     # label - returned list of atomic labels (strings)
     # Q - returned list of nuclear charges (floats)
     # R - returned list of nuclear coordinates (VECTOR objects)
-
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
 
     label, Q, R = [], [], []
@@ -297,9 +299,10 @@ def gms_extract_gradient(inp_str,flag):
     #  ....  gx  gy  gz
     #
     # \param[in] inp_str  Strings containing the gradient for all atoms
+    # \param[in] flag     debugging info: option 1-> print, otherwise -> don't
     # grad - returned list of VECTOR objects
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     grad = []
     for a in inp_str:
@@ -325,16 +328,21 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     ##
     # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 
     # AOs, etc. ) from the GAMESS output.
-    # \param[in] filename The name of the GAMESS output file from which we will be getting info
-    # \param[in] states excitation states
-    # \param[in] min_shift -1 -> includes HOMO-1, HOMO
-    # \param[in] active_space molecular orbital considered during the calculation 
-    # \param[in] flag  a flag for debugging detect module
-
-    # This function returns the coordinates of atoms, gradients, atomic orbital basis,
-    # and molecular orbitals extracted from the file, as objects
     #
-    # Used in: 
+    # \param[in] filename    The name of the GAMESS output file from which we will be getting info
+    # \param[in] states      excitation states
+    # \param[in] min_shift   e.g. -1 -> includes HOMO-1, HOMO
+    # \param[in] active_space molecular orbital considered during the calculation 
+    # \param[in] flag  debugging info: option 1-> print, otherwise -> don't
+    # label - returned list of atomic labels (strings)
+    # Q - returned list of nuclear charges (floats)
+    # R - returned list of nuclear coordinates (VECTOR objects)
+    # grad - returned list of VECTOR objects
+    # E - returned MATRIX object, containing the total excitation energies 
+    # C - returned MATRIX object, containing the eigenvectors: 
+    # ao - returned lists of atomic orbital basis sets 
+    #
+    # Used in: main.py/main or x_to_libra_gms.py/gamess_to_libra
 
     f = open(filename,"r")
     A = f.readlines()

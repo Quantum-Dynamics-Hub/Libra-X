@@ -10,9 +10,10 @@
 #*********************************************************************************/
 
 ## \file detect_gms.py
-# This module implements the functions that detect columns showing
+# This module implements a function that detect columns showing
 # gradients, molecular energies, molecular orbitals, and atomic basis information
-# written in the GAMESS output file.
+# written in the GAMESS output file; also implements a function that shows 
+# the detected columns for debugging.
 
 import os
 import sys
@@ -23,9 +24,10 @@ def detect_columns(inp_lines):
     ##
     # Finds the keywords and their patterns and extracts the descriptors info
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
+    # 
     # info - The returned dictionary of descriptors of the given input lines.
     #
-    # Used in: detect.py/detect
+    # Used in: detect_gms.py/detect
 
     info = {}
 
@@ -59,7 +61,6 @@ def detect_columns(inp_lines):
 
         # the atomic basis sets
 
-        #if flag_ao == 1:
         if len(spline) == 3 and spline[1] == "BASIS" and spline[2] == "SET":
             info["ab_start"] = i + 7
         if len(spline) == 8 and spline[5] == "SHELLS":
@@ -95,14 +96,14 @@ def detect_columns(inp_lines):
 
 
 def show_outputs(inp_lines,info):
-    ##
+    ## Find the keywords below
     # \param[in] inp_lines The list of lines containing GAMESS output file to be unpacked
     # \param[in] info The dictionary of descriptors of the given input lines.
-
+    #
     # This function shows the positions of the data elements in the analyzed file and 
     # some other auxiliary information extracted from the file
     #
-    # Used in: detect.py/detect
+    # Used in: detect_gms.py/detect
 
     print "******************************************"
     print "according to the %i th column," % (info["latoms"]+1)
@@ -174,10 +175,9 @@ def detect(inp_lines,flag):
     # atomic gradients, coordinates, and labels.
     # \param[in] inp_lines The list of lines containing the file to be unpacked
     # \param[in] flag Debug info printing: 1 - print, otherwise - don't 
-    ### \param[in] flag_ao  using atomic orbital basis: 1 - yes, otherwise - no
     # info - is the returned dictionary of descriptors of the given input lines
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     info = detect_columns(inp_lines)
     
