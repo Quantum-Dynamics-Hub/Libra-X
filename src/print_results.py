@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 ## \file print_results.py
-# This module implements the functions which will print out the results of NA-MD calculation.
+# This module implements the functions which print out the results of NA-MD calculation.
 
 import os
 import sys
@@ -32,12 +32,12 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
     # \param[in] syst    list of objects containing atomic system information
     # \param[in] mu      is a transition dipole moment matrix (MATRIX object) of a single trajectory
     # \param[in] epot    current electronic state potential energy for one trajectory, so this is a floating point value
-    # \param[in] ekin
-    # \param[in] etot
-    # \param[in] eext
-    # \param[in] params     list of input parameters from run.py
+    # \param[in] ekin    current kinetic energy of the system for one trajectory
+    # \param[in] etot    = epot + ekin for one trajectory
+    # \param[in] eext    = etot + (Thermostat energy) for one trajectory
+    # \param[in] params  list of input parameters from {gms,qe}_run.py
     #                                                                                                                                                        
-    # Used in:  print_results.py/auxiliary
+    # Used in:  print_results.py/print_ens_traj
 
     kB = 3.166811429e-6 # Boltzmann constant in hartree unit                                                                                                 
     dt_nucl = params["dt_nucl"]
@@ -46,19 +46,19 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
     print_coherences = params["print_coherences"]
     nstates = len(params["excitations"])
     ij = isnap*params["Nsteps"]
-
+    
     traj_file_prefix = params["res"]+"md"
     ene_file_prefix = params["res"]+"ene"
     mu_file_prefix = params["res"]+"mu"
 
     # Re-compute energies, to print
-# WE DON'T WANT TO CALL compute_potential_energy here!
-#    if params["interface"] == "GAMESS":
-#        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
-#    elif params["interface"] == "QE":
-#        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
-#    print "epot = ", epot    
-#    ekin = compute_kinetic_energy(mol)
+    # WE DON'T WANT TO CALL compute_potential_energy here!
+    #    if params["interface"] == "GAMESS":
+    #        epot = tot_ene + compute_potential_energy(mol, el, ham, f_pot)
+    #    elif params["interface"] == "QE":
+    #        epot = tot_ene.get(i_ex,i_ex) + compute_potential_energy(mol, el, ham, f_pot)
+    #    print "epot = ", epot    
+    #    ekin = compute_kinetic_energy(mol)
 
     curr_T = 2.0*ekin/(3.0*syst.Number_of_atoms*kB)
 
@@ -105,10 +105,10 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
     # \param[in] syst    list of objects containing atomic system information
     # \param[in] mu      list of transition dipole moments (MATRIX objects)
     # \param[in] epot    list of the current electronic state potential energies for each trajectory in the ensemble, so this is a list of N floating point values
-    # \param[in] ekin
-    # \param[in] etot   
-    # \param[in] eext
-    # \param[in] params  list of input parameters from run.py
+    # \param[in] ekin    list of the current kinetic energies of the system
+    # \param[in] etot    list of  (epot + ekin)
+    # \param[in] eext    list of (etot + Thermostat energy)
+    # \param[in] params  list of input parameters from {gms,qe}_run.py
     #
     # Used in:  md.py/run_MD 
 
@@ -126,13 +126,13 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
 
 
 def pops_ave_TSH_traj(i,el,params):
-    # This function prints out SE and SH populations averaged over TSH trajectories (only one trajectory without SH calculation);
-    # also returns them as lists.
+    # This function averages SE and SH populations over TSH trajectories.
     #
     # \param[in] i       snap index
     # \param[in] el      object containing electronic DOF's
     # \param[in] params  list of input parameters from run.py 
-    #
+    # l_se_pop - list of SE populations whose size is nconfig x nstates. 
+    # l_sh_pop - list of SH populations (the same size above)
     # Used in: md.py/run_MD
 
     nconfig = params["nconfig"]
@@ -249,7 +249,7 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     # \param[in] nstates number of excitation states
     # \param[in] se_pop  list of SE populations averaged over TSH trajectories; the size is nconfig*nstates
     # \param[in] sh_pop  list of SH populations averaged over TSH trajectories; the size is nconfig*nstates 
-    # \param[in] params  list of input parameters from run.py 
+    # \param[in] params  list of input parameters from {gms,qe}_run.py 
     #
     # Used in: md.py/run_MD
 
@@ -290,8 +290,8 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
                 sh_sum += sh_pop[cnt]
 
             #Print populations
-            line_se = line_se + " %8.5f " % (se_sum)
-            line_sh = line_sh + " %8.5f " % (sh_sum)
+            line_se = line_se + " %8.5f " % (se_sum/float(nconfig))
+            line_sh = line_sh + " %8.5f " % (sh_sum/float(nconfig))
 
         line_se = line_se + "\n"
         line_sh = line_sh + "\n"

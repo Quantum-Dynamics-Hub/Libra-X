@@ -10,8 +10,7 @@
 #*********************************************************************************/
 
 ## \file md.py
-# This module implements the functions which execute GAMESS, execute classical MD coupled to 
-# Nose-Hoover thermostat, execute TD-SE and SH calculations, and set initial system.
+# This module implements functions setting initial system and executing NA-MD calculation.
 #
 
 import os
@@ -32,7 +31,6 @@ from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
 #import print_results_qe # This module isn't defined yet.
-
 
 ##############################################################
 
@@ -91,30 +89,27 @@ def init_files(params):
 def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ##
     # This function handles a swarm of trajectories.
-    # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
-    # velocity rescaling
+    # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic velocity rescaling
     #
-    # \param[in,out] syst list of  System objects that include atomic system information.
-    # \param[in,out] el list of object containig electronic DOFs for the nuclear coordinate
-    # given by syst. I have decided to go back a bit - one set of electronic DOF per set of
-    # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
-    # ground state forces for propagation. This also brings a conceptual clarity
-    # 
-    # \param[in,out] ao   list pf Atomic orbital basis
-    # \param[in,out] E    list of Molecular orbital energies
-    # \param[in,out] sd_basis list of lists of MO-LCAO coefficients, such that 
-    # sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i. Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
-    # \param[in,out] params list of input parameters from (gms/qe)_run.py , which will get some changes here.
-    # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
-    # \param[in] Q        list of atomic charges
-    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in
-    # calculations (and to read from the QE output files)
+    # \param[in,out] syst     A list of System objects that include atomic system information.
+    # \param[in,out] el       A list of object containig electronic DOFs for the nuclear coordinate given by syst.
+    #                         I have decided to go back a bit - one set of electronic DOF per set of nuclear DOF.
+    #                         This is also needed when we do the velocity rescaling,
+    #                         even if we use the ground state forces for propagation.
+    #                         This also brings a conceptual clarity.
+    # \param[in,out] ao       A list pf Atomic orbital basis
+    # \param[in,out] E        A list of total excitation energies
+    # \param[in,out] sd_basis A list of lists of MO-LCAO coefficients, such that 
+    #                         sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i.
+    #                         Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
+    # \param[in,out] params   A list of input parameters from (gms/qe)_run.py , which will get some changes here.
+    # \param[in] label        A list of atomic labels e.g. H, He, Li, etc...
+    # \param[in] Q            A list of atomic charges
+    # \param[in] active_space A list of indices (starting from 1) of the MOs to include in
+    #                         calculations (and to read from the QE output files)
 
-
-    # This function executes classical MD in Libra and electronic structure calculation
-    # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
-    # It outputs MD trajectories, Energy evolutions, and SE and SH populations.
-    #
+    # Mainly, SE and SH populations are printed in /res directory.
+    # With flags, MD, energy,and dipole momement trajectories are printed, too. 
     # Used in:  main.py/main
 
     rnd = Random()
@@ -262,7 +257,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
-                        # excited stes, so no need for reference energy)
+                        # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]

@@ -32,7 +32,6 @@ from moment import *
 from misc import *
 
 
-
 def exe_gamess(params):
     ##
     # This is a function that call GAMESS execution on the compute node
@@ -64,22 +63,16 @@ def exe_gamess(params):
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params :  contains input parameters , in the directory form
-    # \param[in,out] ao :  atomic orbital basis at "t" old
-    # \param[in,out] E  :  total excitation energies at "t" old
-    # \param[in,out] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
-    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
-    # \param[in] suff : The suffix to add to the name of the output files
-    # this suffix is now considered to be of a string type - so you can actually encode both the
-    # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
-    # related information
-    #
-    # This function outputs the files for excited electron dynamics
-    # in "res" directory.
-    # It returns the forces which act on the atoms.
-    # Also, it returns new atomic orbitals, molecular energies, and
-    # molecular coefficients used for calculating time-averaged
-    # molecular energies and Non-Adiabatic Couplings(NACs).
+    # \param[in] params         contains input parameters , in the directory form
+    # \param[in,out] ao         atomic orbital basis at "t" old
+    # \param[in,out] E          total excitation energies at "t" old
+    # \param[in,out] sd_basis   Basis of Slater determinants at "t" old (list of CMATRIX object).
+    #                           In the present implementation, it contains a single determinant
+    # \param[in] active_space   A list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
+    # \param[in] suff           A suffix to add to the name of the output files; this suffix is now considered to be of a string type 
+    #                           - so you can actually encode both the iteration number (MD timestep),
+    #                           the nuclear cofiguration (e.g. trajectory), and any other related information
+    # Returned datas are explained above the return line.
     #
     # Used in: md.py/run_MD
 
@@ -98,7 +91,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     
 
     # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
+    #P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
@@ -111,13 +104,13 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "mu_y:";    mu_y.show_matrix()
         print "mu_z:";    mu_z.show_matrix()
  
-    if params["debug_densmat_output"]==1:
-        print "P11 and P22 matrixes should show orthogonality"
-        print "P11 is";    P11.show_matrix()
-        print "P22 is";    P22.show_matrix()
-        print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
-        print "P12 is";    P12.show_matrix()
-        print "P21 is";    P21.show_matrix()
+    #if params["debug_densmat_output"]==1:
+    #    print "P11 and P22 matrixes should show orthogonality"
+    #    print "P11 is";    P11.show_matrix()
+    #    print "P22 is";    P22.show_matrix()
+    #    print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+    #    print "P12 is";    P12.show_matrix()
+    #    print "P21 is";    P21.show_matrix()
 
 
     ### TO DO: In the following section, we need to avoid computing NAC matrices in the full
@@ -125,7 +118,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_ave = average_E(E,E2)
-    nac = NAC(P12,P21,params["dt_nucl"])
+    nac = compute_nac_sd(sd_basis[0], sd_basis2, params["dt_nucl"])
+    #nac = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
     #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
