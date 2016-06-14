@@ -138,7 +138,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         coef_d.append(coef_dtmp)
 
 
-    orb_name, scount, pcount, dcount, lcount = ao_basis_gms.input_AO_name(label, atom_spec, basis_type, flag)
+    orb_name, scount, pcount, dcount, lcount = ao_basis.input_AO_name(label, atom_spec, basis_type, flag)
 
     ao_data = {}
     ao_data["expo_s"] = expo_s
@@ -157,7 +157,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         print "coef_d=",ao_data["coef_d"]
 
 
-    ao = ao_basis_gms.construct_ao_basis(ao_data,label,R,scount,orb_name)
+    ao = ao_basis.construct_ao_basis(ao_data,label,R,scount,orb_name)
 
     return ao
 
@@ -214,7 +214,7 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     # ***********Here, reduce E_full and C_full ***************
     sz = len(active_space)
     if sz==0:
-        print "ddd"
+        print "active space is not defined correctly, exit....."
         sys.exit(0)
 
     
