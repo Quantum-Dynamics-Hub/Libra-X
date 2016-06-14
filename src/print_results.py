@@ -85,7 +85,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
         #**************modified here************************************************************
         Nao = mu[0].num_of_rows
         for k in xrange(Nao):
-            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+            line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k).real,mu[1].get(k,k).real,mu[2].get(k,k).real)
         # **************************************************************************************
 
         line = line + "\n"

@@ -6,7 +6,7 @@ import os
 import sys
 import math
 
-user = 1 # 0 for Alexey, 1 for Kosuke, others should input the path they use
+user = 2 # 0 for Alexey, 1 for Kosuke, 2 for Ekadashi others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -22,6 +22,11 @@ elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
     libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
+
+elif user==2:
+    # For Ekadashi
+    libra_bin_path = "/projects/academic/alexeyak/ekadashi/libra-dev/libracode-code/_build/src"
+    libra_gamess_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_gamess_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
@@ -48,7 +53,7 @@ params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
 params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 
-if user==0:
+if user==0 or user==2:
     # For Alexey (setting for CCR @ UB)
     params["GMSPATH"] = "" # GAMESS path is already taken.
     params["rungms"] = "rungms.slurm"
@@ -78,7 +83,7 @@ params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
-#params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
+params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.01                   # shows thermostat frequency
 params["NHC_size"] = 3                      # the size of Nose-Hoover chains
@@ -123,6 +128,14 @@ elif user==1:
     params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
     params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
     params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
+
+elif user==2:
+    # For Ekadashi
+    cwd = os.getcwd()
+    params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
+    params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
+    params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
+
 
 # flags for debugging
 params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
