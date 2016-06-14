@@ -16,6 +16,8 @@ import os
 import sys
 import math
 
+from overlap import *
+
 if sys.platform=="cygwin":
     from cyglibra_core import *
 elif sys.platform=="linux" or sys.platform=="linux2":
