@@ -290,7 +290,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             print "Before TSH"
 
             if SH_type>=1:
-                tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+                if params["interface"]=="GAMESS":
+                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+                elif params["interface"]=="QE":
+                    tsh.surface_hopping(mol, el, ham, rnd, params)
+
 
             ################### END of TSH ##########################
             print "Finished TSH"
