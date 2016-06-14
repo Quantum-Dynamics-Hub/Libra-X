@@ -214,7 +214,7 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     # ***********Here, reduce E_full and C_full ***************
     sz = len(active_space)
     if sz==0:
-        print "ddd"
+        print "active space is not defined correctly, exit....."
         sys.exit(0)
 
     
