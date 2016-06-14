@@ -66,7 +66,7 @@ params["sigma_pos"] = 0.01  #Displace atomic position randomly
 sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
 from libcontrol_parameters import *
 
-params["num_MO"] = 3  # number of MO basis used in constructing electronic wavefunction
+#params["num_MO"] = 3  # number of MO basis used in constructing electronic wavefunction
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
 params["HOMO"] = 0
 params["min_shift"] = 0
