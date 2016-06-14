@@ -25,8 +25,7 @@ module load gamess
 #The PMI library is necessary for srun
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
-
-python run.py
+python run_gms.py
 
 
 
