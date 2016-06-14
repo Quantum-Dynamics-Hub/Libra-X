@@ -211,20 +211,24 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
 
     # ***********Here, reduce E_full and C_full ***************
     sz = len(active_space)
-    if sz > 1:
-        E = MATRIX(sz,sz)
-        C = CMATRIX(Ngbf,sz)
-        for i in xrange(sz):
-            imo = active_space[i]-1
-            E.set(i,i,E_full.get(imo,imo))
-
-        for i in xrange(Ngbf):
-            for j in xrange(sz):
-                jmo = active_space[j]-1
-                C.set(i,j,C_full.get(i,jmo),0.0)
-    else:
-        print "active space is not defined correctly, exit....."
+    if sz==0:
+        print "ddd"
         sys.exit(0)
+
+    
+    E = MATRIX(sz,sz)
+    C = CMATRIX(Ngbf,sz)
+    for i in xrange(sz):
+        imo = active_space[i]-1
+        E.set(i,i,E_full.get(imo,imo))
+
+    for i in xrange(Ngbf):
+        for j in xrange(sz):
+            jmo = active_space[j]-1
+            C.set(i,j,C_full.get(i,jmo),0.0)
+    #else:
+    #    print "active space is not defined correctly, exit....."
+    #    sys.exit(0)
 
     # ************************************************************
 
