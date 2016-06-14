@@ -91,7 +91,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     
 
     # calculate overlap matrix of atomic and molecular orbitals
-    #P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
+    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
@@ -104,13 +104,13 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "mu_y:";    mu_y.show_matrix()
         print "mu_z:";    mu_z.show_matrix()
  
-    #if params["debug_densmat_output"]==1:
-    #    print "P11 and P22 matrixes should show orthogonality"
-    #    print "P11 is";    P11.show_matrix()
-    #    print "P22 is";    P22.show_matrix()
-    #    print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
-    #    print "P12 is";    P12.show_matrix()
-    #    print "P21 is";    P21.show_matrix()
+    if params["debug_densmat_output"]==1:
+        print "P11 and P22 matrixes should show orthogonality"
+        print "P11 is";    P11.show_matrix()
+        print "P22 is";    P22.show_matrix()
+        print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+        print "P12 is";    P12.show_matrix()
+        print "P21 is";    P21.show_matrix()
 
 
     ### TO DO: In the following section, we need to avoid computing NAC matrices in the full
@@ -118,8 +118,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_ave = average_E(E,E2)
-    nac = compute_nac_sd(sd_basis[0], sd_basis2, params["dt_nucl"])
-    #nac = NAC(P12,P21,params["dt_nucl"])
+    #nac = compute_nac_sd(sd_basis[0], sd_basis2, params["dt_nucl"])
+    nac = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
     #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
