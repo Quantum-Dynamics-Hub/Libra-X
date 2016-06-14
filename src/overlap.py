@@ -10,7 +10,7 @@
 #*********************************************************************************/
 
 ## \file overlap.py
-# This program implements the module that calculates
+# This module implements the functions that calculates
 # the overlap matrixes of atomic and molecular orbitals with different time steps.
 # This returns the overlap matrix of molecular orbitals like  <MO(t)|MO(t+dt)>.
 
@@ -141,8 +141,8 @@ def overlap_sd_basis(sd_basis1, sd_basis2):
 # from two sets: sd_basis1 and sd_basis2, which can be the same, but may be 
 # different (e.g. at different time steps)
 #
-# \param[in] sd_basis1 Is a list of length n, containing different Slater determinants (each
-# is represented by a CMATRIX object)
+# \param[in] sd_basis1  A list of length n, containing different Slater determinants
+#                       (each is represented by a CMATRIX object)
 # \param[in] sd_basis2  -- // -- similar to the above
 #
 

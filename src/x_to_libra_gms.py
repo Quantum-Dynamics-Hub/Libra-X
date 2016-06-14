@@ -32,7 +32,6 @@ from moment import *
 from misc import *
 
 
-
 def exe_gamess(params):
     ##
     # This is a function that call GAMESS execution on the compute node
@@ -64,22 +63,16 @@ def exe_gamess(params):
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params :  contains input parameters , in the directory form
-    # \param[in,out] ao :  atomic orbital basis at "t" old
-    # \param[in,out] E  :  total excitation energies at "t" old
-    # \param[in,out] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
-    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
-    # \param[in] suff : The suffix to add to the name of the output files
-    # this suffix is now considered to be of a string type - so you can actually encode both the
-    # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
-    # related information
-    #
-    # This function outputs the files for excited electron dynamics
-    # in "res" directory.
-    # It returns the forces which act on the atoms.
-    # Also, it returns new atomic orbitals, molecular energies, and
-    # molecular coefficients used for calculating time-averaged
-    # molecular energies and Non-Adiabatic Couplings(NACs).
+    # \param[in] params         contains input parameters , in the directory form
+    # \param[in,out] ao         atomic orbital basis at "t" old
+    # \param[in,out] E          total excitation energies at "t" old
+    # \param[in,out] sd_basis   Basis of Slater determinants at "t" old (list of CMATRIX object).
+    #                           In the present implementation, it contains a single determinant
+    # \param[in] active_space   A list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
+    # \param[in] suff           A suffix to add to the name of the output files; this suffix is now considered to be of a string type 
+    #                           - so you can actually encode both the iteration number (MD timestep),
+    #                           the nuclear cofiguration (e.g. trajectory), and any other related information
+    # Returned datas are explained above the return line.
     #
     # Used in: md.py/run_MD
 
@@ -125,6 +118,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
     E_ave = average_E(E,E2)
+    #nac = compute_nac_sd(sd_basis[0], sd_basis2, params["dt_nucl"])
     nac = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
@@ -138,7 +132,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
-    # ********** "CMATRIX.show_matrix(filename)" is not defined here ****** 
+    # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
@@ -160,9 +154,9 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ### E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
     # E_ave : the matrix of the total excitation energy averaged over energies at "t" and "t+dt"
     # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
-    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
+    # sd_basis : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
     # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
     # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_ave, nac, sd_basis2, all_grads, mu
+    return E_ave, nac, sd_basis, all_grads, mu
 
