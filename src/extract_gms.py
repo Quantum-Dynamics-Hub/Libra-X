@@ -138,7 +138,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         coef_d.append(coef_dtmp)
 
 
-    orb_name, scount, pcount, dcount, lcount = ao_basis_gms.input_AO_name(label, atom_spec, basis_type, flag)
+    orb_name, scount, pcount, dcount, lcount = ao_basis.input_AO_name(label, atom_spec, basis_type, flag)
 
     ao_data = {}
     ao_data["expo_s"] = expo_s
