@@ -59,12 +59,14 @@ def main(params):
     ntraj = nstates*ninit*num_SH_traj
 
     #######
-    #active_space = [6,7]  # For C2H4 
+    if params["interface"]=="QE":
+        active_space = [6,7]  # For C2H4 
     #print "Implement the algorithm to define the active space"
     #********** active space is defined here *****************
-    active_space = []
-    for i in range(params["min_shift"],params["max_shift"]+1):
-        active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
+    elif params["interface"]=="GAMESS":
+        active_space = []
+        for i in range(params["min_shift"],params["max_shift"]+1):
+            active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
     #sys.exit(0)
     ######
