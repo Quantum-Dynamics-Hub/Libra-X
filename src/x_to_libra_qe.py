@@ -29,6 +29,7 @@ from overlap import *
 from hamiltonian_el import *
 from create_input_qe import *
 from misc import *
+from spin_indx import *
 
 
 
@@ -83,34 +84,38 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
 
     nstates = len(params["excitations"])
 
-    sd_basis2 = []    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
+    sd_basis2 = SDList()    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
     all_grads = [] # this will be a list of lists of VECTOR objects
     E2 = MATRIX(nstates,nstates)
 
 
     #======== Run QE calculations and get the info at time step t+dt ========
-
+    
     for ex_st in xrange(nstates): # for each excited configuration
                                   # run a separate set of QE calculations
+        idx = params["excitations"][ex_st]
 
         write_qe_input(ex_st,label,mol,params)
         exe_espresso(ex_st)
 
         flag = 0
-        tot_ene, label, R, grads, sd_ex, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
- 
-        sd_basis2.append(sd_ex)
+        tot_ene, label, R, grads, mo_pool, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+        mo_pool_alp = CMATRIX(mo_pool) 
+        mo_pool_bet = CMATRIX(mo_pool) 
+        alp,bet = index_spin(params,active_space)
+        # use excitation object to create proper SD object for different excited state
+        sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet) )
+        sd_basis2.append(sd)
         all_grads.append(grads)
         
         E2.set(ex_st, ex_st, tot_ene)
 
-
-
     # calculate overlap matrix of Slater determinant basis states
-    P11 = overlap_sd_basis(sd_basis,  sd_basis)
-    P22 = overlap_sd_basis(sd_basis2, sd_basis2)
-    P12 = overlap_sd_basis(sd_basis,  sd_basis2)
-    P21 = overlap_sd_basis(sd_basis2, sd_basis)
+    P11 = SD_overlap(sd_basis,  sd_basis)
+    P22 = SD_overlap(sd_basis2, sd_basis2)
+    P12 = SD_overlap(sd_basis,  sd_basis2)
+    P21 = SD_overlap(sd_basis2, sd_basis)
+
 
 
 
