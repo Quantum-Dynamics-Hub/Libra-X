@@ -89,16 +89,32 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
             grd.append(VECTOR(g))
         all_grads.append(grd)
     
-
+    t = Timer()
     # calculate overlap matrix of atomic and molecular orbitals
     #P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
-    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
+    # In semi-empirical case, AO basis isn't used and last input(d2_max) can be set 0.0.
+    sz = len(active_space)
+    act = Py2Cpp_int(active_space)
+    P11, P22, P12, P21 = CMATRIX(sz,sz), CMATRIX(sz,sz), CMATRIX(sz,sz), CMATRIX(sz,sz) 
+    tt = Timer()
+    tt.start()
+    MO_overlap(P11,sd_basis,sd_basis,act,act,0.0)
+    MO_overlap(P22,sd_basis2,sd_basis2,act,act,0.0)
+    MO_overlap(P12,sd_basis,sd_basis2,act,act,0.0)
+    tt.stop() # 3 components same as dipole moment
+    MO_overlap(P21,sd_basis2,sd_basis,act,act,0.0)
+    print "Time to compute in MO_overlap= ",tt.show(),"sec"
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
     # this is done for the "current" state only    
+    t.start()
     mu_x, mu_y, mu_z = transition_dipole_moments(ao2,sd_basis2)
     mu = [mu_x, mu_y, mu_z] # now mu is defined as a CMATRIX list.
+    t.stop()
+    print "Time to compute in dipole moment= ",t.show(),"sec"
+
+    sys.exit(0)
 
     if params["debug_mu_output"]==1:
         print "mu_x:";    mu_x.show_matrix()
