@@ -32,6 +32,7 @@ from create_input_qe import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
 from md import *
+from spin_indx import *
 
 
 def main(params):
@@ -59,12 +60,14 @@ def main(params):
     ntraj = nstates*ninit*num_SH_traj
 
     #######
-    #active_space = [6,7]  # For C2H4 
+    if params["interface"]=="QE":
+        active_space = [5,6,7]  # For C2H4 
     #print "Implement the algorithm to define the active space"
     #********** active space is defined here *****************
-    active_space = []
-    for i in range(params["min_shift"],params["max_shift"]+1):
-        active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
+    elif params["interface"]=="GAMESS":
+        active_space = []
+        for i in range(params["min_shift"],params["max_shift"]+1):
+            active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
     #sys.exit(0)
     ######
@@ -82,7 +85,7 @@ def main(params):
 
     # Initialize variables for a single trajectory first!
     label, Q, R, ao, tot_ene = None, [], None, [], None
-    sd_basis = []
+    sd_basis = SDList()
     all_grads = []
     e = MATRIX(nstates,nstates)  # contains total energy of excited states!
     
@@ -107,9 +110,16 @@ def main(params):
             params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
             exe_espresso(ex_st)
             flag = 0
-            tot_ene, label, R, grads, sd_ex, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+            tot_ene, label, R, grads, mo_pool, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+            mo_pool_alp = CMATRIX(mo_pool)
+            mo_pool_bet = CMATRIX(mo_pool)
+            alp,bet = index_spin(params,active_space)
+            # use excitation object to create proper SD object for different excited state
+            sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet) )
 
-            sd_basis.append(sd_ex)
+            #sd_basis2 = SDList()
+            sd_basis.append(sd)
+
             all_grads.append(grads)
             e.set(ex_st, ex_st, tot_ene)
 
@@ -137,10 +147,12 @@ def main(params):
 
         # Slater determinants
         # eventually, the ordering is this: sd_basis_list[traj][ex_st] - type CMATRIX
-        sd_basis_tr = []
-        for sd in sd_basis:        
-            sd_basis_tr.append(CMATRIX(sd))
-        sd_basis_list.append(sd_basis_tr)
+        #sd_basis_tr = []
+        #for sd in sd_basis:        
+            #sd_basis_tr.append(CMATRIX(sd))
+            #sd_basis_tr.append(sd)
+        #sd_basis_list.append(sd_basis_tr)
+        sd_basis_list.append(sd_basis)
 
         # Gradients
         # eventually, the ordering is this: grad_list[traj][ex_st][n_atom] - type VECTOR
