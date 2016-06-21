@@ -183,6 +183,9 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     # create objects of MATRIX type, containing eigenvalues and eigenvectors 
     E_full = MATRIX(Ngbf,Ngbf)
     C_full = MATRIX(Ngbf,Ngbf)
+    E = MATRIX(Ngbf,Ngbf)
+    C = CMATRIX(Ngbf,Ngbf)
+
 
     for i in xrange(sz):
 
@@ -193,8 +196,8 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
             eig_val = inp_str[i+1].split() # split lines for eigenvalues
             for j in range(0,len(ind_of_eig)):
                 k = int(ind_of_eig[j]) - 1           # python index start from 0
-                E_full.set(k,k,float(eig_val[j]))
-
+                #E_full.set(k,k,float(eig_val[j]))
+                E.set(k,k,float(eig_val[j]))
             # molecular coefficients
             ic = i + 3                              # beginning of coefficient lines
             for j in range(ic,ic+Ngbf):             # loop for AO basis
@@ -206,28 +209,28 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
                         kvec = k + 3
                     else:                           # discontinuous word like "H 20" 
                         kvec = k + 4
-                    C_full.set(ja,ke,float(eig_vec[kvec]))
-
+                    #C_full.set(ja,ke,float(eig_vec[kvec]))
+                    C.set(ja,ke,float(eig_vec[kvec]),0.0)
     #Here, we need to add reduction of E, C matrices and the corresponding trunctaion of the ao list. 
     #This will allow us make further computations faster and in consistent with those adopted in QE 
 
     # ***********Here, reduce E_full and C_full ***************
-    sz = len(active_space)
-    if sz==0:
-        print "active space is not defined correctly, exit....."
-        sys.exit(0)
+    #sz = len(active_space)
+    #if sz==0:
+    #    print "active space is not defined correctly, exit....."
+    #    sys.exit(0)
 
     
-    E = MATRIX(sz,sz)
-    C = CMATRIX(Ngbf,sz)
-    for i in xrange(sz):
-        imo = active_space[i]-1
-        E.set(i,i,E_full.get(imo,imo))
+    #E = MATRIX(sz,sz)
+    #C = CMATRIX(Ngbf,sz)
+    #for i in xrange(sz):
+    #    imo = active_space[i]-1
+    #    E.set(i,i,E_full.get(imo,imo))
 
-    for i in xrange(Ngbf):
-        for j in xrange(sz):
-            jmo = active_space[j]-1
-            C.set(i,j,C_full.get(i,jmo),0.0)
+    #for i in xrange(Ngbf):
+    #    for j in xrange(sz):
+    #        jmo = active_space[j]-1
+    #        C.set(i,j,C_full.get(i,jmo),0.0)
     #else:
     #    print "active space is not defined correctly, exit....."
     #    sys.exit(0)
@@ -244,8 +247,8 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         print "C_full(Ngbf-1,Ngbf-1) is",C_full.get(Ngbf-1,Ngbf-1)
         print "*** reduced matrix ****"
         print "active_space=",active_space
-        print "E Matrix is"; E.show_matrix()
-        print "C Matrix is"; C.show_matrix()
+        #print "E Matrix is"; E.show_matrix()
+        #print "C Matrix is"; C.show_matrix()
 
     return E, C
     
