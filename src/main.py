@@ -147,10 +147,12 @@ def main(params):
 
         # Slater determinants
         # eventually, the ordering is this: sd_basis_list[traj][ex_st] - type CMATRIX
-        sd_basis_tr = []
-        for sd in sd_basis:        
-            sd_basis_tr.append(CMATRIX(sd))
-        sd_basis_list.append(sd_basis_tr)
+        #sd_basis_tr = []
+        #for sd in sd_basis:        
+            #sd_basis_tr.append(CMATRIX(sd))
+            #sd_basis_tr.append(sd)
+        #sd_basis_list.append(sd_basis_tr)
+        sd_basis_list.append(sd_basis)
 
         # Gradients
         # eventually, the ordering is this: grad_list[traj][ex_st][n_atom] - type VECTOR
