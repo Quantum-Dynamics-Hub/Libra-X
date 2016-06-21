@@ -23,8 +23,21 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 
 def index_spin(params,active_space):
+##
+# This function creates alpha (up-spin) and beta (down spin) index list
+# which are later used to create SD (Slater Determinant) data type
+# \param[in] params Parameter dictionary, particularly, params["excitations"] and params["nel"]
+#                   is used in this function
+# \param[in] active_space List of active space orbital number
+# \param[out] alp list of alpha spin index
+# \param[out] bet list of beta spin index 
+#
     nstates = len(params["excitations"])
-    n_HOMO = params["nel"]/2
+    # In case of non-spin-polarized calculation
+    n_HOMO = params["nel"]/2 
+    # Index of HOMO orbital in the active space, e.g., if active space is [4,5,6,7,8] and HOMO
+    # orbital is 6, then the h_idx of HOMO in the active space is 2, new index in the active space is
+    # [0,1,2,3,4]
     h_idx = active_space.index(n_HOMO)
     for ex_st in xrange(nstates): # for each excited configuration
                                  
@@ -32,20 +45,35 @@ def index_spin(params,active_space):
         alp,bet = [],[]
 
         # use excitation object to create proper SD object for different excited state
+        # Currently, excitation only from HOMO is included
+
+        # Consider 2 electrons in the active space:
+        # Ground state: 2 electrons are sitting on HOMO (HOMO-1 is not included into our active space)
+        # Schematics: U - spin-up, D - spin-down, I - inactive electrons
+        #
+        #       SD0            SD1           SD2
+        #
+        #  3  ---------     ---------      ---------
+        #  2  ---------     --   D --      -- U   --
+        #  1  -- U D --     -- U   --      -- U   --
+        #  0  -- I I --     -- I I --      -- I I --
+
         if idx.from_orbit[0] == idx.to_orbit[0]:
+        # For SD0 or the ground state
             alp.append(idx.to_orbit[0] + h_idx)
             bet = alp
-            print "alp=",alp,"bet=",bet
+            #print "alp=",alp,"bet=",bet
         elif idx.from_orbit[0] != idx.to_orbit[0]:
             if idx.from_spin[0] != idx.to_spin[0]:
+            # For SD2 or excited state triplet
                 bet.append(idx.from_orbit[0] + h_idx)
                 bet.append(idx.to_orbit[0]+h_idx)
-                print "alp=",alp,"bet=",bet
-
+                #print "alp=",alp,"bet=",bet
             else:
+            # For SD1 or excited state singlet
                 alp.append(idx.to_orbit[0] + h_idx)
                 bet.append(idx.from_orbit[0] + h_idx)
-                print "alp=",alp,"bet=",bet
+                #print "alp=",alp,"bet=",bet
 
     return alp, bet
 
