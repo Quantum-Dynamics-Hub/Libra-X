@@ -45,7 +45,7 @@ def construct_active_space(params):
 
     active_space = []
 
-    homo = params["nel"] / 2  # the index of HOMO
+    homo = params["nel"]/2 +  params["nel"] % 2  # the index of HOMO
     print "nel = ", params["nel"]
     print "homo = ", homo
 
@@ -166,7 +166,9 @@ def main(params):
             mo_pool_alp = CMATRIX(mo_pool)
             mo_pool_bet = CMATRIX(mo_pool)
 
-            alp,bet = index_spin(params,active_space)
+            homo = params["nel"]/2 +  params["nel"] % 2
+
+            alp,bet = index_spin(params["excitations"][ex_st], active_space, homo)
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet) )
 
