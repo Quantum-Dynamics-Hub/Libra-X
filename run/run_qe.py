@@ -40,8 +40,8 @@ params = {}
 params["qe_debug_print"] = 0
 params["nproc"] = 1              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=100      # the number of MD rounds
-params["Nsteps"]=2      # the number of MD steps per snap
+params["Nsnaps"]=10      # the number of MD rounds
+params["Nsteps"]=1      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
