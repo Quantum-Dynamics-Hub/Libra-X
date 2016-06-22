@@ -134,8 +134,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     ### END TO DO
 
     if params["print_mo_ham"]==1:
-        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
-        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+        E_mol.show_matrix(params["mo_ham"]+"full_re_Ham_"+suff)
+        D_mol.show_matrix(params["mo_ham"]+"full_im_Ham_"+suff)
         #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
         #D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
 

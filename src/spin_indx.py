@@ -93,6 +93,127 @@ def index_spin(ex,active_space,homo):
     return alp, bet
 
 
+def index_spin_gen(ex,active_space,nel):
+##
+# This function creates alpha (up-spin) and beta (down spin) index list
+# which are later used to create SD (Slater Determinant) data type
+# \param[in] params Parameter dictionary, particularly, params["excitations"] and params["nel"]
+#                   is used in this function
+# \param[in] active_space List of active space orbital number
+# \param[out] alp list of alpha spin index
+# \param[out] bet list of beta spin index 
+#
+    print "in index_spin..."
+
+    # In case of non-spin-polarized calculation
+    # Index of HOMO orbital in the active space, e.g., if active space is [4,5,6,7,8] and HOMO
+    # orbital is 6, then the h_idx of HOMO in the active space is 2, new index in the active space is
+    # [0,1,2,3,4]
+    homo = nel/2 +  nel % 2
+    open_shell = nel % 2
+    print "homo = ", homo
+    print "active_space = ", active_space
+
+    h_idx = active_space.index(homo)
+    alp,bet = [],[]
+
+        # use excitation object to create proper SD object for different excited state
+        # Currently, excitation only from HOMO is included
+        # Consider 2 electrons in the active space:
+        # Ground state: 2 electrons are sitting on HOMO (HOMO-1 is not included into our active space)
+        # Schematics: U - spin-up, D - spin-down, I - inactive electrons
+        #
+        #       SD0            SD1           SD2
+        #
+        #  3  ---------     ---------      ---------
+        #  2  ---------     --   D --      -- U   --
+        #  1  -- U D --     -- U   --      -- U   --
+        #  0  -- I I --     -- I I --      -- I I --
+
+    if ex.size>1:
+        print "Only single excitations are currently allowed. Exiting...\n"
+        sys.exit(0)
+    #For Open_shell System
+    if open_shell == 1:
+        print "Open Shell System"
+        # Only alpha spin is considered in the ground state
+        # Ground state "excitation"
+        if ex.from_orbit[0] == ex.to_orbit[0]:
+            #__________________________________
+            for i in xrange(h_idx):
+                alp.append(ex.from_orbit[0]+i)
+                bet.append(ex.from_orbit[0]+i)
+            #----------------------------------
+            if ex.from_spin[0] == 1:
+                alp.append(ex.from_orbit[0] + h_idx)
+            elif ex.to_spin[0] == -1:
+                bet.append(ex.from_orbit[0] + h_idx)
+
+
+        elif ex.from_orbit[0] != ex.to_orbit[0]:
+            #__________________________________
+            for i in xrange(h_idx):
+                alp.append(ex.from_orbit[0]+i)
+                bet.append(ex.from_orbit[0]+i)
+            #----------------------------------
+
+            # spin flip excitations
+            if ex.from_spin[0] != ex.to_spin[0]:
+                if ex.to_spin[0] == -1:
+                    bet.append(ex.to_orbit[0] + h_idx)
+                elif ex.to_spin[0] == 1:
+                    alp.append(ex.to_orbit[0] + h_idx)
+
+            # same spin excitations
+            else:
+                if ex.to_spin[0] == 1:
+                    alp.append(ex.to_orbit[0] + h_idx)
+                elif ex.to_spin[0] == -1:
+                    bet.append(ex.to_orbit[0] + h_idx)
+
+    elif open_shell == 0:
+        # Closed shell system
+        # Ground state "excitation"
+        if ex.from_orbit[0] == ex.to_orbit[0]:
+            #___________________________________
+            for i in xrange(h_idx):
+                alp.append(ex.from_orbit[0] + i)
+            #-----------------------------------
+            alp.append(ex.to_orbit[0] + h_idx)
+            bet = alp
+
+        elif ex.from_orbit[0] != ex.to_orbit[0]:
+            #__________________________________
+            for i in xrange(h_idx):
+                alp.append(ex.from_orbit[0]+i)
+                bet.append(ex.from_orbit[0]+i)
+            #----------------------------------
+
+            # spin flip excitations
+            if ex.from_spin[0] != ex.to_spin[0]:
+                if ex.to_spin[0] == -1:
+                    bet.append(ex.from_orbit[0] + h_idx)
+                    bet.append(ex.to_orbit[0] + h_idx)
+                elif ex.to_spin[0] == 1:
+                    alp.append(ex.from_orbit[0] + h_idx)
+                    alp.append(ex.to_orbit[0] + h_idx)
+
+            # same spin excitations
+            else:
+                if ex.to_spin[0] == 1:
+                    alp.append(ex.to_orbit[0] + h_idx)
+                    bet.append(ex.from_orbit[0] + h_idx)
+                elif ex.to_spin[0] == -1:
+                    bet.append(ex.to_orbit[0] + h_idx)
+                    alp.append(ex.from_orbit[0] + h_idx)
+
+
+
+    print "alp = ", alp
+    print "bet = ", bet
+    return alp, bet
+
+
 def test_index_spin():
     params = {}
     params["excitations"] = [ excitation(0,1,0,1), 
@@ -101,16 +222,19 @@ def test_index_spin():
                               excitation(0,1,1,-1),
                               excitation(0,-1,1,1)
                             ]
+   #___uncomment the following two lines if you 
+   # want to use index_spin(ex, active_space, nel)
+   # params["nel"] = 12
+   # homo = params["nel"]/2 +  params["nel"] % 2
 
-    params["nel"] = 12
-    homo = params["nel"]/2 +  params["nel"] % 2
-    active_space = [6,7]  # HOMO, LUMO
-
+    nel = 12 # for using index_spin_gen
+    active_space = [5,6,7]  # HOMO, LUMO
     for ex in params["excitations"]:
-        index_spin(ex, active_space, homo)
+        #index_spin(ex, active_space, nel)
+        index_spin_gen(ex, active_space, nel)
 
 
 # For testing and debug purposes
-#test_index_spin()
+test_index_spin()
 
 
