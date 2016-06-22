@@ -32,12 +32,19 @@ def index_spin(params,active_space):
 # \param[out] alp list of alpha spin index
 # \param[out] bet list of beta spin index 
 #
+    print "in index_spin..."
+
     nstates = len(params["excitations"])
     # In case of non-spin-polarized calculation
     n_HOMO = params["nel"]/2 
     # Index of HOMO orbital in the active space, e.g., if active space is [4,5,6,7,8] and HOMO
     # orbital is 6, then the h_idx of HOMO in the active space is 2, new index in the active space is
     # [0,1,2,3,4]
+
+    print "nel = ", params["nel"]
+    print "n_HOMO = ", n_HOMO
+    print "active_space = ", active_space
+
     h_idx = active_space.index(n_HOMO)
     for ex_st in xrange(nstates): # for each excited configuration
                                  
@@ -62,19 +69,18 @@ def index_spin(params,active_space):
         # For SD0 or the ground state
             alp.append(idx.to_orbit[0] + h_idx)
             bet = alp
-            #print "alp=",alp,"bet=",bet
         elif idx.from_orbit[0] != idx.to_orbit[0]:
             if idx.from_spin[0] != idx.to_spin[0]:
             # For SD2 or excited state triplet
                 bet.append(idx.from_orbit[0] + h_idx)
                 bet.append(idx.to_orbit[0]+h_idx)
-                #print "alp=",alp,"bet=",bet
             else:
             # For SD1 or excited state singlet
                 alp.append(idx.to_orbit[0] + h_idx)
                 bet.append(idx.from_orbit[0] + h_idx)
-                #print "alp=",alp,"bet=",bet
 
+    print "alp = ", alp
+    print "bet = ", bet
     return alp, bet
 
 

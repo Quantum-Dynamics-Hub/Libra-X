@@ -41,25 +41,35 @@ def construct_active_space(params):
 # params["excitations"] - a list of user-provided excitations to include in the TD-SE basis
 # params["nel"] - the number of electrons in the system - used to determine the index of HOMO
 #
+    print "In construct_active_space..."
+
     active_space = []
 
-    homo = params["nel"] % 2  # the index of HOMO
+    homo = params["nel"] / 2  # the index of HOMO
+    print "nel = ", params["nel"]
+    print "homo = ", homo
 
     # Find the lowest orbital from which excitation occurs and find the highest orbital to where
     # electron is sent
     min_from = 0
     max_to = 0
     for ex in params["excitations"]:
-        if min_from<ex.from_orbit[0]:
+        print "ex = ", ex.from_orbit[0], ex.to_orbit[0]
+
+        if min_from>ex.from_orbit[0]:
             min_from = ex.from_orbit[0]
 
-        if max_to>ex.to_orbit[0]:
+        if max_to<ex.to_orbit[0]:
             max_to = ex.to_orbit[0]
 
+    print "min_from = ", min_from
+    print "max_to = ", max_to
 
     # This definition may be a bit excessive, but it is general and correct (at least for single
     # excitations)
     active_space = range(min_from + homo, max_to + homo + 1)
+
+    print "active_space = ", active_space
 
     return active_space
 
