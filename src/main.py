@@ -83,6 +83,8 @@ def main(params):
 
     #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
 
+    t = Timer()
+    t.start()
     # Initialize variables for a single trajectory first!
     label, Q, R, ao, tot_ene = None, [], None, [], None
     sd_basis = SDList()
@@ -93,11 +95,16 @@ def main(params):
 
         params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
         exe_gamess(params)
-        label, Q, R, grads, E, c, ao = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],\
+        label, Q, R, grads, E, c, ao, params["nel"] = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],\
                                                             active_space,params["debug_gms_unpack"])
         e = MATRIX(E)
-        for ex_st in xrange(nstates):
-            sd_basis.append(CMATRIX(c))
+        for ex_st in xrange(nstates): 
+            mo_pool_alp = CMATRIX(c)
+            mo_pool_bet = CMATRIX(c)
+            alp,bet = index_spin(params,active_space)
+            # use excitation object to create proper SD object for different excited state
+            sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
+            sd_basis.append(sd)
             all_grads.append(copy.deepcopy(grads)) # newly defined
         #print "sd_basis=",sd_basis
         #print "all_grads=",all_grads
@@ -183,10 +190,15 @@ def main(params):
             qq.append(q)
         Q_list.append(qq)
 
+    t.stop()
+    print "Step 1 in main takes",t.show(),"sec"
 
+    sys.exit(0)
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
+
+    t.start()
     print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
     syst = []
@@ -212,5 +224,8 @@ def main(params):
     print "run MD"
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space) # 2 inputs have been added
     print "MD is done"
+
+    t.stop();
+    print "step 2 in main takes",t.show(),"sec"
 
     #return data, test_data

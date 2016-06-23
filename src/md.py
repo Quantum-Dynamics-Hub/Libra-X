@@ -112,6 +112,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     # With flags, MD, energy,and dipole momement trajectories are printed, too. 
     # Used in:  main.py/main
 
+    t = Timer()
     rnd = Random()
 
     dt_nucl = params["dt_nucl"]
@@ -169,7 +170,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #sys.exit(0) # DEBUG!!!
 
     print "Starting propagation"
-
+    t.stop()
+    print "Initialization in md takes",t.show(),"sec"
+    
     #=============== Propagation =======================
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
@@ -201,6 +204,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
 
                         print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itraj)
+                        t.start()
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
@@ -281,6 +285,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         for k in xrange(el_mts):
                             el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
+                        t.stop()
+                        print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
                         #******** end of itsh loop
                     #********* end of i_ex loop
                 #********* end of iconf loop
