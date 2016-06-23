@@ -10,7 +10,7 @@ from libra_py import *
 
 
 
-user = 1  # 0 - Alexey, 1 - Ekadashi
+user = 0  # 0 - Alexey, 1 - Ekadashi
 
 ################ System-specific settings ########################
 if user==0:
@@ -41,7 +41,7 @@ params["qe_debug_print"] = 0
 params["nproc"] = 1              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["Nsnaps"]=10      # the number of MD rounds
-params["Nsteps"]=2      # the number of MD steps per snap
+params["Nsteps"]=1      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
@@ -51,7 +51,7 @@ params["nspin"] = 1
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["tsh_method"] = 1     # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["num_SH_traj"] = 5
+params["num_SH_traj"] = 2
 params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes

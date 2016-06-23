@@ -187,20 +187,13 @@ def qe_extract_gradients(inp_str,  flag):
     return grads
 
 
-
-#def unpack_file(filename,params, flag): 
-
-def qe_extract(filename, flag, active_space, ex_st): 
+ 
+def qe_extract_info(filename, flag): 
 ##
-# Function for reading and extracting Quantum Espresso
-# output. Extracted parameters are used in classical MD
-# calculation using LIBRA in the next step.
+# This function reads Quantum Espresso output and extracts 
+# the descriptive data.
 # \param[in] filename The name of the QE output file which we unpack
 # \param[in] flag Controls the output: 0 - no additional printing, 1 - yes
-# \param[in] active_space The list of indices (starting from 1) of the MOs to include in
-# calculations (and to read from the QE output files)
-# \param[in] ex_st The index of the currently computing electronic state. This index is
-# also used in as a part of the corresponding input/output files
 #
     Ry_to_Ha = 0.5
   
@@ -216,10 +209,8 @@ def qe_extract(filename, flag, active_space, ex_st):
 
     nlines = len(A)
 
-    #for i in range(0,nlines):
-    #    s = A[i].split()  #is this A or a????
     for a in A:
-        s = a.split()  #is this A or a????
+        s = a.split() 
         # Lines where positions and forces start
         # example:
         #     site n.     atom                  positions (alat units)
@@ -284,24 +275,42 @@ def qe_extract(filename, flag, active_space, ex_st):
         sys.exit(0)
     
 
+    return tot_ene, norb, nel, nat, alat, icoord, iforce
 
-    # Reading atom names and xyz coordinates    
+
+
+
+def qe_extract(filename, flag, active_space, ex_st):
+##
+# Function for reading and extracting Quantum Espresso
+# output. Extracted parameters are used in classical MD
+# calculation using LIBRA in the next step.
+# \param[in] filename The name of the QE output file which we unpack
+# \param[in] flag Controls the output: 0 - no additional printing, 1 - yes
+# \param[in] active_space The list of indices (starting from 1) of the MOs to include in
+# calculations (and to read from the QE output files)
+# \param[in] ex_st The index of the currently computing electronic state. This index is
+# also used in as a part of the corresponding input/output files
+#
+
+    f_qe = open(filename, "r")
+    A = f_qe.readlines()
+    f_qe.close()
+
+    # Read the descriptive info
+    tot_ene, norb, nel, nat, alat, icoord, iforce = qe_extract_info(filename, flag)
+
+    # Read atom names and xyz coordinates    
     label, R = qe_extract_coordinates(A[icoord+1:icoord+1+nat], alat, flag)
 
     # Get gradients
     grads = qe_extract_gradients(A[iforce+4:iforce+4+nat], flag)
 
 
-    param = {}
-    param["nel"] = nel
-    param["norb"]= norb
-    param["nat"] = nat
-    param["alat"]= alat    
-    #print params
-
     # Read the wavefunctions:
     MO = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
 
 
     return tot_ene, label, R, grads, MO, norb, nel, nat, alat
+
 

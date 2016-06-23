@@ -80,11 +80,9 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     #
     # Used in: md.py/run_MD
 
-#    qe_extract(filename, flag, active_space, ex_st)
-
     nstates = len(params["excitations"])
 
-    sd_basis2 = SDList()    # this will be a list of CMATRIX objects, Note: each object represents a Slater Determinant
+    sd_basis2 = SDList()    # this is a list of SD objects. Eeach represents a Slater Determinant
     all_grads = [] # this will be a list of lists of VECTOR objects
     E2 = MATRIX(nstates,nstates)
 
@@ -93,16 +91,20 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     
     for ex_st in xrange(nstates): # for each excited configuration
                                   # run a separate set of QE calculations
-        idx = params["excitations"][ex_st]
+        #idx = params["excitations"][ex_st]
 
         write_qe_input(ex_st,label,mol,params)
         exe_espresso(ex_st)
 
         flag = 0
         tot_ene, label, R, grads, mo_pool, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+
         mo_pool_alp = CMATRIX(mo_pool) 
-        mo_pool_bet = CMATRIX(mo_pool) 
-        alp,bet = index_spin(params,active_space)
+        mo_pool_bet = CMATRIX(mo_pool)
+
+        homo = nel/2 +  nel % 2
+        alp,bet = index_spin(params["excitations"][ex_st], active_space, homo) 
+
         # use excitation object to create proper SD object for different excited state
         sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet) )
         sd_basis2.append(sd)
