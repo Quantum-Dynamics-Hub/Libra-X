@@ -112,6 +112,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     # With flags, MD, energy,and dipole momement trajectories are printed, too. 
     # Used in:  main.py/main
 
+    t = Timer()
     rnd = Random()
 
     dt_nucl = params["dt_nucl"]
@@ -169,7 +170,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #sys.exit(0) # DEBUG!!!
 
     print "Starting propagation"
-
+    t.stop()
+    print "Initialization in md takes",t.show(),"sec"
+    
     #=============== Propagation =======================
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
@@ -201,6 +204,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
 
                         print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itraj)
+                        t.start()
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
@@ -223,12 +227,12 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         opt = 0 # default
 
                         if params["interface"]=="GAMESS":
-                            opt = 0 # use 1-electron wavefunctions
+                            opt = 1 # use SD wavefunctions constructed by ground state calculation
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
                        
-                            # update AO, MO, and gradients
+                            # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
                             E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
@@ -253,7 +257,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # Compose electronic and vibronic Hamiltonians
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
 
-           
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
@@ -281,6 +284,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         for k in xrange(el_mts):
                             el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
+                        t.stop()
+                        print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
                         #******** end of itsh loop
                     #********* end of i_ex loop
                 #********* end of iconf loop
