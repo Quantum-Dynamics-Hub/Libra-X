@@ -35,6 +35,47 @@ from md import *
 from spin_indx import *
 
 
+def construct_active_space(params):
+##
+# This function constructs the active space using:
+# params["excitations"] - a list of user-provided excitations to include in the TD-SE basis
+# params["nel"] - the number of electrons in the system - used to determine the index of HOMO
+#
+    print "In construct_active_space..."
+
+    active_space = []
+
+    homo = params["nel"]/2 +  params["nel"] % 2  # the index of HOMO
+    print "nel = ", params["nel"]
+    print "homo = ", homo
+
+    # Find the lowest orbital from which excitation occurs and find the highest orbital to where
+    # electron is sent
+    min_from = 0
+    max_to = 0
+    for ex in params["excitations"]:
+        print "ex = ", ex.from_orbit[0], ex.to_orbit[0]
+
+        if min_from>ex.from_orbit[0]:
+            min_from = ex.from_orbit[0]
+
+        if max_to<ex.to_orbit[0]:
+            max_to = ex.to_orbit[0]
+
+    print "min_from = ", min_from
+    print "max_to = ", max_to
+
+    # This definition may be a bit excessive, but it is general and correct (at least for single
+    # excitations)
+    active_space = range(min_from + homo, max_to + homo + 1)
+
+    print "active_space = ", active_space
+
+    return active_space
+
+
+
+
 def main(params):
     ##
     # Finds the keywords and their patterns and extracts the parameters
@@ -60,12 +101,15 @@ def main(params):
     ntraj = nstates*ninit*num_SH_traj
 
     #######
+    active_space = []
+    mo_pool_alp, mo_pool_bet = None, None
+
     if params["interface"]=="QE":
-        active_space = [5,6,7]  # For C2H4 
-    #print "Implement the algorithm to define the active space"
-    #********** active space is defined here *****************
+        pass
+#        active_space = [5,6,7]  # For C2H4 
+#    #print "Implement the algorithm to define the active space"
+#    #********** active space is defined here *****************
     elif params["interface"]=="GAMESS":
-        active_space = []
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
@@ -117,10 +161,21 @@ def main(params):
             params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
             exe_espresso(ex_st)
             flag = 0
+
+            # Basically, here we automatically determine the position of HOMO and will construct
+            # the active space before actually using it
+            if ex_st==0:
+                tot_ene, params["norb"], params["nel"], params["nat"], params["alat"], icoord, iforce = qe_extract_info("x%i.scf.out" % ex_st, flag)
+                active_space = construct_active_space(params)
+
             tot_ene, label, R, grads, mo_pool, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+
             mo_pool_alp = CMATRIX(mo_pool)
             mo_pool_bet = CMATRIX(mo_pool)
-            alp,bet = index_spin(params,active_space)
+
+            homo = params["nel"]/2 +  params["nel"] % 2
+
+            alp,bet = index_spin(params["excitations"][ex_st], active_space, homo)
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet) )
 
