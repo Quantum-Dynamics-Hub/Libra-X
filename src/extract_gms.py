@@ -217,20 +217,17 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         print "active space is not defined correctly, exit....."
         sys.exit(0)
 
-    
     E = MATRIX(sz,sz)
-    C = CMATRIX(Ngbf,sz)
     for i in xrange(sz):
         imo = active_space[i]-1
         E.set(i,i,E_full.get(imo,imo))
 
+    #C = CMATRIX(C_full) # input full matrix
+    C = CMATRIX(Ngbf,sz)
     for i in xrange(Ngbf):
         for j in xrange(sz):
             jmo = active_space[j]-1
             C.set(i,j,C_full.get(i,jmo),0.0)
-    #else:
-    #    print "active space is not defined correctly, exit....."
-    #    sys.exit(0)
 
     # ************************************************************
 
@@ -382,6 +379,6 @@ def gms_extract(filename,states,min_shift,active_space,flag):
         print "extract program ends"
         print "********************************************\n"
     
-    return label, Q, R, grad, E, C, ao
+    return label, Q, R, grad, E, C, ao, info["Nele"]
 
 
