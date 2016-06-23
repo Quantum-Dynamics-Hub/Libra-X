@@ -227,13 +227,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         opt = 0 # default
 
                         if params["interface"]=="GAMESS":
-                            opt = 0 # use 1-electron wavefunctions
+                            opt = 1 # use SD wavefunctions constructed by ground state calculation
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
-                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt][0], active_space, str(ij)) # E_mol_red -> E_SD  
+                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
                         elif params["interface"]=="QE":
@@ -257,7 +257,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # Compose electronic and vibronic Hamiltonians
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
 
-           
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 

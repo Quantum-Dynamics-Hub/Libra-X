@@ -83,9 +83,11 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
         fm = open(mu_file,"a")
         line = "t= %8.5f " % (ij*dt_nucl)
         # *************************************************************************************
-        #Nao = mu[0].num_of_rows
-        #for k in xrange(Nao):
-        #    line = line + " %8.5f %8.5f %8.5f " % (mu[0].get(k,k),mu[1].get(k,k),mu[2].get(k,k))
+        Nao = mu[0].num_of_rows
+        for k in xrange(Nao):
+            line = line + " %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f " % (mu[0].real().get(k,k),mu[0].imag().get(k,k),\
+                                                                         mu[1].real().get(k,k),mu[1].imag().get(k,k),\
+                                                                         mu[2].real().get(k,k),mu[2].imag().get(k,k))
         # commented out temporarily because mu[k] is a complex number; will be modified later
         # **************************************************************************************
 

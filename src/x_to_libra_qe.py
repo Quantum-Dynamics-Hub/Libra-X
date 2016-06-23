@@ -125,6 +125,11 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # basis. We will need the information on cropping, in order to avoid computations that 
     # we do not need (the results are discarded anyways)
     # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
+
+    # ********************************************************************************************
+    # The names "E_mol" and "D_mol" are confusing when you have already constructed Energy and NACs           
+    # based on SD basis sets.
+    # ********************************************************************************************
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
 
