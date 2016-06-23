@@ -222,7 +222,7 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         imo = active_space[i]-1
         E.set(i,i,E_full.get(imo,imo))
 
-    C = CMATRIX(C_full) # input full matrix
+    #C = CMATRIX(C_full) # input full matrix
     C = CMATRIX(Ngbf,sz)
     for i in xrange(Ngbf):
         for j in xrange(sz):
