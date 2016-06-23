@@ -10,7 +10,7 @@ from libra_py import *
 
 
 
-user = 0  # 0 - Alexey, 1 - Ekadashi
+user = 1  # 0 - Alexey, 1 - Ekadashi
 
 ################ System-specific settings ########################
 if user==0:
@@ -40,8 +40,8 @@ params = {}
 params["qe_debug_print"] = 0
 params["nproc"] = 1              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=10      # the number of MD rounds
-params["Nsteps"]=1      # the number of MD steps per snap
+params["Nsnaps"]=200      # the number of MD rounds
+params["Nsteps"]=2      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
@@ -89,7 +89,7 @@ params["flag_ao"] = 0   # flag for atomic orbital basis : option 1 -> yes. other
 params["print_coherences"] = 1
 params["print_aux_results"] = 1
 params["print_mo_ham"] = 0
-params["print_sd_ham"] = 0
+params["print_sd_ham"] = 1
 params["print_tsh_probabilities"] = 1
 params["check_tsh_probabilities"] = 1 
 
