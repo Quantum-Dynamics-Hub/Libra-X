@@ -142,10 +142,13 @@ def main(params):
         label, Q, R, grads, E, c, ao, params["nel"] = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],\
                                                             active_space,params["debug_gms_unpack"])
         e = MATRIX(E)
+        homo = params["nel"]/2 +  params["nel"] % 2
+
         for ex_st in xrange(nstates): 
             mo_pool_alp = CMATRIX(c)
             mo_pool_bet = CMATRIX(c)
-            alp,bet = index_spin(params,active_space)
+            alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
             sd_basis.append(sd)
@@ -248,7 +251,7 @@ def main(params):
     t.stop()
     print "Step 1 in main takes",t.show(),"sec"
 
-    sys.exit(0)
+    #sys.exit(0)
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
@@ -277,7 +280,7 @@ def main(params):
     # set list of SH state trajectories
     #sys.exit(0)
     print "run MD"
-    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space) # 2 inputs have been added
+    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
     t.stop();
