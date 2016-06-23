@@ -12,7 +12,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 1 # 0 for Alexey, 1 for Kosuke, 2 for Ekadashi others should input the path they use
+user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
