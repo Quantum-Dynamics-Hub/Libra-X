@@ -148,7 +148,8 @@ def print_occupations(occ):
 # \param[in] occ Occupation scheme representing an excitation (list of floats/integers)
 #
     
-    line = "OCCUPATIONS\n"
+    #line = "OCCUPATIONS\n"
+    line = ""
     count = 0
     for f in occ:
         line = line + "%5.3f " % f 
@@ -201,11 +202,15 @@ def write_qe_input(ex_st, label, mol, params):
         z = B_to_A*mol.q[3*k+2]
         g.write("%s    %12.7f    %12.7f    %12.7f  \n"  % (atms, x, y, z) )
 
+    # Write occupation
+    g.write(""+'\n')
+    g.write("OCCUPATIONS"+'\n')
     # Single excitations with no spin-polarization 
     occ, occ_alp, occ_bet = excitation_to_qe_occ(params, excitation)
     if params["nspin"] <= 1:
         g.write(print_occupations(occ))
         g.write(""+'\n')
+    # Single excitations with spin-polarization 
     if params["nspin"] >1:
         g.write(print_occupations(occ_alp))
         g.write(""+'\n')
