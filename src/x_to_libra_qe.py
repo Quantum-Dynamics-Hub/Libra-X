@@ -97,10 +97,12 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
         exe_espresso(ex_st)
 
         flag = 0
-        tot_ene, label, R, grads, mo_pool, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+        nspin = params["nspin"]
+        tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st,nspin)
 
-        mo_pool_alp = CMATRIX(mo_pool) 
-        mo_pool_bet = CMATRIX(mo_pool)
+        #mo_pool_alp = CMATRIX(mo_pool) 
+        #mo_pool_bet = CMATRIX(mo_pool)
+
 
         homo = nel/2 +  nel % 2
         alp,bet = index_spin(params["excitations"][ex_st], active_space, homo) 
