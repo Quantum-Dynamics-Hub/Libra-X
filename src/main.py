@@ -93,6 +93,7 @@ def main(params):
     nstates = len(params["excitations"])
     ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
+    nspin = params["nspin"]
 
     num_SH_traj = 1
     if SH_type >= 1: # calculate no SH probs.  
@@ -171,10 +172,10 @@ def main(params):
                 tot_ene, params["norb"], params["nel"], params["nat"], params["alat"], icoord, iforce = qe_extract_info("x%i.scf.out" % ex_st, flag)
                 active_space = construct_active_space(params)
 
-            tot_ene, label, R, grads, mo_pool, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+            tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st, nspin)
 
-            mo_pool_alp = CMATRIX(mo_pool)
-            mo_pool_bet = CMATRIX(mo_pool)
+            #mo_pool_alp = CMATRIX(mo_pool)
+            #mo_pool_bet = CMATRIX(mo_pool)
 
             homo = params["nel"]/2 +  params["nel"] % 2
 
