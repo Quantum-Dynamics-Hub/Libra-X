@@ -239,6 +239,6 @@ def index_spin_test2():
 
 # For testing and debug purposes
 #index_spin_test1()
-index_spin_test2()
+#index_spin_test2()
 
 
