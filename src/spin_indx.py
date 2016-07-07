@@ -32,15 +32,15 @@ def index_spin(ex,active_space,homo):
 # \param[out] alp list of alpha spin index
 # \param[out] bet list of beta spin index 
 #
-    print "in index_spin..."
+    #print "in index_spin..."
 
     # In case of non-spin-polarized calculation
     # Index of HOMO orbital in the active space, e.g., if active space is [4,5,6,7,8] and HOMO
     # orbital is 6, then the h_idx of HOMO in the active space is 2, new index in the active space is
     # [0,1,2,3,4]
 
-    print "homo = ", homo
-    print "active_space = ", active_space
+    #print "homo = ", homo
+    #print "active_space = ", active_space
 
     h_idx = active_space.index(homo)
     alp,bet = [],[]
@@ -88,12 +88,49 @@ def index_spin(ex,active_space,homo):
                 alp.append(ex.from_orbit[0] + h_idx)
 
 
-    print "alp = ", alp
-    print "bet = ", bet
+    #print "alp = ", alp
+    #print "bet = ", bet
     return alp, bet
 
 
-def index_spin_gen(ex,active_space,nel):
+def truncate_spin(ex,alp,bet,nel_SD,homo_idx):
+##
+# This function further reduce the mo_pool and selects the number of
+# electrons in the SD
+#
+    #print "begining spin index=",alp,bet,"homo idx=",homo_idx
+    if nel_SD % 2 == 0: #Closed Shell System
+        #print "closed shell system"
+        if nel_SD == 2:
+            #print "Number of Electron in SD =",nel_SD
+            #print "from orb=",ex.from_orbit[0],"from spin=",ex.from_spin[0],"to orbit=",ex.to_orbit[0],"to spin=",ex.to_spin[0]
+            alp,bet = [],[]
+            if ex.from_spin[0] != ex.to_spin[0]:   #Triplet state
+                if ex.to_spin[0] == 1:
+                    #print "alp=",alp,"homo_idx=",homo_idx,ex.from_orbit[0]
+                    alp.append(homo_idx + ex.from_orbit[0])
+                    alp.append(homo_idx + ex.to_orbit[0])
+                    #print "alp loop 1=",alp,bet
+                if ex.to_spin[0] == -1:
+                    bet.append(homo_idx + ex.from_orbit[0])
+                    bet.append(homo_idx + ex.to_orbit[0])
+                #print "working"
+            else:    # Singlet state
+                if ex.to_spin[0] == 1:
+                    alp.append(homo_idx + ex.to_orbit[0])
+                    bet.append(homo_idx + ex.from_orbit[0])
+                if ex.to_spin[0] == -1:
+                    alp.append(homo_idx + ex.from_orbit[0])
+                    bet.append(homo_idx + ex.to_orbit[0])
+    #print alp,bet
+    return alp,bet
+
+
+
+        
+
+
+def index_spin_gen(ex,active_space,nel,nel_SD):
 ##
 # This function creates alpha (up-spin) and beta (down spin) index list
 # which are later used to create SD (Slater Determinant) data type
@@ -104,7 +141,7 @@ def index_spin_gen(ex,active_space,nel):
 # \param[out] alp list of alpha spin index
 # \param[out] bet list of beta spin index 
 #
-    print "in index_spin..."
+    #print "in index_spin..."
 
     # In case of non-spin-polarized calculation
     # Index of HOMO orbital in the active space, e.g., if active space is [4,5,6,7,8] and HOMO
@@ -112,7 +149,7 @@ def index_spin_gen(ex,active_space,nel):
     # [0,1,2,3,4]
     homo = nel/2 +  nel % 2
     open_shell = nel % 2   # if 0 then closed shell, if 1 then open shell
-    print "homo = ", homo
+    #print "homo = ", homo
     #origin_ex = homo + ex.from_orbit[0]
     #print "active_space = ", active_space
 
@@ -146,9 +183,7 @@ def index_spin_gen(ex,active_space,nel):
             alp.append(i)
             bet.append(i)
             #-----------------------------------
-
         if ex.from_orbit[0] != ex.to_orbit[0]:
-
             # spin flip excitations
             if ex.from_spin[0] != ex.to_spin[0]:
                 if ex.to_spin[0] == -1:
@@ -157,7 +192,6 @@ def index_spin_gen(ex,active_space,nel):
                 elif ex.to_spin[0] == 1:
                     bet.remove(homo_idx + ex.from_orbit[0])
                     alp.append(homo_idx + ex.to_orbit[0])
-
             # same spin excitations
             else:
                 if ex.to_spin[0] == 1:
@@ -166,6 +200,8 @@ def index_spin_gen(ex,active_space,nel):
                 elif ex.to_spin[0] == -1:
                     bet.remove(homo_idx + ex.from_orbit[0])
                     bet.append(homo_idx + ex.to_orbit[0])
+        #print alp,bet
+        alp,bet = truncate_spin(ex,alp,bet,nel_SD,homo_idx)
 
     elif open_shell == 1:
         # Closed shell system
@@ -201,8 +237,8 @@ def index_spin_gen(ex,active_space,nel):
                     bet.remove(homo_idx + ex.from_orbit[0])
                     bet.append(homo_idx + ex.to_orbit[0])
 
-    print "alp = ", alp
-    print "bet = ", bet
+    #print "alp = ", alp
+    #print "bet = ", bet
     return alp, bet
 
 
@@ -231,10 +267,11 @@ def index_spin_test2():
                               excitation(-2,1,1,1),
                               excitation(-2,-1,1,1)
                             ]
-    nel = 11 # for using index_spin_gen
+    nel = 12 # for using index_spin_gen
+    nel_SD = 2
     active_space = [4,5,6,7]  # HOMO, LUMO
     for ex in params["excitations"]:
-        index_spin_gen(ex, active_space, nel)
+        index_spin_gen(ex, active_space, nel, nel_SD)
 
 
 # For testing and debug purposes
