@@ -33,6 +33,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from md import *
 from spin_indx import *
+from extract_qe import *
 
 
 def construct_active_space(params):
@@ -175,7 +176,45 @@ def main(params):
                 #t.stop()
                 #print "time to extract tot_ene, norb,nel,nat,alat, icoord,iforce for GS is ",t.show()," Sec"
             #t.start()
-            tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st, nspin)
+            #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
+###########################################
+            excitation = params["excitations"][ex_st]
+            nspin = params["nspin"]
+            nel = params["nel"]
+            occ, occ_alp, occ_bet = excitation_to_qe_occ(params, excitation)
+            status = -1
+
+            while status != 0: #for i in xrange(5):
+                write_qe_input_first("x%i.scf_wrk.in"%ex_st,occ,occ_alp,occ_bet,nspin)
+                exe_espresso(ex_st)
+                status = check_convergence("x%i.scf.out" % ex_st) # returns 0 if SCF converges, 1 if not converges
+                if status == 0:
+                    #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
+                    tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
+
+                else:
+
+                    en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
+                    en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
+                    occ_alp_new = fermi_pop(en_alp)
+                    occ_bet_new = fermi_pop(en_bet)
+                    HOMO = nel/2 + nel%2 -1
+
+                    occ_alp[HOMO-1] = float(occ_alp_new[0][1])
+                    occ_alp[HOMO]   = float(occ_alp_new[1][1])
+                    occ_alp[HOMO+1] = float(occ_alp_new[2][1])
+                    occ_alp[HOMO+2] = float(occ_alp_new[3][1])
+
+                    occ_bet[HOMO-1] = float(occ_bet_new[0][1])
+                    occ_bet[HOMO]   = float(occ_bet_new[1][1])
+                    occ_bet[HOMO+1] = float(occ_bet_new[2][1])
+                    occ_bet[HOMO+2] = float(occ_bet_new[3][1])
+
+###########################################
+
+
+
+
             #t.stop()
             #print "time to extract MO pool",t.show(),"Sec"
 
