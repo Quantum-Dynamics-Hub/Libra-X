@@ -87,7 +87,7 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     E2 = MATRIX(nstates,nstates)
     nspin = params["nspin"]
     nel = params["nel"]
-    HOMO = nel/2 + nel%2
+    HOMO = nel/2 + nel%2 -1
     
     #======== Run QE calculations and get the info at time step t+dt ========
     
