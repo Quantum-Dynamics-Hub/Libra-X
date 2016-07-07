@@ -53,12 +53,12 @@ def qe_extract_mo(filename, upper_tag, active_space):
 
     ctx = Context(filename)
     ctx.set_path_separator("/")
-    print "path=", ctx.get_path()
-    ctx.show_children(upper_tag)  # ("Kpoint.1") #
+    #print "path=", ctx.get_path()
+    #ctx.show_children(upper_tag)  # ("Kpoint.1") #
 
     ngw = int(float(ctx.get("Info/<xmlattr>/ngw","n")))
     nbnd = int(float(ctx.get("Info/<xmlattr>/nbnd","n")))
-    print ngw, nbnd
+    #print ngw, nbnd
 
     n_mo = len(active_space)
 
@@ -69,7 +69,7 @@ def qe_extract_mo(filename, upper_tag, active_space):
     for band in active_space:
 
         c = []
-        print "band=",band
+        #print "band=",band
         all_coeff = ctx.get("Wfc."+str(band), "n").split(',')
         sz = len(all_coeff)
 
@@ -131,7 +131,6 @@ def qe_extract_coordinates(inp_str, alat, flag):
     for a in inp_str: 
         spline = a.split() 
 
-        # atom labels
         label.append(spline[1])
 
         # coordinates of atoms
@@ -186,9 +185,211 @@ def qe_extract_gradients(inp_str,  flag):
     # Gradients, in units Ha/Bohr
     return grads
 
+#alp_d,bet_d = check_eig_deg()
 
+def fermi_pop(e):
+
+    #e = [-1.0, -0.5, -0.4] Energies of list of orbitals
+    a = MATRIX(4,4)
+    for i in range(0,4):
+        for j in range(0,4):
+            if i==j:
+                a.set(i,j, e[i])
+            else:
+                a.set(i,j, 0.0)
+
+    #a.show_matrix()
+    Nel = 2.0 # Two electrons in 4 orbitals
+    degen = 1.0 # One orbital can have 1 electrons, in this case of spin-polarization
+    kT = 0.025
+    etol = 0.0001
+    #etol = 0.1
+    Ef = fermi_energy(e, Nel, degen, kT, etol)
+
+    bnds = order_bands(a)
+    #print bnds
+    #print "\n Test5: populate bands"
+    Nocc = Nel
+    pop_opt = 1
+    occ_new = populate_bands(Nel, degen, kT, etol, pop_opt, bnds)
+    #print occ
+    #print occ[0][1]
+    tot_elec = 0.0
+    for i in xrange(4):
+        occ_new[i][1] = "%4.2f"%occ_new[i][1]
+        tot_elec = tot_elec + float(occ_new[i][1])
+#        print occ[i][1], tot_elec
+    #print occ[0][1]
+#    print (2.0 - tot_elec)
+#    print occ[3][1]
+    occ_new[3][1] = "%4.2f"%(float(occ_new[3][1]) + (Nel - tot_elec))
+#    print "%4.2f"%occ[3][1]
+#######################################################
+    if float(occ_new[3][1]) < 0.0 :
+        occ_new[1][1] = float(occ_new[1][1]) + float(occ_new[3][1])
+        occ_new[3][1] = 0.00
+#######################################################
+
+    return occ_new
+
+
+#def get_active_mo_en(filename):
+def qe_extract_eigenvalues(filename,nel):
+#def extract_orb_energy(HOMO):
+    f = open(filename,"r")
+    #print "filename=",filename
+    a = f.readlines()
+    #f.close()
+    na = len(a)
+    HOMO = (nel/2 + nel%2) - 1
+    en_alp = []
+    for i in xrange(na):
+        fa = a[i].split()
+        if len(fa) > 0 and fa[0] =="<EIGENVALUES":
+            eig_num = i + 1
+            #print "Found Eigen values",eig_num
+
+        #if len(fa) > 0 and fa[0] =="<OCCUPATIONS":
+        #    occ_num = i + 1
+        #    print "Found OCCUPATIONS", occ_num
+
+    eig_val = []
+    #occ_val = []
+    for ia in range(eig_num,eig_num+HOMO+4):
+        fa = a[ia].split()
+        eig_val.append("%12.8f"%(float(fa[0])))
+    en_alp.append(float(eig_val[HOMO-1]))
+    en_alp.append(float(eig_val[HOMO]))
+    en_alp.append(float(eig_val[HOMO+1]))
+    en_alp.append(float(eig_val[HOMO+2]))
+    #print "active space energies",en_alp
+
+    return en_alp
+
+def gen_new_occ(ex_st,nel):
+#def extract_orb_energy(HOMO):
+
+    cwd1 = os.getcwd()
+    en_alp = get_active_mo_en(cwd1+"/x%i.save/K00001/eigenval1.xml"%ex_st,nel)
+    en_bet = get_active_mo_en(cwd1+"/x%i.save/K00001/eigenval2.xml"%ex_st,nel)
+    #print "cwd",cwd1
+
+    # push HOMO-1, HOMO, LUMO and LUMO+1 energies to get fermi energies
+    # and fermi population, so, another function needed.
+    occ_alp_new = fermi_pop(en_alp)
+
+    # Similarly, compute fermi population for Beta spin, as this is a spin-polarized calculation
+    occ_bet_new = fermi_pop(en_bet)
+
+    return occ_alp_new, occ_bet_new
+
+
+def write_qe_input(filename, nel,norb, flag_a, flag_b):
+    #norb = 16
+    nHOMO = nel/2 + nel%2 # HOMO orbital index
+    if norb%10 ==0:
+        nl_spin_orb = norb/10      # Number of lines in spin orbital
+    else:
+        nl_spin_orb = norb/10 + 1  # For Ethylene, it is 2, 12/10 + 1
+
+    #print "nHOMO=",nHOMO
+    fa = filename.split('.')
+    fb = fa[0]+".scf_wrk.in"
+    f = open(fb,"r+")
+    a = f.readlines()
+    N = len(a)
+    f.close()
+    f = open(fb, "w")
+    i_homo = -1 # initializing with random value
+    i_homo_bet = -1 # initializing
+    homo_idx = (nHOMO%10) -1
+    for i in range(0,N):
+        s = a[i].split()
+        if len(s)>0 and s[0] =="OCCUPATIONS":
+            i_alp = i+1
+            #print "i_alp=",i_alp
+            i_homo = i_alp + nHOMO/10
+            i_bet = i + nl_spin_orb + 2
+            i_homo_bet = i_bet + nHOMO/10
+            #print "i_homo=",i_homo
+
+        if i==i_homo:
+            s[4],s[5],s[6],s[7] = flag_a[0][1],flag_a[1][1],flag_a[2][1],flag_a[3][1]
+            a[i] = " ".join(str(x) for x in s)+'\n'
+        if i==i_homo_bet:
+            s[4],s[5],s[6],s[7] = flag_b[0][1],flag_b[1][1],flag_b[2][1],flag_b[3][1]
+            a[i] = " ".join(str(x) for x in s)+'\n'
+
+        f.write(a[i])
+    f.close()
+
+def extract_ene_force(filename):
+    Ry_to_Ha = 0.5
+    f_qe = open(filename, "r")
+    A = f_qe.readlines()
+    f_qe.close()
+    iforce = -1
+    tot_ene = 0.0
+    nlines = len(A)
+    for a in A:
+        s = a.split() 
+        # Lines forces start
+        if len(s) > 0 and s[0] == "Forces" and s[1] == "acting":
+            iforce = A.index(a)
+        # !    total energy              =     -27.62882078 Ry
+        if len(s) > 0 and s[0] == "!" and s[1] == "total" and s[2] == "energy":
+            tot_ene = Ry_to_Ha*float(s[4]) # so convert energy into atomic units
+    return tot_ene,iforce
+
+def exe_espresso(i):
+##
+# Function for executing calculations using Quantum Espresso
+# once the calculations are finished, all the temporary data are
+# deleted
+# \param[in] inp The name of the input file
+# \param[in] out The name of the output file
+#
+    inp = "x%i.scf_wrk.in" % i # e.g. "x0.scf_wrk.in"
+    out = "x%i.scf.out" % i    # e.g. "x0.scf.out"
+    inexp = "x%i.exp.in" % i   # e.g. "x0.exp.in"
+    outexp = "x%i.exp.out" % i # e.g "x0.exp.out"
+
+    os.system("srun pw.x < %s > %s" % (inp,out))
+    os.system("srun pw_export.x < %s > %s" % (inexp,outexp))
+
+    # Delete scratch directory and unecessary files
+    #os.system("rm *.dat *.wfc* *.igk* *.mix*")
+    #os.system("rm -r *.save") # not sure if we  need to remove this directory
+
+
+
+def robust_cal_extract(filename, ex_st, nel, flag_a, flag_b):
+    write_qe_input(filename, nel,flag_a, flag_b)
+    exe_espresso(ex_st)
+    tot_ene,iforce = extract_ene_force(filename)
+    return tot_ene, iforce
  
-def qe_extract_info(filename, flag): 
+def check_convergence(filename):
+
+    f_out = open(filename, "r")
+    A = f_out.readlines()
+    f_out.close()
+
+    status = 1 # 0 is okay, non-zero is somethig else
+    nlines = len(A)
+
+    for a in A:
+        s = a.split()
+        # Line says "convergence has been achieved in -- iterations"
+        if len(s) > 0 and s[0] == "convergence"  and s[3] == "achieved":
+            status = 0
+       # if len(s) > 0 and s[0] == "Forces" and s[1] == "acting":
+       #     status = 0
+
+    return status
+
+
+def qe_extract_info(filename, ex_st, flag): 
 ##
 # This function reads Quantum Espresso output and extracts 
 # the descriptive data.
@@ -206,6 +407,8 @@ def qe_extract_info(filename, flag):
     nel, norb, nat = -1, -1, -1
     icoord, iforce = -1, -1
     tot_ene = 0.0
+
+    status = 0 # 0 is okay, non-zero is somethig else
 
     nlines = len(A)
 
@@ -270,9 +473,23 @@ def qe_extract_info(filename, flag):
         print "Coordinates of atoms are not found. Exiting...\n"
         sys.exit(0)
     if iforce==-1:
-        print "Error in unpack_file\n"
-        print "Force of atoms are not found. Exiting...\n"
-        sys.exit(0)
+        print "Error in unpack_file first time, Forces not found \n"
+        #status = 1
+
+        #for la in xrange(5):
+
+####        a1,b1 = gen_new_occ(ex_st,nel)
+
+        #    tot_ene, iforce = robust_cal_extract(filename, ex_st, nel, a1,b1)
+        #    if iforce !=-1:
+        #        break
+        #alp_d,bet_d = check_eig_deg()
+        #flag_a = 1
+        #if iforce ==-1:
+        #    print "Something new problem in SCF convergence"
+        #    sys.exit(0)
+
+
     
 
     return tot_ene, norb, nel, nat, alat, icoord, iforce
@@ -280,7 +497,8 @@ def qe_extract_info(filename, flag):
 
 
 
-def qe_extract(filename, flag, active_space, ex_st, nspin):
+def qe_extract(filename, active_space, ex_st, nspin, flag):
+#def qe_extract(filename, active_space, ex_st, nspin, verbose_level):
 ##
 # Function for reading and extracting Quantum Espresso
 # output. Extracted parameters are used in classical MD
@@ -293,12 +511,16 @@ def qe_extract(filename, flag, active_space, ex_st, nspin):
 # also used in as a part of the corresponding input/output files
 #
 
+    #f_qe = open(filename, "r")
+    #A = f_qe.readlines()
+    #f_qe.close()
+    grads = []
+    # Read the descriptive info
+    tot_ene, norb, nel, nat, alat, icoord, iforce = qe_extract_info(filename, ex_st, flag)
+
     f_qe = open(filename, "r")
     A = f_qe.readlines()
     f_qe.close()
-
-    # Read the descriptive info
-    tot_ene, norb, nel, nat, alat, icoord, iforce = qe_extract_info(filename, flag)
 
     # Read atom names and xyz coordinates    
     label, R = qe_extract_coordinates(A[icoord+1:icoord+1+nat], alat, flag)
