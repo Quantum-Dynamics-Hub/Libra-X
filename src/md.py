@@ -114,7 +114,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     t = Timer()
     rnd = Random()
-
+    t.start()
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
     if el_mts < 1:
@@ -182,6 +182,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     etot = [0.0]*ens_sz
     eext = [0.0]*ens_sz
     mu = []
+    smat = CMATRIX(nstates,nstates)
     for i in xrange(ens_sz):
         mu.append(MATRIX())
 
@@ -208,7 +209,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                            #el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
@@ -223,6 +225,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # ======= Compute forces and energies using external package ============
                         #tot_ene0 = 0.0
                         nac = CMATRIX()
+                        #smat = CMATRIX()
                         all_grads = []
                         opt = 0 # default
 
@@ -240,7 +243,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             opt = 1 # use true SD wavefunctions
 
                             # update MO and gradients
-                            E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            #E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
                             #tot_ene.append(E[cnt]), E_mol_red --> E_SD
 
                         # ============== Common blocks ==================
@@ -255,8 +259,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
-
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
@@ -265,6 +272,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
+                        t.stop()
+                        print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
+
           
                         if MD_type == 1:
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
@@ -282,7 +292,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                            #el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagation using overlap (S) matrix
 
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
@@ -293,6 +304,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                     
             ############ Add surface hopping ######################
             print "Before TSH"
+            t.stop()
+            print "time before TSH=",t.show(),"sec"
 
             if SH_type>=1:
                 if params["interface"]=="GAMESS":
@@ -303,6 +316,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             ################### END of TSH ##########################
             print "Finished TSH"
+            t.stop()
+            print "time after TSH=",t.show(),"sec"
+
 
         #************ end of j loop - all steps for this snap
 
@@ -317,6 +333,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
         print "       ********* %i snap ends ***********" % i
         print 
+        t.stop()
+        print "time after final result printing=",t.show(),"sec"
+
 
 
 
