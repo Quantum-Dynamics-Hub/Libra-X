@@ -183,6 +183,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     eext = [0.0]*ens_sz
     mu = []
     smat = CMATRIX(nstates,nstates)
+    for i in xrange(nstates):
+        smat.set(i,i,1.0,0.0)
     for i in xrange(ens_sz):
         mu.append(MATRIX())
 
