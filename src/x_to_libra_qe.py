@@ -184,6 +184,7 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # The names "E_mol" and "D_mol" are confusing when you have already constructed Energy and NACs           
     # based on SD basis sets.
     # ********************************************************************************************
+    S_mol = average_S(P11,P22)  # Average S(t+dt/2) = (S(t) + S(t+dt))/2.0
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
 
@@ -213,5 +214,6 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # sd_basis2: the list of reduced SD (active space orbitals), representing all computed states
     # all_grads: the gradients on all atoms for all excited states, such that all_grads[i][n] is a VECTOR object containing the gradient on the atom n for the i-th excited state
 
-    return E_mol, D_mol, E2, sd_basis2, all_grads
+    #return E_mol, D_mol, E2, sd_basis2, all_grads
+    return E_mol, D_mol, S_mol, E2, sd_basis2, all_grads
 
