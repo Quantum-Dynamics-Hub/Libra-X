@@ -184,7 +184,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # The names "E_mol" and "D_mol" are confusing when you have already constructed Energy and NACs           
     # based on SD basis sets.
     # ********************************************************************************************
-    S_mol = average_S(P11,P22)  # Average S(t+dt/2) = (S(t) + S(t+dt))/2.0
+    #S_mol = average_S(P11,P22)  # Average S(t+dt/2) = (S(t) + S(t+dt))/2.0
+    S_mol = 0.50 * (P11 + P22)  # Seperate module is not required, directly averaged here
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
 

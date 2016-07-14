@@ -211,8 +211,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
-                            #el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                            if params["smat_inc"] == 1:
+                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                            else:
+                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
@@ -294,8 +296,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Electronic propagation: half-step
                         for k in xrange(el_mts):
-                            #el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagation using overlap (S) matrix
+                            if params["smat_inc"] == 1:
+                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                            else:
+                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
