@@ -80,3 +80,19 @@ def average_E(E1,E2):
     E = 0.50 * (E1 + E2)
 
     return E
+
+def average_S(S1,S2):
+    ##
+    # Finds the keywords and their patterns and extracts the parameters
+    # \param[in] S1, S2 : Overlap at different time step.
+    # This function returns the time-averaged overlap matrix S(t+dt/2).
+    #
+    # Used in: x_to_libra.py/gamess_to_libra
+
+    Norb = S1.num_of_rows
+    S = MATRIX(Norb,Norb)
+
+    S = 0.50 * (S1 + S2)
+
+    return S
+
