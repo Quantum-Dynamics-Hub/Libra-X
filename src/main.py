@@ -256,7 +256,7 @@ def main(params):
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
 
-    t.start()
+    #t.start()
     print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
     syst = []
@@ -283,7 +283,7 @@ def main(params):
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
-    t.stop();
-    print "step 2 in main takes",t.show(),"sec"
+    #t.stop();
+    #print "step 2 in main takes",t.show(),"sec"
 
     #return data, test_data
