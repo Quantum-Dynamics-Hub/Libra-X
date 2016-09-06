@@ -85,22 +85,76 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     sd_basis2 = SDList()    # this is a list of SD objects. Eeach represents a Slater Determinant
     all_grads = [] # this will be a list of lists of VECTOR objects
     E2 = MATRIX(nstates,nstates)
-
-
+    nspin = params["nspin"]
+    nel = params["nel"]
+    HOMO = nel/2 + nel%2 -1
+    
     #======== Run QE calculations and get the info at time step t+dt ========
     
     for ex_st in xrange(nstates): # for each excited configuration
                                   # run a separate set of QE calculations
         #idx = params["excitations"][ex_st]
-
-        write_qe_input(ex_st,label,mol,params)
-        exe_espresso(ex_st)
-
+        ###########################################
+        #write_qe_input(ex_st,label,mol,params)
+        #exe_espresso(ex_st)
+        #nspin = params["nspin"]
+        #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st,nspin)
+        ###########################################
         flag = 0
-        tot_ene, label, R, grads, mo_pool, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st)
+        #while flag1! = 0: #for i in xrange(5):
+        #    write_qe_input(ex_st,label,mol,params,flag1,occ_a,occ_b)
+        #    exe_espresso(ex_st)
 
-        mo_pool_alp = CMATRIX(mo_pool) 
-        mo_pool_bet = CMATRIX(mo_pool)
+            #flag = 0
+        #    nspin = params["nspin"]
+            # Return flag1, if this is -1, then continue the loop, it != -1, then break the loop
+        #    flag1, tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat, occ_a, occ_b = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st,nspin)
+
+        #occ_alp,occ_bet = excitation_occ(params)
+        excitation = params["excitations"][ex_st]
+        occ, occ_alp, occ_bet = excitation_to_qe_occ(params, excitation)
+        status = -1
+
+        while status != 0: #for i in xrange(5):
+            write_qe_input(ex_st,label,mol,params,occ,occ_alp,occ_bet)
+            exe_espresso(ex_st)
+            status = check_convergence("x%i.scf.out" % ex_st) # returns 0 if SCF converges, 1 if not converges
+            if status == 0:
+                tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
+
+            else:
+
+                en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
+                en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
+                occ_alp_new = fermi_pop(en_alp)
+                occ_bet_new = fermi_pop(en_bet)
+
+                occ_alp[HOMO-1] = float(occ_alp_new[0][1])
+                occ_alp[HOMO]   = float(occ_alp_new[1][1])
+                occ_alp[HOMO+1] = float(occ_alp_new[2][1])
+                occ_alp[HOMO+2] = float(occ_alp_new[3][1])
+
+                occ_bet[HOMO-1] = float(occ_bet_new[0][1])
+                occ_bet[HOMO]   = float(occ_bet_new[1][1])
+                occ_bet[HOMO+1] = float(occ_bet_new[2][1])
+                occ_bet[HOMO+2] = float(occ_bet_new[3][1])
+
+
+
+#            if flag1!=-1: # when iforce != -1, then break this loop and continue
+#                break
+
+        #for la in xrange(5):
+        #    a1,b1 = gen_new_occ(ex_st) # This can be inserted inside qe_extract such that is gives a1 and b1 as output. i.e., extracts additional information
+        #    Then it is easy to just write input and rerun calculation
+        #    tot_ene, iforce = robust_cal_extract(filename, ex_st, nel, a1,b1)
+        #    if iforce !=-1:
+        #        break
+
+
+        #mo_pool_alp = CMATRIX(mo_pool) 
+        #mo_pool_bet = CMATRIX(mo_pool)
+
 
         homo = nel/2 +  nel % 2
         alp,bet = index_spin(params["excitations"][ex_st], active_space, homo) 
@@ -130,6 +184,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # The names "E_mol" and "D_mol" are confusing when you have already constructed Energy and NACs           
     # based on SD basis sets.
     # ********************************************************************************************
+    #S_mol = average_S(P11,P22)  # Average S(t+dt/2) = (S(t) + S(t+dt))/2.0
+    S_mol = 0.50 * (P11 + P22)  # Seperate module is not required, directly averaged here
     E_mol = average_E(E,E2)
     D_mol = NAC(P12,P21,params["dt_nucl"])
 
@@ -139,8 +195,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     ### END TO DO
 
     if params["print_mo_ham"]==1:
-        E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
-        D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+        E_mol.show_matrix(params["mo_ham"]+"full_re_Ham_"+suff)
+        D_mol.show_matrix(params["mo_ham"]+"full_im_Ham_"+suff)
         #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
         #D_mol_red.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
 
@@ -159,5 +215,6 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     # sd_basis2: the list of reduced SD (active space orbitals), representing all computed states
     # all_grads: the gradients on all atoms for all excited states, such that all_grads[i][n] is a VECTOR object containing the gradient on the atom n for the i-th excited state
 
-    return E_mol, D_mol, E2, sd_basis2, all_grads
+    #return E_mol, D_mol, E2, sd_basis2, all_grads
+    return E_mol, D_mol, S_mol, E2, sd_basis2, all_grads
 

@@ -2,10 +2,10 @@
 #SBATCH --partition=valhalla
 ##SBATCH --partition=general-compute
 #SBATCH --clusters=chemistry
-#SBATCH --time=00:50:00
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --mem=2000
+#SBATCH --ntasks-per-node=4
+#SBATCH --mem=10000
 ####SBATCH --mail-user=ekadashi@buffalo.edu
 
 echo "SLURM_JOBID="$SLURM_JOBID

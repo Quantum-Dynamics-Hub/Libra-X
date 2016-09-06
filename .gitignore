@@ -25,3 +25,6 @@ im_*
 *.mix*
 wfc*
 *.err
+*_re_*
+*_im_*
+
