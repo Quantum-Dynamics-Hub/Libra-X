@@ -160,7 +160,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
-
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
