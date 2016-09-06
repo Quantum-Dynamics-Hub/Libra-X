@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -45,7 +45,7 @@ params = {}
 params["interface"] = "GAMESS"
 
 # GAMESS variables
-# We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in md.py/exe_gamess
+# We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in x_to_libra_gms.py/exe_gamess
 # Paths of SCR, USERSCR, GMSPATH in the rungms script will be defined by environmental variables later.
 # (Supposed TARGET is already defined as sockets or mpi.)
 
@@ -56,7 +56,7 @@ params["gms_inp"] = ""            # working input file of GAMESS
 params["gms_out"] = ""            # output file of GAMESS
 params["nproc"] = 1               # the number of processors : default = 1
 params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
-params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.
+params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.This directory will be created and deleted every GAMESS calculation.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 
 if user==0 or user==2:
@@ -86,8 +86,8 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"] = 5                        # the number of MD rounds
-params["Nsteps"] = 1                        # the number of MD steps per snap
+params["Nsnaps"] = 100                      # the number of MD rounds
+params["Nsteps"] = 20                       # the number of MD steps per snap
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
@@ -107,15 +107,15 @@ if test==0:
 elif test==1:
     params["HOMO"] = 91 # not 92
 
-params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
-params["max_shift"] = 1                # e.g.  1 -> LUMO
+params["min_shift"] = 0               # e.g. -1 -> HOMO-1, HOMO
+params["max_shift"] = 0                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
-params["num_SH_traj"] = 3              # number of excited states trajectories per initial nuclei geometry and excited states
+params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
-params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
+params["do_rescaling"] = 0             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
+params["do_reverse"] = 0               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
 # select directories where the results will be printed out.
@@ -145,22 +145,23 @@ elif user==2:
 
 # flags for debugging
 params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
-params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
+params["print_coherences"] = 0              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
+params["print_sd_ham"] = 0                  # print SD basis vibronic Hamiltonian
 params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
 params["print_SH_results_with_scaling"] = 1 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
 params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
-params["debug_mu_output"] = 1               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
+params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
+params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
 #params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["print_tsh_probabilities"] = 1      # print the debug info into standard output: hopping probabilities matrices and SH_states
-params["check_tsh_probabilities"] = 1      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
+params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
+params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************
 
 from states import *
 
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+#params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+params["excitations"] = [ excitation(0,1,0,1)]
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]

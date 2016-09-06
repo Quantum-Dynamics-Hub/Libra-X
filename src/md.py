@@ -147,6 +147,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     # Open and close energy and trajectory files - this will effectively
     # make them empty (to remove older info, in case we restart calculations)
+    t.start()
 
     init_files(params)
     
@@ -207,8 +208,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.start()
 
                         # Electronic propagation: half-step
-                        for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        #for k in xrange(el_mts):
+                        #    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
@@ -233,7 +234,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             exe_gamess(params)
                        
                             # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
-                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
+                            E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
 
                         elif params["interface"]=="QE":
@@ -265,7 +266,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
-          
+                        
                         if MD_type == 1:
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
@@ -281,8 +282,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
                         # Electronic propagation: half-step
-                        for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        #for k in xrange(el_mts):
+                        #    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
