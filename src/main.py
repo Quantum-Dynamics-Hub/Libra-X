@@ -94,7 +94,7 @@ def main(params):
     nstates = len(params["excitations"])
     ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
-    nspin = params["nspin"]
+    # nspin = params["nspin"]  This parameter is used only in Libra-QE interface.
 
     num_SH_traj = 1
     if SH_type >= 1: # calculate no SH probs.  

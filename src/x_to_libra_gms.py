@@ -52,12 +52,15 @@ def exe_gamess(params):
     os.environ["USERSCR"] = scr_dir
     os.environ["GMSPATH"] = params["GMSPATH"]
 
+    # create scratch directory
+    os.system("mkdir %s" % (scr_dir))
+
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")
-    os.system("rm -r %s/*" %(scr_dir))
+    os.system("rm -r %s" % (scr_dir))
 
 
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
@@ -185,5 +188,5 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
     # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_ave, nac, sd_basis2, all_grads, mu
+    return E, E_ave, nac, sd_basis2, all_grads, mu
 
