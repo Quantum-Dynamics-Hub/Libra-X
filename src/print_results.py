@@ -75,7 +75,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
 
     # Energy
     fe = open(ene_file,"a")
-    fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
+    fe.write("t= %8.5f ekin= %10.7f  epot= %10.7f  etot= %10.7f  eext= %10.7f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
     
     if params["interface"] == "GAMESS":       
