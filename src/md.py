@@ -129,6 +129,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
+    nstates_init = len(params["excitations_init"])
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
     SH_type = params["tsh_method"]
@@ -176,7 +177,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #=============== Propagation =======================
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
-    ens_sz = nconfig * nstates * num_SH_traj
+    ens_sz = nconfig * nstates_init * num_SH_traj
     epot = [0.0]*ens_sz
     ekin = [0.0]*ens_sz
     etot = [0.0]*ens_sz
@@ -188,6 +189,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     for i in xrange(ens_sz):
         mu.append(MATRIX())
 
+    #sys.exit(0)
 
     for i in xrange(Nsnaps):   # number of printouts
 
@@ -198,15 +200,15 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             for iconf in xrange(nconfig):     # all initial nuclear configurations
 
-                for i_ex in xrange(nstates):  # consider initial excitations to be on all the basis
-                                              # states - this may be unnecessary for all cases, 
-                                              # so we may want to make this part customizable
+                for i_ex in xrange(nstates_init):  # consider initial excitations to be on all the basis
+                                                   # states - this may be unnecessary for all cases, 
+                                                   # so we may want to make this part customizable
 
                     for itraj in xrange(num_SH_traj): # all stochastic SH realizations
 
-                        cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                        cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
 
-                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itraj)
+                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,params["excitations_init"][i_ex],itraj)
                         t.start()
 
                         # Electronic propagation: half-step
@@ -243,6 +245,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
                             E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
+                            sys.exit(0)
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
