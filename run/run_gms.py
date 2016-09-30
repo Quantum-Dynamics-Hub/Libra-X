@@ -163,6 +163,7 @@ from states import *
 
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
+params["excitations_init"] = [2]
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]

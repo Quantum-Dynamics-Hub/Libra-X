@@ -92,6 +92,7 @@ def main(params):
 
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
+    nstates_init = len(params["excitations_init"])
     ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
     # nspin = params["nspin"]  This parameter is used only in Libra-QE interface.
@@ -100,7 +101,7 @@ def main(params):
     if SH_type >= 1: # calculate no SH probs.  
         num_SH_traj = params["num_SH_traj"]
 
-    ntraj = nstates*ninit*num_SH_traj
+    ntraj = nstates_init*ninit*num_SH_traj
 
     #######
     active_space = []
@@ -146,7 +147,7 @@ def main(params):
         e = MATRIX(E)
         homo = params["nel"]/2 +  params["nel"] % 2
 
-        for ex_st in xrange(nstates): 
+        for ex_st in params["excitations_init"]: 
             mo_pool_alp = CMATRIX(c)
             mo_pool_bet = CMATRIX(c)
             alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
@@ -161,7 +162,7 @@ def main(params):
 
     elif params["interface"]=="QE":
         params["qe_inp_templ"] = []
-        for ex_st in xrange(nstates):
+        for ex_st in xrange(nstates): # modify here #
 
             params["qe_inp_templ"].append( read_qe_inp_templ("x%i.scf_wrk.in" % ex_st) )
             exe_espresso(ex_st)
@@ -211,9 +212,6 @@ def main(params):
                     occ_bet[HOMO+2] = float(occ_bet_new[3][1])
 
 ###########################################
-
-
-
 
             #t.stop()
             #print "time to extract MO pool",t.show(),"Sec"
@@ -308,7 +306,7 @@ def main(params):
     # all excitations for each nuclear configuration
     for i in xrange(ninit):
         #print "init_system..." 
-        for i_ex in xrange(nstates):
+        for i_ex in params["excitations_init"]:
             for itraj in xrange(num_SH_traj):
                 #print "Create a copy of a system"  
                 df = 0 # debug flag
