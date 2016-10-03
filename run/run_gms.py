@@ -148,11 +148,11 @@ elif user==2:
 params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
 params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
 params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
-params["print_mo_ham"] = 0                  # print full and reduced size MO basis vibronic Hamiltonian
+params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
 params["print_SH_results_with_scaling"] = 0 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
-params["debug_densmat_output"] = 0          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
+params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
+params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
 #params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
 params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
 params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)

@@ -43,7 +43,6 @@ def init_files(params):
     # Used in md.py/run_MD 
     
     nconfig = params["nconfig"]
-    nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
     # define prefixes
@@ -56,7 +55,7 @@ def init_files(params):
     sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
 
     for i in xrange(nconfig):
-        for i_ex in xrange(nstates):
+        for i_ex in params["excitations_init"]:
             index0 = "_"+str(i)+"_"+str(i_ex)
 
             se_pop_file = se_pop_file_prefix+index0+".txt"
@@ -77,7 +76,7 @@ def init_files(params):
                     #if params["flag_ao"] == 1:
                     fm = open(mu_file,"w"); fm.close();
 
-    for i_ex in xrange(nstates):
+    for i_ex in params["excitations_init"]:
 
         se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
         sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
@@ -245,7 +244,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
                             E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
-                            sys.exit(0)
+                            
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
@@ -272,6 +271,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
                         t.stop()
                         print "time after update vib ham=",t.show(),"sec"
+
+                        #sys.exit(0)
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
@@ -336,7 +337,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
         ################### Printing results ############################
         # print out SE and SH populations
         se_pop, sh_pop = print_results.pops_ave_TSH_traj(i,el,params)
+        #sys.exit(0)
         print_results.pops_ave_geometry(i,nstates,se_pop,sh_pop,params)
+        #sys.exit(0)
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:
