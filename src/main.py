@@ -147,7 +147,7 @@ def main(params):
         e = MATRIX(E)
         homo = params["nel"]/2 +  params["nel"] % 2
 
-        for ex_st in params["excitations_init"]: 
+        for ex_st in xrange(nstates): 
             mo_pool_alp = CMATRIX(c)
             mo_pool_bet = CMATRIX(c)
             alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
