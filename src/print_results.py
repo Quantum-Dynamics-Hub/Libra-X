@@ -45,6 +45,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
     MD_type = params["MD_type"]
     print_coherences = params["print_coherences"]
     nstates = len(params["excitations"])
+    nstates_init = len(params["excitations_init"])
     ij = isnap*params["Nsteps"]
     
     traj_file_prefix = params["res"]+"md"
@@ -75,7 +76,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
 
     # Energy
     fe = open(ene_file,"a")
-    fe.write("t= %8.5f ekin= %8.5f  epot= %8.5f  etot= %8.5f  eext= %8.5f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
+    fe.write("t= %8.5f ekin= %10.7f  epot= %10.7f  etot= %10.7f  eext= %10.7f curr_T= %8.5f\n" % (ij*dt_nucl, ekin, epot, etot, eext,curr_T))
     fe.close()
     
     if params["interface"] == "GAMESS":       
@@ -115,14 +116,15 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
 
     nconfig = params["nconfig"]
     nstates = len(params["excitations"])
+    nstates_init = len(params["excitations_init"])
     num_SH_traj = params["num_SH_traj"]
 
     for iconf in xrange(nconfig):
-        for i_ex in xrange(nstates):
+        for i_ex in xrange(nstates_init):
             for itraj in xrange(num_SH_traj):
 
-                cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
-                print_one_traj(isnap,iconf,i_ex,itraj,mol[cnt],syst[cnt],mu[cnt],epot[cnt], ekin[cnt], etot[cnt], eext[cnt],params)
+                cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                print_one_traj(isnap,iconf,params["excitations_init"][i_ex],itraj,mol[cnt],syst[cnt],mu[cnt],epot[cnt], ekin[cnt], etot[cnt], eext[cnt],params)
 
 
 
@@ -138,6 +140,7 @@ def pops_ave_TSH_traj(i,el,params):
 
     nconfig = params["nconfig"]
     nstates = el[0].nstates
+    nstates_init = len(params["excitations_init"])
     num_SH_traj = params["num_SH_traj"]
     SH_type = params["tsh_method"]
     ij = i*params["Nsteps"]
@@ -152,8 +155,10 @@ def pops_ave_TSH_traj(i,el,params):
     l_sh_pop = []
 
     for iconf in xrange(nconfig):
-        for i_ex in xrange(nstates):
+        for i_ex in xrange(nstates_init):
 
+            i_ex_init = params["excitations_init"][i_ex]
+            
             #***********  SE population **************
 
             se_pop = []
@@ -164,7 +169,7 @@ def pops_ave_TSH_traj(i,el,params):
             for st in xrange(nstates):
                 p_tmp = 0.0
                 for itraj in xrange(num_SH_traj):
-                    cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                    cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
                     p_tmp += el[cnt].rho(st,st).real
                 se_pop.append(p_tmp/float(num_SH_traj))
                 l_se_pop.append(p_tmp/float(num_SH_traj)) # store SE pops
@@ -175,14 +180,14 @@ def pops_ave_TSH_traj(i,el,params):
                     for st1 in xrange(st):
                         c1_tmp = 0.0; c2_tmp = 0.0
                         for itraj in xrange(num_SH_traj):
-                            cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                            cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
                             c1_tmp += el[cnt].rho(st,st1).real
                             c2_tmp += el[cnt].rho(st,st1).imag                            
                         se_coh_re.append(c1_tmp/float(num_SH_traj))
                         se_coh_im.append(c2_tmp/float(num_SH_traj))
 
             # set file name
-            num_tmp = "_"+str(iconf)+"_"+str(i_ex)
+            num_tmp = "_"+str(iconf)+"_"+str(i_ex_init)
             se_pop_file = se_pop_file_prefix+num_tmp+".txt"
 
             # Populations
@@ -214,7 +219,7 @@ def pops_ave_TSH_traj(i,el,params):
                 # evaluate TSH probabilities
                 tsh_probs = [0.0]*nstates
                 for itraj in xrange(num_SH_traj): # count number of trajectories
-                    cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                    cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
                     tsh_probs[el[cnt].istate] += 1.0
             
                 for st in xrange(nstates):
@@ -222,7 +227,7 @@ def pops_ave_TSH_traj(i,el,params):
                     l_sh_pop.append(tsh_probs[st]) # store SH pops
 
                 # set file name
-                num_tmp = "_"+str(iconf)+"_"+str(i_ex)
+                num_tmp = "_"+str(iconf)+"_"+str(i_ex_init)
                 sh_pop_file = sh_pop_file_prefix+num_tmp+".txt"
 
                 # Populations     
@@ -254,6 +259,7 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     #
     # Used in: md.py/run_MD
 
+    nstates_init = len(params["excitations_init"])
     nconfig = params["nconfig"]
     SH_type = params["tsh_method"]
     ij = i*params["Nsteps"]
@@ -267,11 +273,13 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     #print "length of se_pop is %d" %(len(se_pop))
     #print "length of sh_pop is %d" %(len(sh_pop))
 
-    for i_ex in xrange(nstates):
+    for i_ex in xrange(nstates_init):
+
+        i_ex_init = params["excitations_init"][i_ex]
 
         # set file name                                                                                                                               
-        se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
-        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
+        se_pop_file = se_pop_ex_file_prefix+str(i_ex_init)+".txt"
+        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex_init)+".txt"
 
         # Populations                                                                                                            
         fse = open(se_pop_file,"a")
@@ -285,7 +293,7 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
 
             se_sum = 0.0; sh_sum = 0.0;
             for iconf in xrange(nconfig):
-                cnt = iconf*nstates*nstates + i_ex*nstates + st
+                cnt = iconf*nstates_init*nstates + i_ex*nstates + st
 
                 se_sum += se_pop[cnt]
                 sh_sum += sh_pop[cnt]
