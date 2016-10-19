@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -88,11 +88,13 @@ elif test==1:
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
+params["Ncool"]  = 1                        # the number of cooling rounds from t=0
+params["Nstart"] = 2                        # the number of rounds for starting NA-MD
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
-params["nu_therm"] = 0.01                   # shows thermostat frequency
-params["NHC_size"] = 3                      # the size of Nose-Hoover chains
+params["nu_therm"] = 0.001                  # shows thermostat frequency
+params["NHC_size"] = 5                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"

@@ -211,22 +211,21 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.start()
 
                         # Electronic propagation: half-step
-
-                        for k in xrange(el_mts):
-                            if params["smat_inc"] == 1:
-                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
-                            else:
-                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        if params["Nstart"] < i:
+                            for k in xrange(el_mts):
+                                if params["smat_inc"] == 1:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                else:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
-                        if MD_type == 1: # NVT-MD
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl)
-                        mol[cnt].propagate_q(dt_nucl)
-
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
+                        mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
 
                         # ======= Compute forces and energies using external package ============
                         #tot_ene0 = 0.0
@@ -285,13 +284,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.stop()
                         print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
 
-                        if MD_type == 1:
+                        # propagate thermostat variables
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl)
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
-                        # optional thrmostat
-                        if MD_type == 1: # NVT-MD
+                        # optional thermostat
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
@@ -300,12 +300,12 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
                         # Electronic propagation: half-step
-
-                        for k in xrange(el_mts):
-                            if params["smat_inc"] == 1:
-                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
-                            else:
-                                el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        if params["Nstart"] < i:
+                            for k in xrange(el_mts):
+                                if params["smat_inc"] == 1:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                else:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
@@ -319,7 +319,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             t.stop()
             print "time before TSH=",t.show(),"sec"
 
-            if SH_type>=1:
+            if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
                 elif params["interface"]=="QE":
@@ -331,8 +331,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             t.stop()
             print "time after TSH=",t.show(),"sec"
 
-
         #************ end of j loop - all steps for this snap
+
+        #****************** cooling process ***********************                     
+        if i <= params["Ncool"]:
+            for cnt in xrange(ntraj):
+                for k in xrange(3*syst[0].Number_of_atoms):
+                    mol[cnt].p[k] = 0.0     # This line would be modified later.
 
         ################### Printing results ############################
         # print out SE and SH populations
