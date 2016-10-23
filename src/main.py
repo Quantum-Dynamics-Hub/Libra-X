@@ -303,6 +303,8 @@ def main(params):
     syst = []
     el = []
 
+    Ttemp = 0.0 # nuclei velocities are set 0.
+
     # all excitations for each nuclear configuration
     for i in xrange(ninit):
         #print "init_system..." 
@@ -312,7 +314,7 @@ def main(params):
                 df = 0 # debug flag
                 # Here we use libra_py module!
                 # Utilize the gradients on the ground (0) excited state
-                x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, params["Temperature"], params["sigma_pos"], df, "elements.txt")
+                x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
                 syst.append(x)    
 
                 #print "Create an electronic object"
