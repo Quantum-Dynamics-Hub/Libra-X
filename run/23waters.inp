@@ -4,9 +4,9 @@
 !
  $CONTRL SCFTYP=RHF RUNTYP=GRADIENT COORD=UNIQUE ICHARG=0 UNITS=ANGS $END
  $SYSTEM TIMLIM=10 $END
- $BASIS  GBASIS=PM3 NGAUSS=5 $END
+ $BASIS  GBASIS=AM1 NGAUSS=6 $END
  $DATA
-23 waters in semiempirical models(PM3)
+23 waters in semiempirical models(AM1)
 Cn 1
 
 O 8.0      0.705   0.744   0.160
