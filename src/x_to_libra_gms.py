@@ -52,12 +52,15 @@ def exe_gamess(params):
     os.environ["USERSCR"] = scr_dir
     os.environ["GMSPATH"] = params["GMSPATH"]
 
+    # create scratch directory
+    os.system("mkdir %s" % (scr_dir))
+
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")
-    os.system("rm -r %s/*" %(scr_dir))
+    os.system("rm -r %s" % (scr_dir))
 
 
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
@@ -149,20 +152,15 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "P12 is";    P12.show_matrix()
         print "P21 is";    P21.show_matrix()
 
-    #E_ave = average_E(E,E2)
-    #nac = NAC(P12,P21,params["dt_nucl"])
-
     # Here, explicit computation would be more convinient than using outer functions (in hamiltonian_el.py).
     E_ave = 0.50 * ( E + E2 )
     nac = 0.50/params["dt_nucl"] * ( P12 - P21 )
 
-    # reduce the matrix size
-    #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-    #D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-
-    #if params["print_mo_ham"]==1:
-    #E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
-    #D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+    # here, E_ave and nac are printed for debugging 
+    #if 0==1:
+    #    E_ave.show_matrix(params["mo_ham"] + "E_ave_" + suff)
+    #    nac.real().show_matrix(params["mo_ham"] + "nac_real_" + suff)
+    #    nac.imag().show_matrix(params["mo_ham"] + "nac_imag_" + suff)
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
     # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
@@ -185,5 +183,5 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
     # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_ave, nac, sd_basis2, all_grads, mu
+    return E, E_ave, nac, sd_basis2, all_grads, mu
 
