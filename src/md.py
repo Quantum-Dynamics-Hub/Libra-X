@@ -300,6 +300,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                                 el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
                             else:
                                 el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        #####################################################################
+                        if params["print_S_mat"] == 1:
+                            smat.real().show_matrix(params["sd_ham"] + "S_mat_re_" + str(ij))
+                            smat.imag().show_matrix(params["sd_ham"] + "S_mat_im_" + str(ij))
+                        #####################################################################
 
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
