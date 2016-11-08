@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file create_states.py
+## \file states.py
 # This module defines the function which creates a list of ground and excited states.
 # It outputs the key parameter named "excitation"
 
@@ -38,8 +38,8 @@ def pyxaid_states(states, min_shift, max_shift):
     # active_space_sz = 3
     # so: gs = [1,-1,2,-2]
     #
-    # Used in: vibronic_hamiltonian.py/update_vibronic_hamiltonian
-
+    # Used in: hamiltonian_vib.py/update_vibronic_hamiltonian
+    
     active_space_sz = max_shift - min_shift + 1
     nstates = len(states)
 
@@ -79,7 +79,6 @@ def pyxaid_states(states, min_shift, max_shift):
     return res
 
 
-
 def create_states(Nmin,HOMO,Nmax,spin,flip):
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in]  Nmin  lowest molecular orbital taken for TD-SE calculation
@@ -87,6 +86,8 @@ def create_states(Nmin,HOMO,Nmax,spin,flip):
     # \param[in]  Nmin  Highest molecular orbital taken for TD-SE calculation
     # \param[in]  spin  spin is considered : option 0 -> no, 1 -> yes
     # \param[in]  flip  spin flip is considered if spin = 1: option 0 -> no, 1 -> yes
+    # excitations - returned list of "excitation" objects in active space.
+    #
     # Used in:  run.py
 
     LUMO = HOMO + 1

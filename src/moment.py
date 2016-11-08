@@ -23,11 +23,12 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 
-def transition_dipole_moments(ao,C):
+def transition_dipole_moments(ao,C,act):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] ao : atomic orbital basis
     # \param[in] C  : MO-LCAO coefficients
+    # \param[in] act : active_space
     #
     # Used in: gamess_to_libra.py/gamess_to_libra
 

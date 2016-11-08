@@ -26,12 +26,11 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 from extract_gms import *
-from overlap import *
-from hamiltonian_el import *
+#from overlap import *
+#from hamiltonian_el import *
 from moment import *
 from misc import *
-
-
+from spin_indx import *
 
 def exe_gamess(params):
     ##
@@ -53,42 +52,56 @@ def exe_gamess(params):
     os.environ["USERSCR"] = scr_dir
     os.environ["GMSPATH"] = params["GMSPATH"]
 
+    # create scratch directory
+    os.system("mkdir %s" % (scr_dir))
+
     #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
     os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
 
     # delete the files except input and output ones to do another GAMESS calculation.
     os.system("rm *.dat")
-    os.system("rm -r %s/*" %(scr_dir))
+    os.system("rm -r %s" % (scr_dir))
 
 
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params :  contains input parameters , in the directory form
-    # \param[in,out] ao :  atomic orbital basis at "t" old
-    # \param[in,out] E  :  molecular energies at "t" old
-    # \param[in,out] sd_basis :  basis of Slater determinants at "t" old (list of CMATRIX object). In the present implementation, it contains a single determinant
-    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
-    # \param[in] suff : The suffix to add to the name of the output files
-    # this suffix is now considered to be of a string type - so you can actually encode both the
-    # iteration number (MD timestep), the nuclear cofiguration (e.g. trajectory), and any other
-    # related information
-    #
-    # This function outputs the files for excited electron dynamics
-    # in "res" directory.
-    # It returns the forces which act on the atoms.
-    # Also, it returns new atomic orbitals, molecular energies, and
-    # molecular coefficients used for calculating time-averaged
-    # molecular energies and Non-Adiabatic Couplings(NACs).
+    # \param[in] params         contains input parameters , in the directory form
+    # \param[in,out] ao         atomic orbital basis at "t" old
+    # \param[in,out] E          total excitation energies at "t" old
+    # \param[in] sd_basis       Basis of Slater determinants at "t" old (list of CMATRIX object).
+    #                           In the present implementation, it contains a single determinant
+    # \param[in] active_space   A list of indices (starting from 1) of the MOs to include in calculations (and to read from the QE output files)  
+    # \param[in] suff           A suffix to add to the name of the output files; this suffix is now considered to be of a string type 
+    #                           - so you can actually encode both the iteration number (MD timestep),
+    #                           the nuclear cofiguration (e.g. trajectory), and any other related information
+    # Returned datas are explained above the return line.
     #
     # Used in: md.py/run_MD
 
+    flag_ao = params["flag_ao"]
+    sd_basis2 = SDList()    # this is a list of SD objects. Eeach represents a Slater Determinant
+    nstates = len(params["excitations"])
+    sz = len(active_space)
+
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, sd_basis2, ao2 = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, c2, ao2, nel = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
+
+    #e2 = MATRIX(E2)
+    homo = params["nel"]/2 +  params["nel"] % 2
+
+    for ex_st in xrange(nstates): 
+        mo_pool_alp = CMATRIX(c2)
+        mo_pool_bet = CMATRIX(c2)
+        alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+
+        # use excitation object to create proper SD object for different excited state
+        sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
+        sd_basis2.append(sd)
 
     # Gradients
     # in this implementation (CPA), the gradients on all excited states are the same
-    nstates = len(params["excitations"])
+
     all_grads = []
     for i in xrange(nstates):
         grd = []
@@ -96,15 +109,35 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
             grd.append(VECTOR(g))
         all_grads.append(grd)
     
+    #t = Timer()
 
-    # calculate overlap matrix of atomic and molecular orbitals
-    P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
+    ##P11, P22, P12, P21 = overlap(ao,ao2,sd_basis[0],sd_basis2,params["basis_option"])
+    # calculate overlap matrix of Slater determinant basis states
+    P11 = SD_overlap(sd_basis,  sd_basis)
+    P22 = SD_overlap(sd_basis2, sd_basis2)
+    P12 = SD_overlap(sd_basis,  sd_basis2)
+    P21 = SD_overlap(sd_basis2, sd_basis)
+    #print "Time to compute in SD_overlap= ",t.show(),"sec"
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
     # this is done for the "current" state only    
-    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,sd_basis2)
-    mu = [mu_x, mu_y, mu_z]
+    # ********* we use here only SD basis, which means we will calculate dipole moments
+    # ********* based on SD basis.
+
+    mu_x, mu_y, mu_z = CMATRIX(sz,sz),CMATRIX(sz,sz),CMATRIX(sz,sz)
+    mu = [mu_x, mu_y, mu_z] # initialize mu
+
+    # *************************************************************************
+    # Modify here if calculation on dipole moments with SD_overlap can be done.
+    # *************************************************************************
+    #if flag_ao == 1:
+        #t.start()
+    #    mu_x, mu_y, mu_z = transition_dipole_moments(ao2,sd_basis2)
+    #    mu = [mu_x, mu_y, mu_z] # now mu is defined as a CMATRIX list.
+        #t.stop()
+        #print "Time to compute in dipole moment= ",t.show(),"sec"
+    # *************************************************************************
 
     if params["debug_mu_output"]==1:
         print "mu_x:";    mu_x.show_matrix()
@@ -112,53 +145,43 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "mu_z:";    mu_z.show_matrix()
  
     if params["debug_densmat_output"]==1:
-        print "P11 and P22 matrixes should show orthogonality"
+        print "P11 and P22 matrices should show orthogonality"
         print "P11 is";    P11.show_matrix()
         print "P22 is";    P22.show_matrix()
-        print "P12 and P21 matrixes show overlap of MOs for different molecular geometries "
+        print "P12 and P21 matrices show overlaps of SDs for different molecular geometries "
         print "P12 is";    P12.show_matrix()
         print "P21 is";    P21.show_matrix()
 
+    # Here, explicit computation would be more convinient than using outer functions (in hamiltonian_el.py).
+    E_ave = 0.50 * ( E + E2 )
+    nac = 0.50/params["dt_nucl"] * ( P12 - P21 )
 
-    ### TO DO: In the following section, we need to avoid computing NAC matrices in the full
-    # basis. We will need the information on cropping, in order to avoid computations that 
-    # we do not need (the results are discarded anyways)
-    # calculate molecular energies and Non-Adiabatic Couplings(NACs) on MO basis
-    E_SD = average_E(E,E2)
-    D_mol = NAC(P12,P21,params["dt_nucl"])
-
-    # reduce the matrix size
-    #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-    #D_mol_red = reduce_matrix(D_mol,params["min_shift"], params["max_shift"],params["HOMO"])
-    ### END TO DO
-
-    #if params["print_mo_ham"]==1:
-    #E_mol.show_matrix(params["mo_ham"] + "full_re_Ham_" + suff)
-    #D_mol.show_matrix(params["mo_ham"] + "full_im_Ham_" + suff)
+    # here, E_ave and nac are printed for debugging 
+    #if 0==1:
+    #    E_ave.show_matrix(params["mo_ham"] + "E_ave_" + suff)
+    #    nac.real().show_matrix(params["mo_ham"] + "nac_real_" + suff)
+    #    nac.imag().show_matrix(params["mo_ham"] + "nac_imag_" + suff)
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
-    # ********** "CMATRIX.show_matrix(filename)" is not defined here ****** 
+    # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
         ao[i] = AO(ao2[i])
     E = MATRIX(E2)  # at time t+dt
-    sd_basis = [sd_basis2] #******* modified ******
 
-    nac = CMATRIX(D_mol)
+    # useless lines: nac is already defined as CMATRIX.
     #nac = CMATRIX(D_mol.num_of_rows, D_mol.num_of_cols)
     #for i in xrange(D_mol.num_of_rows):
     #    for j in xrange(D_mol.num_of_cols):
     #        nac.set(i,j,D_mol.get(i,j),0.0)
 
     # Returned data:
-    # Grad: Grad[k] - the gradient w.r.t. to k-th nucleus
-    # data: a dictionary containing transition dipole moments
-    ### E_mol: the matrix of the 1-el orbital energies in the full space of the orbitals
-    # D_mol: the matrix of the NACs computed with 1-el orbitals. Same dimension as E_mol
-    #### E_mol_red (MATRIX): the matrix of the 1-el orbital energies in the reduced (active) space
-    # nac (CMATRIX): the matrix of the NACs computed with 1-el orbital. Same dimension as E_mol_red
-    # sd_basis2 : (list of CMATRIX, only 1 element): the SD of the present calculation - in the full dimension
+    # E_ave : the matrix of the total excitation energy averaged over energies at "t" and "t+dt"
+    # nac (CMATRIX): the matrix of the NACs computed with SD orbitals. Same dimension as E_ave
+    # sd_basis2 : the list of reduced SD (active space orbitals), representing all computed states
+    # all_grads: all_grads[i][k] - the gradient w.r.t. to k-th nucleus of i-th excitation state
+    # mu : mu[i] transition dipole moment of i-th DOF. (mu_x, mu_y, mu_z)
 
-    return E_SD, nac, sd_basis2, all_grads, mu
+    return E, E_ave, nac, sd_basis2, all_grads, mu
 
