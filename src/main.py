@@ -34,7 +34,7 @@ from x_to_libra_qe import *
 from md import *
 from spin_indx import *
 from extract_qe import *
-
+import include_mm
 
 def construct_active_space(params):
 ##
@@ -301,6 +301,7 @@ def main(params):
     #print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
     syst = []
+    syst_mm = []
     el = []
 
     Ttemp = 0.0 # nuclei velocities are set 0.
@@ -315,7 +316,12 @@ def main(params):
                 # Here we use libra_py module!
                 # Utilize the gradients on the ground (0) excited state
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
-                syst.append(x)    
+                syst.append(x)
+
+                # include vdw interaction
+                if params["f_vdw"] == 1:
+                    y = include_mm.init_system(params["mb_functional"], params["R_vdw_on"], params["R_vdw_off"], "elements.txt", "uff.d", params["ent_file"])
+                    syst_mm.append(y)
 
                 #print "Create an electronic object"
                 el.append(Electronic(nstates,i_ex))
@@ -323,7 +329,7 @@ def main(params):
     # set list of SH state trajectories
     #sys.exit(0)
     print "run MD"
-    run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
+    run_MD(syst,syst_mm,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
     #t.stop();
