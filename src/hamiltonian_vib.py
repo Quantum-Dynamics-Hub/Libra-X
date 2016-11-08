@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 ## \file hamiltonian_vib.py
-# This module implements the function which creates vibronic hamiltonian object.
+# This module implements the function which creates and updates ham_vib vibronic hamiltonian object.
 
 import os
 import sys
@@ -24,12 +24,14 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 
 
 def compute_Hvib(H_el,NAC):
-##
-# Compute the vibronic Hamiltonian
-# \param[in] H_el Electronic Hamiltonian matrix (diagonal) - of type MATRIX: nstates x nstates
-# \param[in] NAC Nonadiabatic couplings matrix - of type CMATRIX: nstates x nstates
-# Here, nstates - is the number of excited states included into consideration
-# Assume atomic units: hbar = 1
+    ##
+    # Compute the vibronic Hamiltonian
+    # \param[in] H_el Electronic Hamiltonian matrix (diagonal) - of type MATRIX: nstates x nstates
+    # \param[in] NAC Nonadiabatic couplings matrix - of type CMATRIX: nstates x nstates
+    # H_vib - returned CMATRIX bound for vibronic hamiltonian 
+
+    # Here, nstates - is the number of excited states included into consideration
+    # Assume atomic units: hbar = 1
 
     nstates = H_el.num_of_cols
 
@@ -56,18 +58,18 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     # between the considered excited Slater determinants (SD). In doing this, it will return 
     # the vibronic and electronic (in SD basis) Hamiltonians.
     # 
-    # \param[out] ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
-    # \param[out] ham_vib Vibronic Hamiltonian (CMATRIX)
-    # \param[in] params  contains the dictionary of the input parameters
-    # \param[in] E_SD matrix of total excitation energy 
+    # \param[in,out]     ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
+    # \param[in,out]     ham_vib Vibronic Hamiltonian (CMATRIX)
+    # \param[in] params  contains the dictionary of the input parameters from {gms,qe}_run.py
+    # \param[in] E_SD    total excitation energy (MATRIX) 
     ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
     # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
     # \param[in] suffix the suffix to add to the file names for the files created in this function
     # \param[in] opt The option that defines what kind of electronic approximation has been utilized
-    # opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case D_mol_red is typically 
-    # a real matrix
-    # opt == 1 (or any other value) - N-electron (SD, multielectronic wavefunction), in this case
-    # D_mol_red may be a complex
+    #            opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case nac is typically 
+    #            a real matrix
+    #            opt == 1 (or any other value) - N-electron (SD, multielectronic wavefunction), in this case
+    #            nac may be a complex
     #
     # This function does not return anything - it merely modifies the already existing matrices
     # VERY IMPORTANT: we should modify the existing matrices (bound to the hamiltonian object), not
@@ -107,9 +109,12 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
         #e_indx = states[i].to_orbit[0] - min_shift  # --- same, only for the electron orbital
 
         #EX_ene = E_mol_red.get(e_indx,e_indx) - E_mol_red.get(h_indx,h_indx) # excitation energy
+
+        # ************* Here, H_el only imports E_SD info.********************** 
         H_el.set(i,i,E_SD.get(i,i))
         ham_el.set(i,i,E_SD.get(i,i))
         ham_vib.set(i,i,E_SD.get(i,i), 0.0)
+        #***********************************************************************
 
         #H_el.set(i,i,EX_ene)
         #ham_el.set(i,i,EX_ene)
@@ -156,9 +161,10 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
                     print "\n"
       
     if params["print_sd_ham"] == 1:
-        H_el.show_matrix(params["sd_ham"] + "SD_re_Ham_" + suffix)
-        #D_el.show_matrix(params["sd_ham"] + "SD_im_Ham_" + suffix)
-        # ********** "CMATRIX.show_matrix(filename)" is not defined here ******
+        ham_vib.real().show_matrix(params["sd_ham"] + "Ham_vib_re_" + suffix)
+        ham_vib.imag().show_matrix(params["sd_ham"] + "Ham_vib_im_" + suffix)
+        # ********** "CMATRIX.show_matrix(filename)" is not exported from Libra
+        # **********  now it is commented out
 
     # Returned values - actually we just update matrices ham_el and ham_vib 
     # 

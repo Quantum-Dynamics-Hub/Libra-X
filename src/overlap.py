@@ -10,7 +10,7 @@
 #*********************************************************************************/
 
 ## \file overlap.py
-# This program implements the module that calculates
+# This module implements the functions that calculates
 # the overlap matrixes of atomic and molecular orbitals with different time steps.
 # This returns the overlap matrix of molecular orbitals like  <MO(t)|MO(t+dt)>.
 
@@ -85,6 +85,9 @@ def overlap(ao1,ao2,C1,C2,basis_sets):
     # Used in: gamess_to_libra.py/gamess_to_libra
     # this is mostly a test function
 
+    N = len(ao1)
+    S11 = MATRIX(N,N); S12 = MATRIX(N,N); S21 = MATRIX(N,N); S22 = MATRIX(N,N);
+
     S11 = AO_overlap(ao1,ao1)
     S22 = AO_overlap(ao2,ao2)
     S12 = AO_overlap(ao1,ao2)
@@ -138,8 +141,8 @@ def overlap_sd_basis(sd_basis1, sd_basis2):
 # from two sets: sd_basis1 and sd_basis2, which can be the same, but may be 
 # different (e.g. at different time steps)
 #
-# \param[in] sd_basis1 Is a list of length n, containing different Slater determinants (each
-# is represented by a CMATRIX object)
+# \param[in] sd_basis1  A list of length n, containing different Slater determinants
+#                       (each is represented by a CMATRIX object)
 # \param[in] sd_basis2  -- // -- similar to the above
 #
 

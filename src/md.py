@@ -10,8 +10,7 @@
 #*********************************************************************************/
 
 ## \file md.py
-# This module implements the functions which execute GAMESS, execute classical MD coupled to 
-# Nose-Hoover thermostat, execute TD-SE and SH calculations, and set initial system.
+# This module implements functions setting initial system and executing NA-MD calculation.
 #
 
 import os
@@ -31,8 +30,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
-#import print_results_qe
-
+#import print_results_qe # This module isn't defined yet.
 
 ##############################################################
 
@@ -45,33 +43,43 @@ def init_files(params):
     # Used in md.py/run_MD 
     
     nconfig = params["nconfig"]
-    nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
+    # define prefixes
+    traj_file_prefix = params["res"]+"md"
+    ene_file_prefix = params["res"]+"ene"
+    mu_file_prefix = params["res"]+"mu"
+    se_pop_file_prefix = params["res"]+"se_pop"
+    sh_pop_file_prefix = params["res"]+"sh_pop"
+    se_pop_ex_file_prefix = params["res"]+"se_pop_ex"
+    sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
+
     for i in xrange(nconfig):
-        for i_ex in xrange(nstates):
+        for i_ex in params["excitations_init"]:
             index0 = "_"+str(i)+"_"+str(i_ex)
 
-            se_pop_file = params["se_pop_file_prefix"]+index0+".txt"
-            sh_pop_file = params["sh_pop_file_prefix"]+index0+".txt"
+            se_pop_file = se_pop_file_prefix+index0+".txt"
+            sh_pop_file = sh_pop_file_prefix+index0+".txt"
             fel = open(se_pop_file,"w"); fel.close();
             fel = open(sh_pop_file,"w"); fel.close();
 
             if params["print_aux_results"] == 1:
                 for itraj in xrange(num_SH_traj):
                     index = index0+"_"+str(itraj)
-                    ene_file = params["ene_file_prefix"]+index+".txt"
-                    traj_file = params["traj_file_prefix"]+index+".xyz"
-                    mu_file = params["mu_file_prefix"]+index+".txt"
+                    ene_file = ene_file_prefix+index+".txt"
+                    traj_file = traj_file_prefix+index+".xyz"
+                    mu_file = mu_file_prefix+index+".txt"
 
                     fe = open(ene_file,"w"); fe.close();
                     ft = open(traj_file,"w"); ft.close();
+
+                    #if params["flag_ao"] == 1:
                     fm = open(mu_file,"w"); fm.close();
 
-    for i_ex in xrange(nstates):
+    for i_ex in params["excitations_init"]:
 
-        se_pop_file = params["se_pop_ex_file_prefix"]+str(i_ex)+".txt"
-        sh_pop_file = params["sh_pop_ex_file_prefix"]+str(i_ex)+".txt"
+        se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
+        sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
         fel = open(se_pop_file,"w"); fel.close();
         fel = open(sh_pop_file,"w"); fel.close();
 
@@ -80,34 +88,32 @@ def init_files(params):
 def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ##
     # This function handles a swarm of trajectories.
-    # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic
-    # velocity rescaling
+    # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic velocity rescaling
     #
-    # \param[in,out] syst list of  System objects that include atomic system information.
-    # \param[in,out] el list of object containig electronic DOFs for the nuclear coordinate
-    # given by syst. I have decided to go back a bit - one set of electronic DOF per set of
-    # nuclear DOF. This is also needed when we do the velocity rescaling, even if we use the
-    # ground state forces for propagation. This also brings a conceptual clarity
-    # 
-    # \param[in,out] ao   list pf Atomic orbital basis
-    # \param[in,out] E    list of Molecular orbital energies
-    # \param[in,out] sd_basis list of lists of MO-LCAO coefficients, such that 
-    # sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i. Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
-    # \param[in,out] params list of input parameters from (gms/qe)_run.py , which will get some changes here.
-    # \param[in] label    list of atomic labels e.g. H, He, Li, etc...
-    # \param[in] Q        list of atomic charges
-    # \param[in] active_space The list of indices (starting from 1) of the MOs to include in
-    # calculations (and to read from the QE output files)
+    # \param[in,out] syst     A list of System objects that include atomic system information.
+    # \param[in,out] el       A list of object containig electronic DOFs for the nuclear coordinate given by syst.
+    #                         I have decided to go back a bit - one set of electronic DOF per set of nuclear DOF.
+    #                         This is also needed when we do the velocity rescaling,
+    #                         even if we use the ground state forces for propagation.
+    #                         This also brings a conceptual clarity.
+    # \param[in,out] ao       A list pf Atomic orbital basis
+    # \param[in,out] E        A list of total excitation energies
+    # \param[in,out] sd_basis A list of lists of MO-LCAO coefficients, such that 
+    #                         sd_basis[i] is the list of CMATRIX objects representing SD for the "trajectory/initial condition/realization" i.
+    #                         Then sd_basis[i][j] corresponds to the determinant j of the initial condition i
+    # \param[in,out] params   A list of input parameters from (gms/qe)_run.py , which will get some changes here.
+    # \param[in] label        A list of atomic labels e.g. H, He, Li, etc...
+    # \param[in] Q            A list of atomic charges
+    # \param[in] active_space A list of indices (starting from 1) of the MOs to include in
+    #                         calculations (and to read from the QE output files)
 
-
-    # This function executes classical MD in Libra and electronic structure calculation
-    # in GAMESS iteratively and simulates excited electron dynamics with MF and SH way. 
-    # It outputs MD trajectories, Energy evolutions, and SE and SH populations.
-    #
+    # Mainly, SE and SH populations are printed in /res directory.
+    # With flags, MD, energy,and dipole momement trajectories are printed, too. 
     # Used in:  main.py/main
 
+    t = Timer()
     rnd = Random()
-
+    t.start()
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
     if el_mts < 1:
@@ -118,9 +124,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     dt_elec = dt_nucl/float(el_mts)
 
     nconfig = params["nconfig"]
+    #flag_ao = params["flag_ao"]
     Nsnaps = params["Nsnaps"]
     Nsteps = params["Nsteps"]
     nstates = len(params["excitations"])
+    nstates_init = len(params["excitations_init"])
     print_coherences = params["print_coherences"]
     MD_type = params["MD_type"]
     SH_type = params["tsh_method"]
@@ -139,9 +147,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     # Open and close energy and trajectory files - this will effectively
     # make them empty (to remove older info, in case we restart calculations)
+    t.start()
 
     init_files(params)
-
+    
     # prepare objects for MD
     ntraj = len(syst)
     nnucl = 3*syst[0].Number_of_atoms
@@ -150,7 +159,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ham, ham_adi, d1ham_adi, ham_vib = init_ensembles.init_ext_hamiltonians(ntraj, nnucl, nstates, verbose)
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
-
 
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
@@ -162,19 +170,25 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #sys.exit(0) # DEBUG!!!
 
     print "Starting propagation"
-
+    t.stop()
+    print "Initialization in md takes",t.show(),"sec"
+    
     #=============== Propagation =======================
 
     epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
-    ens_sz = nconfig * nstates * num_SH_traj
+    ens_sz = nconfig * nstates_init * num_SH_traj
     epot = [0.0]*ens_sz
     ekin = [0.0]*ens_sz
     etot = [0.0]*ens_sz
     eext = [0.0]*ens_sz
     mu = []
+    smat = CMATRIX(nstates,nstates)
+    for i in xrange(nstates):
+        smat.set(i,i,1.0,0.0)
     for i in xrange(ens_sz):
         mu.append(MATRIX())
 
+    #sys.exit(0)
 
     for i in xrange(Nsnaps):   # number of printouts
 
@@ -185,53 +199,59 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             for iconf in xrange(nconfig):     # all initial nuclear configurations
 
-                for i_ex in xrange(nstates):  # consider initial excitations to be on all the basis
-                                              # states - this may be unnecessary for all cases, 
-                                              # so we may want to make this part customizable
+                for i_ex in xrange(nstates_init):  # consider initial excitations to be on all the basis
+                                                   # states - this may be unnecessary for all cases, 
+                                                   # so we may want to make this part customizable
 
                     for itraj in xrange(num_SH_traj): # all stochastic SH realizations
 
-                        cnt = iconf*nstates*num_SH_traj + i_ex*num_SH_traj + itraj
+                        cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
 
-                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,i_ex,itraj)
+                        print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,params["excitations_init"][i_ex],itraj)
+                        t.start()
 
                         # Electronic propagation: half-step
-                        for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        if params["Nstart"] < i:
+                            for k in xrange(el_mts):
+                                if params["smat_inc"] == 1:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                else:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
-                        if MD_type == 1: # NVT-MD
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl)
-                        mol[cnt].propagate_q(dt_nucl)
-
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
+                        mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
 
                         # ======= Compute forces and energies using external package ============
                         #tot_ene0 = 0.0
                         nac = CMATRIX()
+                        #smat = CMATRIX()
                         all_grads = []
                         opt = 0 # default
 
                         if params["interface"]=="GAMESS":
-                            opt = 0 # use 1-electron wavefunctions
+                            opt = 1 # use SD wavefunctions constructed by ground state calculation
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
                        
-                            # update AO, MO, and gradients
-                            E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], \
-                                                                                                              sd_basis[cnt], active_space,str(ij) )
+                            # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
+                            E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
+                            
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
 
                             # update MO and gradients
-                            E_mol_red, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-                            #tot_ene.append(E[cnt])
+                            #E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            #tot_ene.append(E[cnt]), E_mol_red --> E_SD
 
                         # ============== Common blocks ==================
 
@@ -245,25 +265,33 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
                         update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
 
-           
+                        #sys.exit(0)
                         # update potential energy
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
-                        # excited stes, so no need for reference energy)
+                        # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
-          
-                        if MD_type == 1:
+
+                        t.stop()
+                        print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
+
+                        # propagate thermostat variables
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl)
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
-                        # optional thrmostat
-                        if MD_type == 1: # NVT-MD
+                        # optional thermostat
+                        if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
@@ -272,9 +300,15 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
 
                         # Electronic propagation: half-step
-                        for k in xrange(el_mts):
-                            el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                        if params["Nstart"] < i:
+                            for k in xrange(el_mts):
+                                if params["smat_inc"] == 1:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                else:
+                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
+                        t.stop()
+                        print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
                         #******** end of itsh loop
                     #********* end of i_ex loop
                 #********* end of iconf loop
@@ -282,19 +316,35 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                     
             ############ Add surface hopping ######################
             print "Before TSH"
+            t.stop()
+            print "time before TSH=",t.show(),"sec"
 
-            if SH_type>=1:
-                tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+            if SH_type>=1 and params["Nstart"] < i:
+                if params["interface"]=="GAMESS":
+                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+                elif params["interface"]=="QE":
+                    tsh.surface_hopping(mol, el, ham, rnd, params)
+
 
             ################### END of TSH ##########################
             print "Finished TSH"
+            t.stop()
+            print "time after TSH=",t.show(),"sec"
 
         #************ end of j loop - all steps for this snap
+
+        #****************** cooling process ***********************                     
+        if i <= params["Ncool"]:
+            for cnt in xrange(ntraj):
+                for k in xrange(3*syst[0].Number_of_atoms):
+                    mol[cnt].p[k] = 0.0     # This line would be modified later.
 
         ################### Printing results ############################
         # print out SE and SH populations
         se_pop, sh_pop = print_results.pops_ave_TSH_traj(i,el,params)
+        #sys.exit(0)
         print_results.pops_ave_geometry(i,nstates,se_pop,sh_pop,params)
+        #sys.exit(0)
 
         # print auxiliary files: MD, Energy, and dipole moment trajectories
         if params["print_aux_results"]==1:
@@ -302,6 +352,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
         print "       ********* %i snap ends ***********" % i
         print 
+        t.stop()
+        print "time after final result printing=",t.show(),"sec"
+
 
 
 

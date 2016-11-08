@@ -24,17 +24,18 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 import detect_gms
-import ao_basis_gms
-import misc
+import ao_basis
 
 def gms_extract_ao_basis(inp_str, label, R, flag):
     ##
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] l_gam : The list which contains the lines of the (GAMESS output) file.
-    # \param[in] params : The list which contains extracted data from l_gam file.
-    # This function returns the atomic orbital basis as "expo_" and "coef_" of param.
+    # \param[in] inp_str A list containing info. for atomic orbital basis.
+    # \param[in] label   A list of atomic labels (e.g. C,H,O)
+    # \param[in] R       A list of atomic coordinates (R[i] =[R[i].x, R[i].y, R[i].z]
+    # \param[in] flag    debugging info: option 1-> print, otherwise -> don't 
+    # ao - returned lists of atomic orbital basis sets 
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     # atomic species
     l_atom_spec = []
@@ -47,6 +48,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         if len(spline) == 1:
             l_atom_spec.append(i)
             # **** Here, atomic names are changed *****
+            # atom labels
             atom = spline[0]
             if len(atom) > 1:
                 atom = atom[0] + atom[1].lower()
@@ -136,7 +138,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         coef_d.append(coef_dtmp)
 
 
-    orb_name, scount, pcount, dcount, lcount = ao_basis_gms.input_AO_name(label, atom_spec, basis_type, flag)
+    orb_name, scount, pcount, dcount, lcount = ao_basis.input_AO_name(label, atom_spec, basis_type, flag)
 
     ao_data = {}
     ao_data["expo_s"] = expo_s
@@ -155,7 +157,7 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
         print "coef_d=",ao_data["coef_d"]
 
 
-    ao = ao_basis_gms.construct_ao_basis(ao_data,label,R,scount,orb_name)
+    ao = ao_basis.construct_ao_basis(ao_data,label,R,scount,orb_name)
 
     return ao
 
@@ -163,17 +165,16 @@ def gms_extract_ao_basis(inp_str, label, R, flag):
 def gms_extract_mo(inp_str,Ngbf,active_space,flag):
     ##
     # Extracts MO-LCAO coefficients from the the list of input lines
-    # assumed format is:
-    # ???
-    # \param[in] inp_str  Strings containing the info for all orbitals
-    # \param[in] Ngbf   Number of Gaussian Basis Functions
-    # \param[in] active_space molecular orbital considered during the calculation
-    # \param[in] flag for debugging
-    # E - returned MATRIX object, containing the reduced eigenvalues
-    # C - returned MATRIX object, containing the reduced eigenvectors:
+    # 
+    # \param[in] inp_str      Strings containing the info for molecular orbitals
+    # \param[in] Ngbf         Number of Gaussian Basis Functions
+    # \param[in] active_space A list of molecular orbitals considered during the calculation
+    # \param[in] flag         debugging info: option 1-> print, otherwise -> don't
+    # E - returned MATRIX object, containing the total excitation energies
+    # C - returned MATRIX object, containing the eigenvectors:
     # C.get(a,i) - is the coefficient of AO with index a in the MO with index i
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     stat_span = Ngbf + 4 # period for beginning of coefficient lines
 
@@ -212,20 +213,23 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
 
     # ***********Here, reduce E_full and C_full ***************
     sz = len(active_space)
-    if sz > 1:
-        E = MATRIX(sz,sz)
-        C = CMATRIX(Ngbf,sz)
-        for i in xrange(sz):
-            imo = active_space[i]-1
-            E.set(i,i,E_full.get(imo,imo))
-
-        for i in xrange(Ngbf):
-            for j in xrange(sz):
-                jmo = active_space[j]-1
-                C.set(i,j,C_full.get(i,jmo),0.0)
-    else:
+    if sz==0:
         print "active space is not defined correctly, exit....."
         sys.exit(0)
+
+    E = MATRIX(sz,sz)
+    for i in xrange(sz):
+        imo = active_space[i]-1
+        E.set(i,i,E_full.get(imo,imo))
+
+    #C = CMATRIX(C_full) # input full matrix
+    C = CMATRIX(Ngbf,sz)
+    for i in xrange(Ngbf):
+        for j in xrange(sz):
+            jmo = active_space[j]-1
+            C.set(i,j,C_full.get(i,jmo),0.0)
+
+    # ************************************************************
 
     if flag == 1:
         print "*** full matrix ****"
@@ -248,14 +252,14 @@ def gms_extract_coordinates(inp_str,flag):
     # from the the list of input lines
     # each input line is assumed to have the format:
     # label  Q  ....  x y z
-
-    # \param[in] inp_str  Strings containing the info for all atoms
+    #
+    # \param[in] inp_str  Strings containing the info for all atomic coordinates
+    # \param[in] flag     debugging info: option 1-> print, otherwise -> don't
     # label - returned list of atomic labels (strings)
     # Q - returned list of nuclear charges (floats)
     # R - returned list of nuclear coordinates (VECTOR objects)
-
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
 
     label, Q, R = [], [], []
@@ -263,7 +267,10 @@ def gms_extract_coordinates(inp_str,flag):
         spline = a.split() 
 
         # atom labels
-        label.append(spline[0])
+        atom = spline[0]
+        if len(atom) > 1:
+            atom = atom[0] + atom[1].lower()
+        label.append(atom)
 
         # atomic charges
         Q.append(float(spline[1]))
@@ -293,9 +300,10 @@ def gms_extract_gradient(inp_str,flag):
     #  ....  gx  gy  gz
     #
     # \param[in] inp_str  Strings containing the gradient for all atoms
+    # \param[in] flag     debugging info: option 1-> print, otherwise -> don't
     # grad - returned list of VECTOR objects
     #
-    # Used in: extract.py/extract
+    # Used in: extract_gms.py/gms_extract
 
     grad = []
     for a in inp_str:
@@ -321,15 +329,21 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     ##
     # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 
     # AOs, etc. ) from the GAMESS output.
-    # \param[in] filename The name of the GAMESS output file from which we will be getting info
-    # \param[in] states excitation states
-    # \param[in] min_shift -1 -> includes HOMO-1, HOMO
-    # \param[in] active_space molecular orbital considered during the calculation 
-    # \param[in] flag  a flag for debugging detect module
-    # This function returns the coordinates of atoms, gradients, atomic orbital basis,
-    # and molecular orbitals extracted from the file, as objects
     #
-    # Used in: 
+    # \param[in] filename    The name of the GAMESS output file from which we will be getting info
+    # \param[in] states      excitation states
+    # \param[in] min_shift   e.g. -1 -> includes HOMO-1, HOMO
+    # \param[in] active_space molecular orbital considered during the calculation 
+    # \param[in] flag  debugging info: option 1-> print, otherwise -> don't
+    # label - returned list of atomic labels (strings)
+    # Q - returned list of nuclear charges (floats)
+    # R - returned list of nuclear coordinates (VECTOR objects)
+    # grad - returned list of VECTOR objects
+    # E - returned MATRIX object, containing the total excitation energies 
+    # C - returned MATRIX object, containing the eigenvectors: 
+    # ao - returned lists of atomic orbital basis sets 
+    #
+    # Used in: main.py/main or x_to_libra_gms.py/gamess_to_libra
 
     f = open(filename,"r")
     A = f.readlines()
@@ -344,16 +358,20 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     E_MO, C = gms_extract_mo(A[info["mo_start"]:info["mo_end"]+1], info["Ngbf"],active_space,flag)
     ao = gms_extract_ao_basis(A[info["ab_start"]:info["ab_end"]+1], label, R, flag)
 
-    # ***********************************************************
     # Convert the KS excitation energies and the ground state potential energy into 
-    # the total energies of excited states (1-electron basis)                                                                                               
+    # the total energies of excited states (1-electron basis)
+
+    # *********Here, KS excitation energy -> total excitation energy***************
     nstates = len(states)
     E = MATRIX(nstates,nstates)
     for i in xrange(nstates):
         h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
         e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
         EX_ene = info["tot_ene"] + E_MO.get(e_indx,e_indx) - E_MO.get(h_indx,h_indx) # excitation energy
+        #EX_ene = info["tot_ene"] # for debugging MD without electron dynamics 
         E.set(i,i,EX_ene)
+
+    # ******************************************************************************
 
     if flag == 1:
         print "ground states energy is",info["tot_ene"]
@@ -362,6 +380,6 @@ def gms_extract(filename,states,min_shift,active_space,flag):
         print "extract program ends"
         print "********************************************\n"
     
-    return label, Q, R, grad, E, C, ao
+    return label, Q, R, grad, E, C, ao, info["Nele"]
 
 
