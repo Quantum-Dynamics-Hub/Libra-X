@@ -58,6 +58,7 @@ params["nproc"] = 1               # the number of processors : default = 1
 params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
 params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.This directory will be created and deleted every GAMESS calculation.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
+params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part 
 
 if user==0 or user==2:
     # For Alexey (setting for CCR @ UB)
@@ -77,27 +78,33 @@ if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
     params["gms_inp"] = "H2O_wrk.inp" # working input file of GAMESS
     params["gms_out"] = "H2O.out"     # output file of GAMESS
+    params["ent_file"] = "H2O.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 elif test==1:
     params["gms_inp0"] = "23waters.inp"    # initial input file of GAMESS
     params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
     params["gms_out"] = "23waters.out"     # output file of GAMESS
+    params["ent_file"] = "23waters.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
 params["Nsnaps"] = 5                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
-params["Ncool"]  = 1                        # the number of cooling rounds from t=0
-params["Nstart"] = 2                        # the number of rounds for starting NA-MD
+params["Ncool"]  = 3                        # the number of cooling rounds from t=0
+params["Nstart"] = 6                        # the number of rounds for starting NA-MD
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
-params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
+params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["nu_therm"] = 0.001                  # shows thermostat frequency
 params["NHC_size"] = 5                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
+params["f_vdw"] = 1                         # flag for including vdw(non-bonded) interaction : option 1 -> yes, otherwise -> no.
+params["mb_functional"] = "LJ_Coulomb"      # set mb_functional type e.g. LJ_Coulomb, vdw_LJ, vdw_LJ1, etc....
+params["R_vdw_on"] = 10.0                   # radius where vdw interaction is switched on.
+params["R_vdw_off"] = 15.0                  #                                          off.   
 
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
@@ -154,7 +161,7 @@ params["print_mo_ham"] = 1                  # print full and reduced size MO bas
 params["print_SH_results_with_scaling"] = 0 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
 params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
 params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 1              # print the debug info into standard output: unpacked data from GAMESS
+params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
 #params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
 params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
 params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
