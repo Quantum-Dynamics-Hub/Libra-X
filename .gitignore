@@ -7,7 +7,7 @@ slurm*
 *.xyz
 *.txt
 *.dat
-*_Ham_*
+Ham_*
 *wrk.inp
 run/H2O_wrk.inp
 *.nfs*
@@ -24,4 +24,5 @@ im_*
 *igk*
 *.mix*
 wfc*
+*.err
 
