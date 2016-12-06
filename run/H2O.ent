@@ -1,7 +1,3 @@
-HETATM 1 O 1           0           0  0 0.0
-HETATM 2 H 1   0.7575408  -0.5870796  0 0.0
-HETATM 3 H 1  -0.7575408  -0.5870796  0 0.0
-END
 CONECT    1  2  3
 CONECT    2  1
 CONECT    3  1
