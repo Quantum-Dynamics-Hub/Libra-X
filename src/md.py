@@ -30,6 +30,7 @@ from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
 import print_results
+import include_mm
 #import print_results_qe # This module isn't defined yet.
 
 ##############################################################
@@ -122,6 +123,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
         print "Exiting..."
         sys.exit(0)
     dt_elec = dt_nucl/float(el_mts)
+    uff = params["uff"]
 
     nconfig = params["nconfig"]
     #flag_ao = params["flag_ao"]
@@ -160,6 +162,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
+    if params["f_vdw"] == 1: # include vdw interaction
+        ham_mm = include_mm.init_hamiltonian_mm(syst, uff)        
+        
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
@@ -175,12 +180,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     
     #=============== Propagation =======================
 
-    epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
+    #epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
     ens_sz = nconfig * nstates_init * num_SH_traj
-    epot = [0.0]*ens_sz
-    ekin = [0.0]*ens_sz
-    etot = [0.0]*ens_sz
-    eext = [0.0]*ens_sz
+    epot    = [0.0]*ens_sz
+    epot_mm = [0.0]*ens_sz
+    ekin    = [0.0]*ens_sz
+    etot    = [0.0]*ens_sz
+    eext    = [0.0]*ens_sz
     mu = []
     smat = CMATRIX(nstates,nstates)
     for i in xrange(nstates):
@@ -191,8 +197,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #sys.exit(0)
 
     for i in xrange(Nsnaps):   # number of printouts
-
-#        tot_ene = []; mu = []; # initialize lists
 
         for j in xrange(Nsteps):   # number of integration steps per printout
             ij = i*Nsteps + j
@@ -254,14 +258,25 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             #tot_ene.append(E[cnt]), E_mol_red --> E_SD
 
                         # ============== Common blocks ==================
+                        
+                        #sys.exit(0)
 
+                        if params["f_vdw"] == 1:
+                            # update mol.f computed from ham_mm 
+                            epot_mm[cnt] = compute_forces(mol[cnt],Electronic(1,0),ham_mm[cnt],1)
+                            # update forces
+                            for k in xrange(syst[cnt].Number_of_atoms):
+                                for st in xrange(nstates):
+                                    d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x - mol[cnt].f[3*k+0])
+                                    d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y - mol[cnt].f[3*k+1])
+                                    d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z - mol[cnt].f[3*k+2])
+                        else:
+                            for k in xrange(syst[cnt].Number_of_atoms):
+                                for st in xrange(nstates):
+                                    d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
+                                    d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
+                                    d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
 
-                        # update forces
-                        for k in xrange(syst[cnt].Number_of_atoms):
-                            for st in xrange(nstates):
-                                d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
-                                d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
-                                d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
@@ -277,6 +292,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] += epot_mm[cnt]
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
