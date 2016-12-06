@@ -98,7 +98,7 @@ def qe_extract_mo(filename, upper_tag, active_space):
     # The read MOs (KS orbitals) are not orthonormal, strictly-speaking, - becasue 
     # of the pseudopotentials. So we will normalize them, at least
     for i in xrange(n_mo):
-        mo_i = coeff.col(n_mo)
+        mo_i = coeff.col(i)
         nrm = (mo_i.H() * mo_i).get(0,0).real
         nrm = (1.0/math.sqrt(nrm))
 
