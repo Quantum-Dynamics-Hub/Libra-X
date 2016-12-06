@@ -86,13 +86,12 @@ def init_files(params):
 
 
 
-def run_MD(syst,syst_mm,el,ao,E,sd_basis,params,label,Q, active_space):
+def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ##
     # This function handles a swarm of trajectories.
     # When NA-MD is utilized (by specifying the TSH method), we use the CPA with isotropic velocity rescaling
     #
     # \param[in,out] syst     A list of System objects that include atomic system information.
-    # \param[in,out] syst_mm  A list of System objects that include atomic system information for classical MD. 
     # \param[in,out] el       A list of object containig electronic DOFs for the nuclear coordinate given by syst.
     #                         I have decided to go back a bit - one set of electronic DOF per set of nuclear DOF.
     #                         This is also needed when we do the velocity rescaling,
@@ -124,6 +123,7 @@ def run_MD(syst,syst_mm,el,ao,E,sd_basis,params,label,Q, active_space):
         print "Exiting..."
         sys.exit(0)
     dt_elec = dt_nucl/float(el_mts)
+    uff = params["uff"]
 
     nconfig = params["nconfig"]
     #flag_ao = params["flag_ao"]
@@ -163,9 +163,8 @@ def run_MD(syst,syst_mm,el,ao,E,sd_basis,params,label,Q, active_space):
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
     if params["f_vdw"] == 1: # include vdw interaction
-        ham_mm, el_mm = include_mm.init_hamiltonian_ele(syst_mm, params["mb_functional"], params["R_vdw_on"], params["R_vdw_off"], "elements.txt", "uff.d")        
+        ham_mm = include_mm.init_hamiltonian_mm(syst, uff)        
         
-
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
@@ -264,7 +263,7 @@ def run_MD(syst,syst_mm,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         if params["f_vdw"] == 1:
                             # update mol.f computed from ham_mm 
-                            epot_mm[cnt] = compute_forces(mol[cnt],el_mm[cnt],ham_mm[cnt],1)
+                            epot_mm[cnt] = compute_forces(mol[cnt],Electronic(1,0),ham_mm[cnt],1)
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):
                                 for st in xrange(nstates):

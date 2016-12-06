@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -99,12 +99,9 @@ params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE 
 params["nu_therm"] = 0.001                  # shows thermostat frequency
 params["NHC_size"] = 5                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
-params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
+params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
 params["f_vdw"] = 1                         # flag for including vdw(non-bonded) interaction : option 1 -> yes, otherwise -> no.
-params["mb_functional"] = "LJ_Coulomb"      # set mb_functional type e.g. LJ_Coulomb, vdw_LJ, vdw_LJ1, etc....
-params["R_vdw_on"] = 10.0                   # radius where vdw interaction is switched on.
-params["R_vdw_off"] = 15.0                  #                                          off.   
 
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
@@ -170,9 +167,20 @@ params["check_tsh_probabilities"] = 0      # print the hopping probabilities if 
 
 from states import *
 
+# create excitation list
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
-params["excitations_init"] = [2]
+params["excitations_init"] = [0]
+
+# create thermostat
+#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+
+# create Universe
+params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
+
+# Create force field                                                                                                                                 
+params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["uff"], "uff.d")
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]
