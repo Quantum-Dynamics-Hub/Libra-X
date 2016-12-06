@@ -40,8 +40,8 @@ params = {}
 params["qe_debug_print"] = 0
 params["nproc"] = 4              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=500      # the number of MD rounds
-params["Nsteps"]=2      # the number of MD steps per snap
+params["Nsnaps"]=5      # the number of MD rounds
+params["Nsteps"]=1      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
@@ -59,6 +59,7 @@ params["do_rescaling"] = 1             # The flag to control velocity rescaling:
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
+params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
 params["smat_inc"] = 1 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 params["interface"] = "QE"   # "QE" for libra_qe_interface, "GAMESS" if libra_gamess_interface is used
 params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
