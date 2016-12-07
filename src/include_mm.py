@@ -36,7 +36,7 @@ def init_hamiltonian_mm(syst, ff):
         ham = Hamiltonian_Atomistic(1, 3*syst[i].Number_of_atoms)
         ham.set_Hamiltonian_type("MM")
         atlst1 = range(1,syst[i].Number_of_atoms+1)
-        ham.set_interactions_for_atoms(syst[i], atlst1, atlst1, uff, 1, 0) # 0 - verb, 0 - assign_rings
+        ham.set_interactions_for_atoms(syst[i], atlst1, atlst1, ff, 1, 0) # 0 - verb, 0 - assign_rings
         ham.set_system(syst[i])
         ham.show_interactions_statistics()
         ham.compute()

@@ -278,8 +278,10 @@ def main(params):
                 # Utilize the gradients on the ground (0) excited state
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
-                # Add the connectivity - needed if we plan to use MM 
-                LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+                # Add the connectivity - needed if we plan to use MM
+                if params["is_MM"]: 
+                    LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+
                 syst.append(x)
 
                 el.append(Electronic(nstates,i_ex))
