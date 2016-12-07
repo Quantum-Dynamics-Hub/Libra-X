@@ -101,7 +101,8 @@ params["NHC_size"] = 5                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
-params["f_vdw"] = 1                         # flag for including vdw(non-bonded) interaction : option 1 -> yes, otherwise -> no.
+params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
+params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
 
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
