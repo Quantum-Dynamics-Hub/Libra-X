@@ -42,20 +42,15 @@ def construct_active_space(params):
 # params["excitations"] - a list of user-provided excitations to include in the TD-SE basis
 # params["nel"] - the number of electrons in the system - used to determine the index of HOMO
 #
-    #print "In construct_active_space..."
 
     active_space = []
-
     homo = params["nel"]/2 +  params["nel"] % 2  # the index of HOMO
-    #print "nel = ", params["nel"]
-    #print "homo = ", homo
 
     # Find the lowest orbital from which excitation occurs and find the highest orbital to where
     # electron is sent
     min_from = 0
     max_to = 0
     for ex in params["excitations"]:
-        #print "ex = ", ex.from_orbit[0], ex.to_orbit[0]
 
         if min_from>ex.from_orbit[0]:
             min_from = ex.from_orbit[0]
@@ -63,18 +58,12 @@ def construct_active_space(params):
         if max_to<ex.to_orbit[0]:
             max_to = ex.to_orbit[0]
 
-    #print "min_from = ", min_from
-    #print "max_to = ", max_to
 
     # This definition may be a bit excessive, but it is general and correct (at least for single
     # excitations)
     active_space = range(min_from + homo, max_to + homo + 1)
 
-    #print "active_space = ", active_space
-
     return active_space
-
-
 
 
 def main(params):
@@ -104,21 +93,19 @@ def main(params):
 
     ntraj = nstates_init*ninit*num_SH_traj
 
-    #######
+
+
     active_space = []
     mo_pool_alp, mo_pool_bet = None, None
 
     if params["interface"]=="QE":
         pass
 #        active_space = [5,6,7]  # For C2H4 
-#    #print "Implement the algorithm to define the active space"
 #    #********** active space is defined here *****************
     elif params["interface"]=="GAMESS":
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
-    #sys.exit(0)
-    ######
 
     ################# Step 0: Use the initial file to create a working input file ###############
 
@@ -130,7 +117,6 @@ def main(params):
             os.system("cp x%i.scf.in x%i.scf_wrk.in" % (ex_st, ex_st))
 
     #### Step 1: Read initial input, run first calculation, and initialize the "global" variables ####
-
     #t = Timer()
     #t.start()
     # Initialize variables for a single trajectory first!
@@ -143,8 +129,7 @@ def main(params):
 
         params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
         exe_gamess(params)
-        label, Q, R, grads, E, c, ao, params["nel"] = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],\
-                                                            active_space,params["debug_gms_unpack"])
+        label, Q, R, grads, E, c, ao, params["nel"] = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
         e = MATRIX(E)
         homo = params["nel"]/2 +  params["nel"] % 2
 
@@ -157,9 +142,6 @@ def main(params):
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
             sd_basis.append(sd)
             all_grads.append(copy.deepcopy(grads)) # newly defined
-        #print "sd_basis=",sd_basis
-        #print "all_grads=",all_grads
-        #sys.exit(0)
 
     elif params["interface"]=="QE":
         params["qe_inp_templ"] = []
@@ -172,14 +154,11 @@ def main(params):
             # Basically, here we automatically determine the position of HOMO and will construct
             # the active space before actually using it
             if ex_st==0:
-                #t.start()
                 tot_ene, params["norb"], params["nel"], params["nat"], params["alat"], icoord, iforce = qe_extract_info("x%i.scf.out" % ex_st, ex_st, flag)
                 active_space = construct_active_space(params)
-                #t.stop()
-                #print "time to extract tot_ene, norb,nel,nat,alat, icoord,iforce for GS is ",t.show()," Sec"
-            #t.start()
-            #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
-###########################################
+
+    ###########################################
+
             excitation = params["excitations"][ex_st]
             nspin = params["nspin"]
             nel = params["nel"]
@@ -191,11 +170,9 @@ def main(params):
                 exe_espresso(ex_st)
                 status = check_convergence("x%i.scf.out" % ex_st) # returns 0 if SCF converges, 1 if not converges
                 if status == 0:
-                    #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
                     tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
                 else:
-
                     en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                     en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
                     occ_alp_new = fermi_pop(en_alp)
@@ -212,10 +189,7 @@ def main(params):
                     occ_bet[HOMO+1] = float(occ_bet_new[2][1])
                     occ_bet[HOMO+2] = float(occ_bet_new[3][1])
 
-###########################################
-
-            #t.stop()
-            #print "time to extract MO pool",t.show(),"Sec"
+    ###########################################
 
             homo = params["nel"]/2 +  params["nel"] % 2
             #t.start()
@@ -254,11 +228,6 @@ def main(params):
 
         # Slater determinants
         # eventually, the ordering is this: sd_basis_list[traj][ex_st] - type CMATRIX
-        #sd_basis_tr = []
-        #for sd in sd_basis:        
-            #sd_basis_tr.append(CMATRIX(sd))
-            #sd_basis_tr.append(sd)
-        #sd_basis_list.append(sd_basis_tr)
         sd_basis_list.append(sd_basis)
 
         # Gradients
@@ -290,16 +259,9 @@ def main(params):
             qq.append(q)
         Q_list.append(qq)
 
-    #t.stop()
-    #print "Step 1 in main takes",t.show(),"sec"
-
-    #sys.exit(0)
 
     ################## Step 2: Initialize molecular system and run MD part with TD-SE and SH####
 
-
-    #t.start()
-    #print "Initializing nuclear configuration and electronic variables..."
     rnd = Random() # random number generator object
     syst = []
     syst_mm = []
@@ -309,28 +271,22 @@ def main(params):
 
     # all excitations for each nuclear configuration
     for i in xrange(ninit):
-        #print "init_system..." 
         for i_ex in params["excitations_init"]:
             for itraj in xrange(num_SH_traj):
-                #print "Create a copy of a system"  
                 df = 0 # debug flag
                 # Here we use libra_py module!
                 # Utilize the gradients on the ground (0) excited state
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
+
+                # Add the connectivity - needed if we plan to use MM 
                 LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
                 syst.append(x)
 
-
-                #print "Create an electronic object"
                 el.append(Electronic(nstates,i_ex))
     
     # set list of SH state trajectories
-    #sys.exit(0)
     print "run MD"
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
 
-    #t.stop();
-    #print "step 2 in main takes",t.show(),"sec"
 
-    #return data, test_data
