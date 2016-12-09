@@ -89,10 +89,16 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
-params["Nsnaps"] = 5                        # the number of MD rounds
-params["Nsteps"] = 1                        # the number of MD steps per snap
-params["Ncool"]  = 3                        # the number of cooling rounds from t=0
-params["Nstart"] = 6                        # the number of rounds for starting NA-MD
+params["Nsnaps"] = 5                        # the number of total MD snapshots
+params["Nsteps"] = 1                        # the number of MD steps per 1 snapshot
+params["Ncool"]  = 3                        # in the end of that many initial snapshots 
+                                            # we will be cooling the system: resetting momenta to zero
+                    # It is important to use a sufficiently large "Nsteps" variable, to make the
+                    # annealing process more efficient. But, on the other had, if you are too far from
+                    # equilibrium, make "Nsteps" smaller
+
+params["Nstart"] = 6       # the printout cycle when we will initiate NA-MD and
+                           # electronic dynamics with surface hoping
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.

@@ -231,6 +231,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
                         mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
 
+                        ## Here, we also need to update coordinates of system objects, because
+                        ## this is what the MM Hamiltonian uses - not the coordinates stored in mol
+                        ## variables... At least, this is what I think.. Need to verify that..
+                       
+#                        syst[cnt].set_atomic_q(mol[cnt].q) # mol -> syst
+# well, actually, it seems the code works fine even without the above instruction
+
                         # ======= Compute forces and energies using external package ============
                         #tot_ene0 = 0.0
                         nac = CMATRIX()
@@ -357,11 +364,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
         #************ end of j loop - all steps for this snap
 
-        #****************** cooling process ***********************                     
+
+        #****************** cooling process ***********************   
         if i <= params["Ncool"]:
             for cnt in xrange(ntraj):
-                for k in xrange(3*syst[0].Number_of_atoms):
-                    mol[cnt].p[k] = 0.0     # This line would be modified later.
+                syst[cnt].cool()
+                syst[cnt].extract_atomic_p(mol[cnt].p)  # syst -> mol
+
 
         ################### Printing results ############################
         # print out SE and SH populations
