@@ -532,13 +532,16 @@ def qe_extract(filename, active_space, ex_st, nspin, flag):
 
     if nspin <= 1:
         # Read the wavefunctions:
-        MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
         MO_b = CMATRIX(MO_a)
 
     if nspin == 2:
         # Read the wavefunctions:
-        MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
-        MO_b = qe_extract_mo("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
+        #MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_b = qe_extract_mo("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
+        MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        MO_b = QE_methods.read_qe_wfc("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
 
     return tot_ene, label, R, grads, MO_a, MO_b, norb, nel, nat, alat
 
