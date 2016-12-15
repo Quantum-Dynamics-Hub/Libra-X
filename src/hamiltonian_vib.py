@@ -47,6 +47,107 @@ def compute_Hvib(H_el,NAC):
 
     return H_vib
 
+def compute_H_el(E_SD,smat):
+    ##
+    #
+    # For computing electronic coupling hamiltonian H_el = <Psi_i|H|Psi_j>
+    # This function uses unity operator I = sum_i|i><i|
+    # Returns H_el in non-orthogonal basis
+    #
+    nstates = E_SD.num_of_cols
+    H_el = CMATRIX(nstates,nstates)  # electronic Hamiltonian
+    #============ EX energies ===============    
+    for i in xrange(nstates):
+        # ************* Here, H_el only imports E_SD info.********************** 
+        H_el.set(i,i,E_SD.get(i,i),0.0)
+        #***********************************************************************
+    for I in xrange(nstates):
+        for J in xrange(nstates):
+            if I != J:
+                H_el.set(I,J,(0.5*(E_SD.get(I,I)+E_SD.get(J,J))*smat.get(I,J)))
+    return H_el
+
+
+def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix, opt):
+    ##
+    #
+    # This function transforms the 1- or N- electron energies matrix and the matrix of 
+    # nonadiabatic couplings into the matrix of excitation energies and corresponding couplings
+    # between the considered excited Slater determinants (SD). In doing this, it will return 
+    # the vibronic and electronic (in SD basis) Hamiltonians.
+    # 
+    # \param[in,out]     ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
+    # \param[in,out]     ham_vib Vibronic Hamiltonian (CMATRIX)
+    # \param[in] params  contains the dictionary of the input parameters from {gms,qe}_run.py
+    # \param[in] E_SD    total excitation energy (MATRIX) 
+    ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
+    # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
+    # \param[in] suffix the suffix to add to the file names for the files created in this function
+    # \param[in] opt The option that defines what kind of electronic approximation has been utilized
+    #            opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case nac is typically 
+    #            a real matrix
+    #            opt == 1 (or any other value) - N-electron (SD, multielectronic wavefunction), in this case
+    #            nac may be a complex
+    #
+    # This function does not return anything - it merely modifies the already existing matrices
+    # VERY IMPORTANT: we should modify the existing matrices (bound to the hamiltonian object), not
+    # create the new ones. In the latter case we loose the binding of the previousely allocated 
+    # matrices with the hamiltonian object!!!
+    #
+    # Used in: md.py/run_MD
+
+    HOMO = params["HOMO"]
+    min_shift = params["min_shift"]
+    max_shift = params["max_shift"]
+    states = params["excitations"]
+    nstates = len(states)
+    H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
+    H_el_new = CMATRIX(nstates,nstates)  # electronic Hamiltonian
+    H_el_old = CMATRIX(nstates,nstates)  # electronic Hamiltonian
+    flag = params["print_sd_ham"]
+
+    #pyx_st = pyxaid_states(states, min_shift, max_shift)
+
+    for i in xrange(nstates):
+        H_el.set(i,i,E_SD_new.get(i,i))
+        ham_el.set(i,i,E_SD_new.get(i,i))
+        ham_vib.set(i,i,E_SD_new.get(i,i), 0.0)
+
+    # Define compute_H_el() which takes Delta-SCF energies and overlap matrics
+    # as arguments and returns H_el in non-orthogonal basis
+    H_el_old = compute_H_el(E_SD_old,smat_old)
+    H_el_new = compute_H_el(E_SD_new,smat_new)
+
+    sz = H_el.num_of_cols
+    C_old = CMATRIX(sz, sz);  E_old = CMATRIX(sz, sz)
+    #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
+    solve_eigen_gen(sz, H_el_old, smat_old, E_old, C_old)  # H * C = S * C * E  ^M
+
+    C_new = CMATRIX(sz, sz);  E_new = CMATRIX(sz, sz)
+    #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
+    solve_eigen_gen(sz, H_el_new, smat_new, E_new, C_new)  # H * C = S * C * E  ^M
+
+    H_el = E_new.real()  # adiabatic Hamiltonian in orthogonal basis
+
+    # compute NACs 
+    Dmo = nac
+    Dmo_adi = MATRIX(sz,sz)
+    Dmo_adi = C_old.T() * Dmo * C_new
+    Dmo_adi = (0.5/params["dt_nucl"])*(Dmo_adi - Dmo_adi.T()) 
+    Dmo_adi = Dmo_adi.real()
+    Hvib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
+
+    ham_vib = Hvib
+
+    if params["print_sd_ham"] == 1:
+        ham_vib.real().show_matrix(params["sd_ham"] + "Ham_vib_re_" + suffix)
+        ham_vib.imag().show_matrix(params["sd_ham"] + "Ham_vib_im_" + suffix)
+    # Returned values - actually we just update matrices ham_el and ham_vib 
+    # ham_el - electronic Hamiltonian - the real diagonal matrix with adiabatic energies of the states
+    #         w.r.t the ground state energy
+    # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
+    # on the off-diagonals   
+
 
 
 
