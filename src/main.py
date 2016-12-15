@@ -91,7 +91,7 @@ def main(params):
     if SH_type >= 1: # calculate no SH probs.  
         num_SH_traj = params["num_SH_traj"]
 
-    ntraj = nstates_init*ninit*num_SH_traj
+    #ntraj = nstates_init*ninit*num_SH_traj
 
 
 
@@ -99,10 +99,12 @@ def main(params):
     mo_pool_alp, mo_pool_bet = None, None
 
     if params["interface"]=="QE":
-        pass
+        ntraj = nstates*ninit*num_SH_traj
+        #pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
     elif params["interface"]=="GAMESS":
+        ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
@@ -279,7 +281,7 @@ def main(params):
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
                 # Add the connectivity - needed if we plan to use MM
-                if params["is_MM"]: 
+                if params["is_MM"]==1: 
                     LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
 
                 syst.append(x)
