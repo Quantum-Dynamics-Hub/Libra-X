@@ -47,7 +47,7 @@ params["ent_file"] = ""           # file including atomic coordinates and connec
 params["qe_debug_print"] = 0
 params["nproc"] = 12              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=2      # the number of MD rounds
+params["Nsnaps"]=5      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
@@ -88,7 +88,7 @@ params["Nstart"] = 100
 
 #params["num_MO"] = 3  # number of MO basis used in constructing electronic wavefunction
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
-params["excitations_init"] = [0]
+params["excitations_init"] = [1]
 params["HOMO"] = 0
 params["min_shift"] = 0
 params["max_shift"] = 1 

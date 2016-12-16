@@ -127,17 +127,20 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
     solve_eigen_gen(sz, H_el_new, smat_new, E_new, C_new)  # H * C = S * C * E  ^M
 
-    H_el = E_new.real()  # adiabatic Hamiltonian in orthogonal basis
+    #H_el = E_new.real()  # adiabatic Hamiltonian in orthogonal basis
 
+    ham_el = E_new.real()
     # compute NACs 
-    Dmo = nac
+    #Dmo = nac
     Dmo_adi = MATRIX(sz,sz)
-    Dmo_adi = C_old.T() * Dmo * C_new
+    #Dmo_adi = C_old.T() * Dmo * C_new
+    Dmo_adi = C_old.T() * nac * C_new
     Dmo_adi = (0.5/params["dt_nucl"])*(Dmo_adi - Dmo_adi.T()) 
     Dmo_adi = Dmo_adi.real()
-    Hvib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
+    #Hvib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
+    ham_vib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
 
-    ham_vib = Hvib
+    #ham_vib = Hvib
 
     if params["print_sd_ham"] == 1:
         ham_vib.real().show_matrix(params["sd_ham"] + "Ham_vib_re_" + suffix)
