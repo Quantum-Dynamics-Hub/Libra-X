@@ -262,8 +262,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
 
-                            E_SD_old = E[cnt]
-                            smat_old = smat
+                            E_SD_old = CMATRIX(E[cnt])
+                            smat_old = CMATRIX(smat)
 
                             # update MO and gradients
                             #E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
