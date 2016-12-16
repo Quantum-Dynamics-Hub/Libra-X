@@ -68,7 +68,7 @@ def compute_H_el(E_SD,smat):
     return H_el
 
 
-def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix, opt):
+def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix):
     ##
     #
     # This function transforms the 1- or N- electron energies matrix and the matrix of 
@@ -80,14 +80,11 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     # \param[in,out]     ham_vib Vibronic Hamiltonian (CMATRIX)
     # \param[in] params  contains the dictionary of the input parameters from {gms,qe}_run.py
     # \param[in] E_SD    total excitation energy (MATRIX) 
+    # \param[in] smat_old and smat_new are the overlap matrix in non-orthogonal basis
+    #            at time "t" and "t+dt" respectively.
     ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
-    # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
+    # \param[in] nac   the overlap matrix P12 = <Psi_i(t)|Psi_j(t+dt)> for non-orthogonal treatment.
     # \param[in] suffix the suffix to add to the file names for the files created in this function
-    # \param[in] opt The option that defines what kind of electronic approximation has been utilized
-    #            opt == 0 - 1-electron (KS, similar to original Pyxaid), in this case nac is typically 
-    #            a real matrix
-    #            opt == 1 (or any other value) - N-electron (SD, multielectronic wavefunction), in this case
-    #            nac may be a complex
     #
     # This function does not return anything - it merely modifies the already existing matrices
     # VERY IMPORTANT: we should modify the existing matrices (bound to the hamiltonian object), not
