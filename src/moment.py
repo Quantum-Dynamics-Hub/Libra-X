@@ -23,11 +23,12 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 
-def transition_dipole_moments(ao,C):
+def transition_dipole_moments(ao,C,act):
     ##
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] ao : atomic orbital basis
     # \param[in] C  : MO-LCAO coefficients
+    # \param[in] act : active_space
     #
     # Used in: gamess_to_libra.py/gamess_to_libra
 
@@ -38,8 +39,10 @@ def transition_dipole_moments(ao,C):
     g = [gx,gy,gz]
 
     Norb = len(ao)
-    mu = [MATRIX(Norb, Norb)]*3
+    #mu = [MATRIX(Norb, Norb)]*3
     d = MATRIX(Norb,Norb)
+
+    mu = [CMATRIX(Norb, Norb)]*3
 
     for k in xrange(3): # all components
 
@@ -47,6 +50,9 @@ def transition_dipole_moments(ao,C):
         for i in xrange(Norb): # all orbitals
             for j in xrange(Norb):
                 d.set(i,j,gaussian_moment(ao[i], g[k], ao[j]) )
-        mu[k] = C.T() * d * C
+
+        dd = CMATRIX(d)
+        mu[k] = C.T() * dd * C
+        #mu[k] = C.T() * d * C
     
     return mu[0], mu[1], mu[2]

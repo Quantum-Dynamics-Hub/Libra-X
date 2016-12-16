@@ -1,0 +1,22 @@
+! A chain of H atoms test calculation
+!   semiempirical calculation, using the MOPAC/GAMESS combo
+!
+!
+ $CONTRL SCFTYP=RHF RUNTYP=GRADIENT COORD=UNIQUE ICHARG=0 UNITS=ANGS $END
+ $SYSTEM TIMLIM=100 $END
+ $BASIS  GBASIS=PM3 NGAUSS=3 $END
+ $DATA
+Hn in semiempirical models(PM3)
+Cn 1
+
+H 1.0     0    0     0.00000
+H 1.0     0    0     0.70800
+H 1.0     0    0     1.41600
+H 1.0     0    0     2.12400
+H 1.0     0    0     2.83200
+H 1.0     0    0     3.54000
+H 1.0     0    0     4.24800
+H 1.0     0    0     4.95600
+H 1.0     0    0     5.66400
+H 1.0     0    0     6.37200
+ $END
