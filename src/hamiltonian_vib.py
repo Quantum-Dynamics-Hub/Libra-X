@@ -93,22 +93,10 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     #
     # Used in: md.py/run_MD
 
-    #HOMO = params["HOMO"]
-    #min_shift = params["min_shift"]
-    #max_shift = params["max_shift"]
     states = params["excitations"]
     nstates = len(states)
-    #H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
     H_el_new = CMATRIX(nstates,nstates)  # electronic Hamiltonian
     H_el_old = CMATRIX(nstates,nstates)  # electronic Hamiltonian
-    #flag = params["print_sd_ham"]
-
-    #pyx_st = pyxaid_states(states, min_shift, max_shift)
-
-    #for i in xrange(nstates):
-    #    H_el.set(i,i,E_SD_new.get(i,i))
-    #    ham_el.set(i,i,E_SD_new.get(i,i))
-    #    ham_vib.set(i,i,E_SD_new.get(i,i), 0.0)
 
     # Define compute_H_el() which takes Delta-SCF energies and overlap matrics
     # as arguments and returns H_el in non-orthogonal basis
@@ -117,27 +105,15 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
 
     sz = ham_el.num_of_cols
     C_old = CMATRIX(sz, sz);  E_old = CMATRIX(sz, sz)
-    #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
     solve_eigen_gen(sz, H_el_old, smat_old, E_old, C_old)  # H * C = S * C * E  ^M
 
     C_new = CMATRIX(sz, sz);  E_new = CMATRIX(sz, sz)
-    #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
     solve_eigen_gen(sz, H_el_new, smat_new, E_new, C_new)  # H * C = S * C * E  ^M
 
-    #H_el = E_new.real()  # adiabatic Hamiltonian in orthogonal basis
-
-    #ham_el = MATRIX(E_new.real())
-    # compute NACs 
-    #Dmo = nac
     Dmo_adi = MATRIX(sz,sz)
-    #Dmo_adi = C_old.T() * Dmo * C_new
     Dmo_adi = C_old.T() * nac * C_new
     Dmo_adi = (0.5/params["dt_nucl"])*(Dmo_adi - Dmo_adi.T()) 
     Dmo_adi = Dmo_adi.real()
-    #Hvib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
-    #ham_vib = CMATRIX(ham_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
-
-    #ham_vib = Hvib
 
     for i in xrange(nstates):
     #    H_el.set(i,i,E_SD_new.get(i,i))
@@ -150,14 +126,10 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
                 ham_vib.set(I,J,(-1.0j+0.0)*Dmo_adi.get(I,J))
             print "\n"
 
-
-
-    print "E = \n"; E_old.show_matrix()
-    print "C = \n"; C_old.show_matrix()
-    print "ham_el = \n"; ham_el.show_matrix()
-    #print "H_el = \n"; ham_el.show_matrix()
-    #print "D_el = \n"; D_el.show_matrix()
-    print "ham_vib = \n"; ham_vib.show_matrix()
+    #print "E = \n"; E_old.show_matrix()
+    #print "C = \n"; C_old.show_matrix()
+    #print "ham_el = \n"; ham_el.show_matrix()
+    #print "ham_vib = \n"; ham_vib.show_matrix()
 
 
     if params["print_sd_ham"] == 1:
