@@ -44,6 +44,7 @@ def init_files(params):
     # Used in md.py/run_MD 
     
     nconfig = params["nconfig"]
+    #nstates = len(params["excitations"])
     num_SH_traj = params["num_SH_traj"]
 
     # define prefixes
@@ -56,6 +57,7 @@ def init_files(params):
     sh_pop_ex_file_prefix = params["res"]+"sh_pop_ex"
 
     for i in xrange(nconfig):
+        #for i_ex in xrange(nstates):
         for i_ex in params["excitations_init"]:
             index0 = "_"+str(i)+"_"+str(i_ex)
 
@@ -78,7 +80,7 @@ def init_files(params):
                     fm = open(mu_file,"w"); fm.close();
 
     for i_ex in params["excitations_init"]:
-
+    #for i_ex in xrange(nstates):
         se_pop_file = se_pop_ex_file_prefix+str(i_ex)+".txt"
         sh_pop_file = sh_pop_ex_file_prefix+str(i_ex)+".txt"
         fel = open(se_pop_file,"w"); fel.close();
