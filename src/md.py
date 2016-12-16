@@ -297,7 +297,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.stop()
                         print "time before update vib ham=",t.show(),"sec"
                         if params["non-orth"] ==1:
-                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij), opt)
+                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
                         else:
                             update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
                         t.stop()
