@@ -80,7 +80,7 @@ params["sigma_pos"] = 0.01  #Displace atomic position randomly
 
 params["is_MM"] = 0                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
-params["Nstart"] = 100
+params["Nstart"] = 0
 
 ########### Now start actual calculations ###########################
 #sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")

@@ -93,29 +93,29 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     #
     # Used in: md.py/run_MD
 
-    HOMO = params["HOMO"]
-    min_shift = params["min_shift"]
-    max_shift = params["max_shift"]
+    #HOMO = params["HOMO"]
+    #min_shift = params["min_shift"]
+    #max_shift = params["max_shift"]
     states = params["excitations"]
     nstates = len(states)
-    H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
+    #H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
     H_el_new = CMATRIX(nstates,nstates)  # electronic Hamiltonian
     H_el_old = CMATRIX(nstates,nstates)  # electronic Hamiltonian
-    flag = params["print_sd_ham"]
+    #flag = params["print_sd_ham"]
 
     #pyx_st = pyxaid_states(states, min_shift, max_shift)
 
-    for i in xrange(nstates):
-        H_el.set(i,i,E_SD_new.get(i,i))
-        ham_el.set(i,i,E_SD_new.get(i,i))
-        ham_vib.set(i,i,E_SD_new.get(i,i), 0.0)
+    #for i in xrange(nstates):
+    #    H_el.set(i,i,E_SD_new.get(i,i))
+    #    ham_el.set(i,i,E_SD_new.get(i,i))
+    #    ham_vib.set(i,i,E_SD_new.get(i,i), 0.0)
 
     # Define compute_H_el() which takes Delta-SCF energies and overlap matrics
     # as arguments and returns H_el in non-orthogonal basis
     H_el_old = compute_H_el(E_SD_old,smat_old)
     H_el_new = compute_H_el(E_SD_new,smat_new)
 
-    sz = H_el.num_of_cols
+    sz = ham_el.num_of_cols
     C_old = CMATRIX(sz, sz);  E_old = CMATRIX(sz, sz)
     #solve_eigen_gen(sz, D_el, smat, E_old, C_old)  # H * C = S * C * E  ^M
     solve_eigen_gen(sz, H_el_old, smat_old, E_old, C_old)  # H * C = S * C * E  ^M
@@ -126,7 +126,7 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
 
     #H_el = E_new.real()  # adiabatic Hamiltonian in orthogonal basis
 
-    ham_el = E_new.real()
+    #ham_el = MATRIX(E_new.real())
     # compute NACs 
     #Dmo = nac
     Dmo_adi = MATRIX(sz,sz)
@@ -135,9 +135,30 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     Dmo_adi = (0.5/params["dt_nucl"])*(Dmo_adi - Dmo_adi.T()) 
     Dmo_adi = Dmo_adi.real()
     #Hvib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
-    ham_vib = CMATRIX(H_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
+    #ham_vib = CMATRIX(ham_el, -1.0*Dmo_adi)  # so Hvib is now Hermitian and in orthonormal basis
 
     #ham_vib = Hvib
+
+    for i in xrange(nstates):
+    #    H_el.set(i,i,E_SD_new.get(i,i))
+        ham_el.set(i,i,E_new.real().get(i,i))
+        ham_vib.set(i,i,E_new.real().get(i,i), 0.0)
+
+    for I in xrange(nstates):
+        for J in xrange(nstates):
+            if I != J:
+                ham_vib.set(I,J,(-1.0j+0.0)*Dmo_adi.get(I,J))
+            print "\n"
+
+
+
+    print "E = \n"; E_old.show_matrix()
+    print "C = \n"; C_old.show_matrix()
+    print "ham_el = \n"; ham_el.show_matrix()
+    #print "H_el = \n"; ham_el.show_matrix()
+    #print "D_el = \n"; D_el.show_matrix()
+    print "ham_vib = \n"; ham_vib.show_matrix()
+
 
     if params["print_sd_ham"] == 1:
         ham_vib.real().show_matrix(params["sd_ham"] + "Ham_vib_re_" + suffix)
