@@ -302,7 +302,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
                         t.stop()
                         print "time after update vib ham=",t.show(),"sec"
-                        print ham_vib[cnt].show_matrix()
+                        #print ham_vib[cnt].show_matrix()
 
                         #sys.exit(0)
                         # update potential energy
