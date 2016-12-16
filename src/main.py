@@ -281,7 +281,7 @@ def main(params):
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
                 # Add the connectivity - needed if we plan to use MM
-                if params["is_MM"]==1: 
+                if params["is_MM"]: 
                     LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
 
                 syst.append(x)
