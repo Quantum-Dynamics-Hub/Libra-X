@@ -47,8 +47,8 @@ params["ent_file"] = ""           # file including atomic coordinates and connec
 params["qe_debug_print"] = 0
 params["nproc"] = 12              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=5      # the number of MD rounds
-params["Nsteps"]=1      # the number of MD steps per snap
+params["Nsnaps"]=200      # the number of MD rounds
+params["Nsteps"]=2      # the number of MD steps per snap
 #params["res"]=res_dir   # the directory where the energies and NACs files will be printed out
 #params["traj_file"] = params["res"]+"md.xyz"
 #params["ene_file"] = params["res"]+"ene.dat"
@@ -60,7 +60,7 @@ params["el_mts"] = 1
 params["tsh_method"] = 1     # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["num_SH_traj"] = 1
 params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
+params["rep"] = 1                      # representation: 0 - diabatic, 1 - adiabatic
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
 params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
@@ -70,7 +70,7 @@ params["non-orth"] = 1  # = 1 when MOs are non-orthogonal, = 0 when calculated i
 params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
 params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 params["interface"] = "QE"   # "QE" for libra_qe_interface, "GAMESS" if libra_gamess_interface is used
-params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
+params["MD_type"] = 1  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
 params["Temperature"] = 300.0
 params["nu_therm"] = 0.01

@@ -303,6 +303,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.stop()
                         print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
+                        print "ham_adi= \n"; ham_adi[cnt].show_matrix()
 
                         #sys.exit(0)
                         # update potential energy
