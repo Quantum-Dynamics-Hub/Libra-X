@@ -34,11 +34,18 @@ sys.path.insert(1,os.environ["src_path"])    # Path to the source code
 
 import main # import main module of the libra-QE-interface code
 
+
+
+
+
 ########## Setup all manual parameters here ####################
 
 params = {}
+
+params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
+
 params["qe_debug_print"] = 0
-params["nproc"] = 4              # the number of processors
+params["nproc"] = 12              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["Nsnaps"]=5      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
@@ -59,8 +66,9 @@ params["do_rescaling"] = 1             # The flag to control velocity rescaling:
 params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 
+params["non-orth"] = 1  # = 1 when MOs are non-orthogonal, = 0 when calculated in orthogonal MO basis
 params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
-params["smat_inc"] = 1 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
+params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 params["interface"] = "QE"   # "QE" for libra_qe_interface, "GAMESS" if libra_gamess_interface is used
 params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
@@ -70,9 +78,9 @@ params["NHC_size"] = 3
 params["thermostat_type"] = "Nose-Hoover"
 params["sigma_pos"] = 0.01  #Displace atomic position randomly
 
-params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
+params["is_MM"] = 0                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
-
+params["Nstart"] = 0
 
 ########### Now start actual calculations ###########################
 #sys.path.insert(1,os.environ["libra_hamiltonian_path"] + "/Hamiltonian_Atomistic/Hamiltonian_QM/Control_Parameters")
@@ -80,6 +88,7 @@ params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E
 
 #params["num_MO"] = 3  # number of MO basis used in constructing electronic wavefunction
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
+params["excitations_init"] = [1]
 params["HOMO"] = 0
 params["min_shift"] = 0
 params["max_shift"] = 1 
@@ -125,6 +134,20 @@ params["se_pop_file_prefix"] = params["res"]+"se_pop"           # containing the
 params["sh_pop_file_prefix"] = params["res"]+"sh_pop"           # containing the SH population averaged over TSH trajectories. File name is defined in the SE way. 
 params["se_pop_ex_file_prefix"] = params["res"]+"se_pop_ex"   # containing the SE population averaged over initial geometries. File name is se_pop_ex"initial excitation" 
 params["sh_pop_ex_file_prefix"] = params["res"]+"sh_pop_ex"   # containing the SH population averaged over initial geometries. File name is defined in the SE way.
+
+
+# create thermostat
+#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+
+# create Universe
+params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
+
+# Create force field                                                                                                                                 
+params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["uff"], "uff.d")
+
+
+
 
 main.main(params)  # run actual calculations
 
