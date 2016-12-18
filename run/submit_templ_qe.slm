@@ -4,7 +4,7 @@
 #SBATCH --clusters=chemistry
 #SBATCH --time=10:10:00
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-node=12
 #SBATCH --mem=10000
 ####SBATCH --mail-user=ekadashi@buffalo.edu
 
