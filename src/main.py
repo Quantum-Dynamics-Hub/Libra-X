@@ -99,10 +99,12 @@ def main(params):
     mo_pool_alp, mo_pool_bet = None, None
 
     if params["interface"]=="QE":
+        #ntraj = nstates*ninit*num_SH_traj
         pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
     elif params["interface"]=="GAMESS":
+        #ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
