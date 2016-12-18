@@ -128,7 +128,7 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
 
     #print "E = \n"; E_old.show_matrix()
     #print "C = \n"; C_old.show_matrix()
-    #print "ham_el = \n"; ham_el.show_matrix()
+    print "ham_el = \n"; ham_el.show_matrix()
     #print "ham_vib = \n"; ham_vib.show_matrix()
 
 
