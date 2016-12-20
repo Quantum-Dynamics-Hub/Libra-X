@@ -157,14 +157,11 @@ def set_defaults(params, interface, recipe=""):
     # Options:  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
     params["tsh_method"] = 1  
 
-    # Representation
-    # Options: 0 -> diabatic, 1 - adiabatic     
-    if interface=="GAMESS":
-        params["rep"] = 1  
-    else if interface=="QE":
-        params["rep"] = 0  # IMPORTANT: why?
-    
-     
+    # Representation - this parameter is used only to determine
+    # how to perform velocity rescaling
+    # Options: 0 -> diabatic (uniform rescaling, needs only energies, not derivaive coplings)
+    #          1 - adiabatic - derivaive coupling vectors are needed
+    params["rep"] = 0      
 
     # A flag to select the Boltzmann scaling in lieu of the hop rejection and 
     # velocity rescaling
