@@ -185,17 +185,23 @@ def set_defaults(params, interface, recipe=""):
     # Options: 0 -> no, 1 -> yes
     params["is_MM"] = 0 
 
-    # The fraction of the MM part in the QM/MM mixing:
-    # E_total = (1-f)*E(QM) + f*E(MM), same for forces (at least for the ground state)!
-    params["MM_fraction"] = 0.0 
+    # The fraction of the MM (QM) part in the QM/MM mixing:
+    # E_total = qm_frac*E(QM) + mm_frac*E(MM), same for forces (at least for the ground state)!
+    # Consider: qm_frac = 1, mm_frac = 1 and ff with only vdw interactions - that would be
+    #                        an empirically-corrected dispersion for the QM part
+    #  or       qm_frac = 0, mm_frac = 1 and ff with all types of interactions - that would be
+    #                        just a classical dynamics (note: the QM calculations may still be done
+    #                        e.g. to compute couplings etc.
+    params["MM_fraction"] = 0.0
+    params["QM_fraction"] = 1.0
 
     # create a Universe object
     params["U"] = Universe()
     LoadPT.Load_PT(params["U"], "elements.txt")
 
     # Create a Force field object
-    params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-    LoadUFF.Load_UFF(params["uff"], "uff.d")
+    params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+    LoadUFF.Load_UFF(params["ff"], "uff.d")
 
     # The file contaiining the atomic connectivity information for the MM part
     params["ent_file"] = ""
