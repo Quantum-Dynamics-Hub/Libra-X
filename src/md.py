@@ -117,6 +117,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     t = Timer()
     rnd = Random()
     t.start()
+
     dt_nucl = params["dt_nucl"]
     el_mts = params["el_mts"] # multiple time stepping algorithm for electronic DOF propagation
     if el_mts < 1:
@@ -125,7 +126,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
         print "Exiting..."
         sys.exit(0)
     dt_elec = dt_nucl/float(el_mts)
-    uff = params["uff"]
 
     nconfig = params["nconfig"]
     #flag_ao = params["flag_ao"]
@@ -144,7 +144,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     # TSH trajectories
     num_SH_traj = 1
-    if SH_type >= 1: # use SH potential                                                                                                                   
+    if SH_type >= 1: # use SH potential
         num_SH_traj = params["num_SH_traj"]
 
     #=============== Initialization =======================
@@ -165,7 +165,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
     if params["is_MM"] == 1: # include MM interactions
-        ham_mm = include_mm.init_hamiltonian_mm(syst, uff)        
+        ham_mm = include_mm.init_hamiltonian_mm(syst, params["ff"])
         
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
@@ -246,10 +246,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         nac = CMATRIX()
                         #smat = CMATRIX()
                         all_grads = []
-                        opt = 0 # default
+                        #opt = 0 # default
 
                         if params["interface"]=="GAMESS":
-                            opt = 1 # use SD wavefunctions constructed by ground state calculation
+                            #opt = 1 # use SD wavefunctions constructed by ground state calculation
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
@@ -260,7 +260,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             
 
                         elif params["interface"]=="QE":
-                            opt = 1 # use true SD wavefunctions
+                            #opt = 1 # use true SD wavefunctions
 
                             E_SD_old = MATRIX(E[cnt])
                             smat_old = CMATRIX(smat)
@@ -272,24 +272,26 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # ============== Common blocks ==================
                         
-                        frac = params["MM_fraction"]  # set 0 to be default
+                        mm_frac = params["MM_fraction"]  # set 0 to be default
+                        qm_frac = params["QM_fraction"]  # set 1 to be default
 
                         if params["is_MM"] == 1:
                             
                             # update mol.f computed from ham_mm 
                             epot_mm[cnt] = compute_forces(mol[cnt],Electronic(1,0),ham_mm[cnt],1)
+
                             # update forces
                             for k in xrange(syst[cnt].Number_of_atoms):
                                 for st in xrange(nstates):
-                                    d1ham_adi[cnt][3*k+0].set(st,st,(1.0-frac)*all_grads[st][k].x - frac*mol[cnt].f[3*k+0])
-                                    d1ham_adi[cnt][3*k+1].set(st,st,(1.0-frac)*all_grads[st][k].y - frac*mol[cnt].f[3*k+1])
-                                    d1ham_adi[cnt][3*k+2].set(st,st,(1.0-frac)*all_grads[st][k].z - frac*mol[cnt].f[3*k+2])
+                                    d1ham_adi[cnt][3*k+0].set(st,st,qm_frac*all_grads[st][k].x - mm_frac*mol[cnt].f[3*k+0])
+                                    d1ham_adi[cnt][3*k+1].set(st,st,qm_frac*all_grads[st][k].y - mm_frac*mol[cnt].f[3*k+1])
+                                    d1ham_adi[cnt][3*k+2].set(st,st,qm_frac*all_grads[st][k].z - mm_frac*mol[cnt].f[3*k+2])
                         else:
                             for k in xrange(syst[cnt].Number_of_atoms):
                                 for st in xrange(nstates):
-                                    d1ham_adi[cnt][3*k+0].set(st,st,all_grads[st][k].x)
-                                    d1ham_adi[cnt][3*k+1].set(st,st,all_grads[st][k].y)
-                                    d1ham_adi[cnt][3*k+2].set(st,st,all_grads[st][k].z)
+                                    d1ham_adi[cnt][3*k+0].set(st,st,qm_frac*all_grads[st][k].x)
+                                    d1ham_adi[cnt][3*k+1].set(st,st,qm_frac*all_grads[st][k].y)
+                                    d1ham_adi[cnt][3*k+2].set(st,st,qm_frac*all_grads[st][k].z)
 
 
                         # Update the matrices that are bound to the Hamiltonian 
@@ -310,7 +312,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = (1.0-frac)*epot[cnt] + frac*epot_mm[cnt]
+                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
