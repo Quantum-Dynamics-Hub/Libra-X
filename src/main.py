@@ -85,7 +85,7 @@ def main(params):
     ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
     # nspin = params["nspin"]  This parameter is used only in Libra-QE interface.
-    uff = params["uff"]
+    uff = params["ff"]
 
     num_SH_traj = 1
     if SH_type >= 1: # calculate no SH probs.  
@@ -281,8 +281,16 @@ def main(params):
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
                 # Add the connectivity - needed if we plan to use MM
-                if params["is_MM"]: 
-                    LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+                if params["is_MM"]:
+                    if os.path.exists(params["ent_file"]):
+                        LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+                    else:
+                        print "is_MM is set to 1, which means you need to provide the \
+                        a file containing the connectivity information for your MM system. \
+                        As of now, such file is called = ", params["ent_file"], " but it cannot \
+                        be found on your system. Pease check if it exists or set is_MM to 0. \
+                        Exiting..."
+                        sys.exit(0)
 
                 syst.append(x)
 

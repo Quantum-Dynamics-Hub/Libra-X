@@ -178,6 +178,11 @@ def set_defaults(params, interface, recipe=""):
     # Options: 0 -> do not change the velocity, 1 - reverse its direction
     params["do_reverse"] = 1
 
+    # The option that depends on how we assume the basis states are
+    # Options: 0 -> orthogonal (good for GAMESS and Pyxaid-type wavefunction)
+    #          1 -> non-orthogonal (as in QE with delta-SCF)
+    params["non-orth"] = 0
+
 
     ##### Optional MM interactions on top of the QM #####
 

@@ -246,10 +246,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         nac = CMATRIX()
                         #smat = CMATRIX()
                         all_grads = []
-                        #opt = 0 # default
+                        opt = 0 # default
 
                         if params["interface"]=="GAMESS":
-                            #opt = 1 # use SD wavefunctions constructed by ground state calculation
+                            opt = 1 # use SD wavefunctions constructed by ground state calculation
                            
                             write_gms_inp(label[cnt], Q[cnt], params, mol[cnt])
                             exe_gamess(params)
@@ -260,7 +260,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             
 
                         elif params["interface"]=="QE":
-                            #opt = 1 # use true SD wavefunctions
+                            opt = 1 # use true SD wavefunctions
 
                             E_SD_old = MATRIX(E[cnt])
                             smat_old = CMATRIX(smat)

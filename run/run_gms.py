@@ -12,7 +12,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
+user = 0 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -108,7 +108,7 @@ params["NHC_size"] = 5                      # the size of Nose-Hoover chains
 params["Temperature"] = 300.0               # Target temperature in thermostat
 params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
-params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
+params["is_MM"] = 0                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
 
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
@@ -145,8 +145,8 @@ params["excitations_init"] = [0]
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
-params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-LoadUFF.Load_UFF(params["uff"], "uff.d")
+params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["ff"], "uff.d")
 
 params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
 
