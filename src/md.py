@@ -162,6 +162,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
     therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
+    #therm = []
+    #therm_i.set_Nf_t(nnucl)
+    #therm_i.set_Nf_r(0)
+    #therm_i.init_nhc()
+    #for i in xrange(ntraj):
+    #therm_ = Thermostat(therm_i)
+    #therm.append(therm_)
+
     if params["f_vdw"] == 1: # include vdw interaction
         ham_mm = include_mm.init_hamiltonian_mm(syst, uff)        
         

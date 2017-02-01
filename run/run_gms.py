@@ -89,7 +89,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
-params["Nsnaps"] = 5                        # the number of MD rounds
+params["Nsnaps"] = 1                        # the number of MD rounds
 params["Nsteps"] = 1                        # the number of MD steps per snap
 params["Ncool"]  = 3                        # the number of cooling rounds from t=0
 params["Nstart"] = 6                        # the number of rounds for starting NA-MD
@@ -120,8 +120,8 @@ params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSS
 params["rep"] = 1                      # representation: 0 - diabatic, 1 - adiabatic
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 0             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
-params["do_reverse"] = 0               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
+params["do_rescaling"] = 1             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
+params["do_reverse"] = 1               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 
@@ -173,7 +173,7 @@ params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-
 params["excitations_init"] = [0]
 
 # create thermostat
-#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
 
 # create Universe
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
