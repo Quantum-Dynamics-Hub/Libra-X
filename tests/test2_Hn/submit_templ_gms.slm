@@ -1,12 +1,11 @@
 #!/bin/sh
 #SBATCH --partition=valhalla
-##SBATCH --partition=general-compute
 #SBATCH --clusters=chemistry
-#SBATCH --time=10:10:00
+#SBATCH --time=01:25:00
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=12
-#SBATCH --mem=10000
-####SBATCH --mail-user=ekadashi@buffalo.edu
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=500
+####SBATCH --mail-user=kosukesa@buffalo.edu
 
 echo "SLURM_JOBID="$SLURM_JOBID
 echo "SLURM_JOB_NODELIST="$SLURM_JOB_NODELIST
@@ -21,13 +20,12 @@ module load boost
 module load intel/16.0
 module load intel-mpi/5.1.1
 module load mkl/11.3
-module load espresso
-
+module load gamess
 
 #The PMI library is necessary for srun
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
+python run_gms.py
 
-#srun pw.x < x.md.in > x.md.out
-python run_qe.py
+
 

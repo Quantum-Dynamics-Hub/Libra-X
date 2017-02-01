@@ -23,11 +23,11 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-def init_hamiltonian_mm(syst, uff):
+def init_hamiltonian_mm(syst, ff):
     #\param[in,out]     syst System object including atomic coordinates and connectivity information
-    #\param[in]          uff Forcefield object indicating Universal Force Field
+    #\param[in]          ff  Forcefield object defining the MM interactions
     #
-    # returned variable -> ham_mm  MM hamiltonian linked to syst
+    # returned variable -> ham_mm  A list of MM Hamiltonians, linked to the corresponding system replicas
 
     ham_mm = []
 
@@ -36,7 +36,7 @@ def init_hamiltonian_mm(syst, uff):
         ham = Hamiltonian_Atomistic(1, 3*syst[i].Number_of_atoms)
         ham.set_Hamiltonian_type("MM")
         atlst1 = range(1,syst[i].Number_of_atoms+1)
-        ham.set_interactions_for_atoms(syst[i], atlst1, atlst1, uff, 1, 0) # 0 - verb, 0 - assign_rings
+        ham.set_interactions_for_atoms(syst[i], atlst1, atlst1, ff, 1, 0) # 0 - verb, 0 - assign_rings
         ham.set_system(syst[i])
         ham.show_interactions_statistics()
         ham.compute()

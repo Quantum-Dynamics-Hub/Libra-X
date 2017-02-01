@@ -23,6 +23,8 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
+from libra_py import *
+
 #>>>>>>>>>>>>>>>> UNCOMMENT THE SECTION BELOW, if THERE IS A PROBLEM WITH PATH
 #cwd = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build"
 #print "Current working directory", cwd
@@ -98,7 +100,7 @@ def qe_extract_mo(filename, upper_tag, active_space):
     # The read MOs (KS orbitals) are not orthonormal, strictly-speaking, - becasue 
     # of the pseudopotentials. So we will normalize them, at least
     for i in xrange(n_mo):
-        mo_i = coeff.col(n_mo)
+        mo_i = coeff.col(i)
         nrm = (mo_i.H() * mo_i).get(0,0).real
         nrm = (1.0/math.sqrt(nrm))
 
@@ -532,13 +534,21 @@ def qe_extract(filename, active_space, ex_st, nspin, flag):
 
     if nspin <= 1:
         # Read the wavefunctions:
-        MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, active_space,0)
         MO_b = CMATRIX(MO_a)
 
     if nspin == 2:
         # Read the wavefunctions:
-        MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
-        MO_b = qe_extract_mo("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
+        #MO_a = qe_extract_mo("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_b = qe_extract_mo("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
+        #MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, "Kpoint.1", active_space)
+        #MO_b = QE_methods.read_qe_wfc("x%i.export/wfc.2" % ex_st, "Kpoint.2", active_space)
+
+        MO_a = QE_methods.read_qe_wfc("x%i.export/wfc.1" % ex_st, active_space,0)
+        MO_b = QE_methods.read_qe_wfc("x%i.export/wfc.2" % ex_st, active_space,0)
+
 
     return tot_ene, label, R, grads, MO_a, MO_b, norb, nel, nat, alat
 
