@@ -162,15 +162,17 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     ham, ham_adi, d1ham_adi, ham_vib = init_ensembles.init_ext_hamiltonians(ntraj, nnucl, nstates, verbose)
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
-    therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
+    #therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
-    #therm = []
-    #therm_i.set_Nf_t(nnucl)
-    #therm_i.set_Nf_r(0)
-    #therm_i.init_nhc()
-    #for i in xrange(ntraj):
-    #therm_ = Thermostat(therm_i)
-    #therm.append(therm_)
+    therm = []
+    for i in xrange(ntraj):
+        therm_i = Thermostat(params["therm"])
+        therm_i.set_Nf_t(nnucl)
+        therm_i.set_Nf_r(0)
+        therm_i.init_nhc()
+        therm.append(therm_i)
+
+    print "size of therm",len(therm)
 
     if params["is_MM"] == 1: # include MM interactions
         ham_mm = include_mm.init_hamiltonian_mm(syst, params["ff"])
@@ -233,14 +235,19 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                                 else:
                                     el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
+                        print "after el propagate"
+
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
+                        print "after thermostat"
                         mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
                         mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
+
+                        print "after nuclear prop"
 
                         ## Here, we also need to update coordinates of system objects, because
                         ## this is what the MM Hamiltonian uses - not the coordinates stored in mol
