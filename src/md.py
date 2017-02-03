@@ -235,19 +235,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                                 else:
                                     el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
 
-                        print "after el propagate"
-
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                        print "after thermostat"
                         mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
                         mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
-
-                        print "after nuclear prop"
 
                         ## Here, we also need to update coordinates of system objects, because
                         ## this is what the MM Hamiltonian uses - not the coordinates stored in mol
