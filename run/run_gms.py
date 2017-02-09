@@ -27,7 +27,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/dev/LibraX/src"
 
 elif user==2:
     # For Ekadashi
@@ -121,7 +121,7 @@ params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-
+params["do_collapse"] = 1              # 0 - no decoherence, 1 - decoherence 
 
 
 # ***************************************************************

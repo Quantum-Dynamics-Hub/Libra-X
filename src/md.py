@@ -29,6 +29,7 @@ from create_input_qe import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
+from ida import *
 import print_results
 import include_mm
 #import print_results_qe # This module isn't defined yet.
@@ -199,6 +200,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     ekin    = [0.0]*ens_sz
     etot    = [0.0]*ens_sz
     eext    = [0.0]*ens_sz
+
+    old_st = [0]*ens_sz
+
     mu = []
     smat_old = CMATRIX(nstates,nstates)
     smat = CMATRIX(nstates,nstates)
@@ -359,7 +363,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                                 smat.imag().show_matrix(params["sd_ham"] + "S_mat_im_" + str(ij))
                         #####################################################################
 
-
                         t.stop()
                         print "(iconf=%i,i_ex=%i,itraj=%i) takes %f sec"%(iconf,i_ex,itraj,t.show()) 
                         #******** end of itsh loop
@@ -368,6 +371,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             #***** End of TD-SE propagation for this step
                     
             ############ Add surface hopping ######################
+            # store the electronic state
+            for tr in xrange(ens_sz):
+                old_st[tr] =el[tr].istate
+
             print "Before TSH"
             t.stop()
             print "time before TSH=",t.show(),"sec"
@@ -378,6 +385,17 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                 elif params["interface"]=="QE":
                     tsh.surface_hopping(mol, el, ham, rnd, params)
 
+            # induce decoherence 
+            if params["do_collapse"] == 1:
+                for tr in xrange(ens_sz):
+                    new_st = el[tr].istate
+                    if old_st[tr] != new_st:
+                        ksi = rnd.uniform(0.0, 1.0)
+                        E_old = Hvib.get(old_st[tr],old_st[tr]).real
+                        E_new = Hvib.get(new_st,new_st).real
+                        el[tr] = ida_py_modified(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"])
+                    
+                    
 
             ################### END of TSH ##########################
             print "Finished TSH"

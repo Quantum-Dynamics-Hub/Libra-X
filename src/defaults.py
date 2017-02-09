@@ -183,6 +183,10 @@ def set_defaults(params, interface, recipe=""):
     #          1 -> non-orthogonal (as in QE with delta-SCF)
     params["non-orth"] = 0
 
+    # The option that determines if decoherence effects are included after hops. 
+    # Options: 0 -> no decoherence
+    #          1 -> decoherence
+    params["do_collapse"] = 0
 
     ##### Optional MM interactions on top of the QM #####
 
