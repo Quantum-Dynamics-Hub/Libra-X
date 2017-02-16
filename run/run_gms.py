@@ -12,7 +12,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 0 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
+user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -93,23 +93,18 @@ elif test==1:
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
 params["Nsnaps"] = 5                        # the number of total MD snapshots
 params["Nsteps"] = 1                        # the number of MD steps per 1 snapshot
-params["Ncool"]  = 3                        # in the end of that many initial snapshots 
+params["Ncool"]  = -1                        # in the end of that many initial snapshots 
                                             # we will be cooling the system: resetting momenta to zero
-                    # It is important to use a sufficiently large "Nsteps" variable, to make the
-                    # annealing process more efficient. But, on the other had, if you are too far from
-                    # equilibrium, make "Nsteps" smaller
-
-params["Nstart"] = 6       # the printout cycle when we will initiate NA-MD and
-                           # electronic dynamics with surface hoping
+                                            # It is important to use a sufficiently large "Nsteps" variable, to make the
+                                            # annealing process more efficient. But, on the other hand, if you are too far from
+                                            # equilibrium, make "Nsteps" smaller
+params["Nstart"] = -1                        # the printout cycle when we will initiate NA-MD and
+                                            # electronic dynamics with surface hoping
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
-params["nu_therm"] = 0.001                  # shows thermostat frequency
-params["NHC_size"] = 5                      # the size of Nose-Hoover chains
-params["Temperature"] = 300.0               # Target temperature in thermostat
-params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
-params["is_MM"] = 0                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
-params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
+params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
+params["MM_fraction"] = 1.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
 
 spin = 0    # a flag to consider spin : option 0 -> no, 1 -> yes
 flip = 0    # (if spin = 1,) a flag to consider spin-flip : option 0 -> no, 1 -> yes
@@ -139,7 +134,8 @@ params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-
 params["excitations_init"] = [0]
 
 # create thermostat
-#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["Temperature"] = params["therm"].Temperature # explicitly defined
 
 # create Universe
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
@@ -148,7 +144,7 @@ params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
 LoadUFF.Load_UFF(params["ff"], "uff.d")
 
-params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
+#params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]

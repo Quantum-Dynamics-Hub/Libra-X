@@ -162,7 +162,17 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     ham, ham_adi, d1ham_adi, ham_vib = init_ensembles.init_ext_hamiltonians(ntraj, nnucl, nstates, verbose)
     mol = init_ensembles.init_mols(syst, ntraj, nnucl, verbose)
-    therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
+    #therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
+
+    therm = []
+    for i in xrange(ntraj):
+        therm_i = Thermostat(params["therm"])
+        therm_i.set_Nf_t(nnucl)
+        therm_i.set_Nf_r(0)
+        therm_i.init_nhc()
+        therm.append(therm_i)
+
+    print "size of therm",len(therm)
 
     if params["is_MM"] == 1: # include MM interactions
         ham_mm = include_mm.init_hamiltonian_mm(syst, params["ff"])
