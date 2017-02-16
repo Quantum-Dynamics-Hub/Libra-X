@@ -269,7 +269,9 @@ def main(params):
     syst_mm = []
     el = []
 
-    Ttemp = 0.0 # nuclei velocities are set 0.
+    Ttemp = 0.0
+    if params["Nstart"] < 0 and params["MD_type"] == 1: # start NA-MD interacting with thermostat @ t=0
+        Ttemp = params["Temperature"]
 
     # all excitations for each nuclear configuration
     for i in xrange(ninit):
