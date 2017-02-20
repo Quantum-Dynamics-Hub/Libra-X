@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -27,7 +27,7 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/dev/LibraX/src"
 
 elif user==2:
     # For Ekadashi
@@ -74,7 +74,8 @@ elif user==1:
     params["GMSPATH"] = "/home/e1667/install/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work/scr"
+    cwd = os.getcwd()
+    params["scr_dir"] = cwd + "/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
@@ -121,7 +122,7 @@ params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-
+params["do_collapse"] = 1              # 0 - no decoherence, 1 - decoherence 
 
 
 # ***************************************************************
