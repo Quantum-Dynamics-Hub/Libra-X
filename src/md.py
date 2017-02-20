@@ -29,7 +29,7 @@ from create_input_qe import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
-from ida import *
+#from ida import *
 import print_results
 import include_mm
 #import print_results_qe # This module isn't defined yet.
@@ -371,6 +371,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             #***** End of TD-SE propagation for this step
                     
             ############ Add surface hopping ######################
+
             # store the electronic state
             for tr in xrange(ens_sz):
                 old_st[tr] =el[tr].istate
@@ -393,8 +394,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         ksi = rnd.uniform(0.0, 1.0)
                         E_old = Hvib.get(old_st[tr],old_st[tr]).real
                         E_new = Hvib.get(new_st,new_st).real
-                        el[tr] = ida_py_modified(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"])
-                    
+                        el[tr].istate, el[tr] = ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
+
                     
 
             ################### END of TSH ##########################
