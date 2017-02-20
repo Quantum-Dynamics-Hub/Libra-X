@@ -29,7 +29,6 @@ from create_input_qe import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
 from hamiltonian_vib import *
-#from ida import *
 import print_results
 import include_mm
 #import print_results_qe # This module isn't defined yet.
