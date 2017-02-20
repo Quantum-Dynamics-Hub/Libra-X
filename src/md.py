@@ -393,7 +393,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         ksi = rnd.uniform(0.0, 1.0)
                         E_old = Hvib.get(old_st[tr],old_st[tr]).real
                         E_new = Hvib.get(new_st,new_st).real
-                        el[tr].istate, el[tr] = ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
+                        el[tr].istate, el[tr] = tsh.ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
 
                     
 
