@@ -389,7 +389,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             if params["do_collapse"] == 1:
                 for tr in xrange(ens_sz):
                     new_st = el[tr].istate
-                    #if old_st[tr] != new_st:
                     ksi = rnd.uniform(0.0, 1.0)
                     E_old = ham_vib[cnt].get(old_st[tr],old_st[tr]).real
                     E_new = ham_vib[cnt].get(new_st,new_st).real
