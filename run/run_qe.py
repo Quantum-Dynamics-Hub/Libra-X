@@ -48,9 +48,9 @@ params["nconfig"] = 1
 params["el_mts"] = 1
 params["num_SH_traj"] = 1
 
-params["non-orth"] = 0  # = 1 when MOs are non-orthogonal, = 0 when calculated in orthogonal MO basis
-params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
-params["smat_inc"] = 1 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
+params["non-orth"] = 1  # = 1 when MOs are non-orthogonal, = 0 when calculated in orthogonal MO basis
+params["print_S_mat"] = 1 # 1 if S-matrix printing required, 0 if not required
+params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 
 params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
