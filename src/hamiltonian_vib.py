@@ -179,7 +179,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     states = params["excitations"]
     nstates = len(states)  
     H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
-    D_el = CMATRIX(nstates,nstates)  # nonadiabatic couplings
+    #D_el = CMATRIX(nstates,nstates)  # nonadiabatic couplings
     flag = params["print_sd_ham"]
 
     # Excitation energy : 
@@ -242,15 +242,15 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
                         i = abs(a) - 1
                         j = abs(b) - 1
                         print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
-                        D_el.set(I,J,(-1.0j+0.0)*nac.get(i,j))
+                        #D_el.set(I,J,(-1.0j+0.0)*nac.get(i,j))
                         ham_vib.set(I,J,(-1.0j+0.0)*nac.get(i,j))
                     else:
-                        D_el.set(I,J, 0.0, 0.0)
+                        #D_el.set(I,J, 0.0, 0.0)
                         ham_vib.set(I,J, 0.0, 0.0)
                     print "\n"
 
                 else:  # N-electron approximation - coupling is alreay there
-                    D_el.set(I,J, (-1.0j+0.0)*nac.get(I,J))
+                    #D_el.set(I,J, (-1.0j+0.0)*nac.get(I,J))
                     ham_vib.set(I,J,(-1.0j+0.0)*nac.get(I,J))
                     print "\n"
       
