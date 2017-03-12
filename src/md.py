@@ -299,12 +299,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                                     d1ham_adi[cnt][3*k+0].set(st,st,qm_frac*all_grads[st][k].x - mm_frac*mol[cnt].f[3*k+0])
                                     d1ham_adi[cnt][3*k+1].set(st,st,qm_frac*all_grads[st][k].y - mm_frac*mol[cnt].f[3*k+1])
                                     d1ham_adi[cnt][3*k+2].set(st,st,qm_frac*all_grads[st][k].z - mm_frac*mol[cnt].f[3*k+2])
-                        else:
-                            for k in xrange(syst[cnt].Number_of_atoms):
-                                for st in xrange(nstates):
-                                    d1ham_adi[cnt][3*k+0].set(st,st,qm_frac*all_grads[st][k].x)
-                                    d1ham_adi[cnt][3*k+1].set(st,st,qm_frac*all_grads[st][k].y)
-                                    d1ham_adi[cnt][3*k+2].set(st,st,qm_frac*all_grads[st][k].z)
 
 
                         # Update the matrices that are bound to the Hamiltonian 
@@ -312,13 +306,25 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         t.stop()
                         print "time before update vib ham=",t.show(),"sec"
                         if params["non-orth"] ==1:
-                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                            cmt=vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
                         else:
                             update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
                         t.stop()
                         print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
                         print "ham_adi= \n"; ham_adi[cnt].show_matrix()
+
+                        if params["non-orth"] == 1:
+                            for k in xrange(syst[cnt].Number_of_atoms):
+                                for st in xrange(nstates):
+                                    force_x = force_orthogonal(smat,cmt,all_grads[0][k].x,all_grads[1][k].x,st)  
+                                    # This function returns orthogonal force components 
+                                    force_y = force_orthogonal(smat,cmt,all_grads[0][k].y,all_grads[1][k].y,st)  
+                                    force_z = force_orthogonal(smat,cmt,all_grads[0][k].z,all_grads[1][k].z,st)  
+                                    #print "atom=",k,"Fx=",force_x,"Fy=",force_y,"Fz=",force_z
+                                    d1ham_adi[cnt][3*k+0].set(st,st,force_x)
+                                    d1ham_adi[cnt][3*k+1].set(st,st,force_y)
+                                    d1ham_adi[cnt][3*k+2].set(st,st,force_z)
 
                         #sys.exit(0)
                         # update potential energy
