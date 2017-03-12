@@ -67,6 +67,24 @@ def compute_H_el(E_SD,smat):
                 H_el.set(I,J,(0.5*(E_SD.get(I,I)+E_SD.get(J,J))*smat.get(I,J)))
     return H_el
 
+def force_orthogonal(smat,cmt,f1,f2,st):
+    ##
+    # This function generates orthogonal forces using delta-SCF forces,
+    # non-orthogonal overlap matrix, and orthogonal transformation matrix
+    #
+    # \param[in]  smat Overlap matrix in non-orthogonal basis (CMATRIX)
+    # \param[in]  cmt Orthogonal transformation matrix (CMATRIX)
+    # \param[in]  f1 and f2 Ground and excited state force component
+    # \param[in]  st Electronic state
+    orth_force = CMATRIX(2,2)
+
+    F_mat = 0.5*(f1+f2)*(cmt.H())*smat*cmt
+    orth_force.set(0,0,F_mat.get(0,0))
+    orth_force.set(1,1,F_mat.get(1,1))
+
+    return orth_force.real().get(st,st)
+
+
 
 def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix):
     ##
@@ -140,6 +158,7 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     #         w.r.t the ground state energy
     # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
     # on the off-diagonals   
+    return C_new
 
 
 
