@@ -92,6 +92,59 @@ def force_orthogonal(smat,cmt,f1,f2,st):
     return orth_force.real().get(st,st)
 
 
+def force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,atm_num,x_i):
+    ##
+    # This function generates orthogonal force using delta-SCF forces,
+    # non-orthogonal overlap matrix and orthogonal transformation matrix
+    ##
+    # This function generates orthogonal forces using delta-SCF forces,
+    # non-orthogonal overlap matrix, and orthogonal transformation matrix
+    #
+    # \param[in]  smat Overlap matrix in non-orthogonal basis (CMATRIX)
+    # \param[in]  cmt Orthogonal transformation matrix (CMATRIX)
+    # \param[in,out]  all_grads is the list of list of gradient vectors.
+    # \param[in]  nstates is the total number of electronic states.
+    # \param[in]  ex  The electronic state index.
+    # \param[in]  atm_num  Atom index
+    # \param[in] x_i  The index of force vector components: =0 for Fx, =1 for Fy, and =2 for Fz
+
+    F = []
+    for i in xrange(nstates):
+        F.append(all_grads[i][atm_num].x)
+        F.append(all_grads[i][atm_num].y)
+        F.append(all_grads[i][atm_num].z)
+
+    fmat = CMATRIX(nstates,nstates)
+    for i in xrange(nstates):
+        for j in xrange(nstates):
+            fmat.set(i,j,0.5*(F[3*i+x_i]+F[3*j+x_i])*smat.get(i,j))
+    F_mat = (cmt.T())*fmat*cmt
+
+    return F_mat.real().get(ex,ex)
+
+
+
+def force_orthogonal(smat,cmt,all_grads,nstates,no_of_atoms):
+    ##
+    # This function returns orthogonal gradients of all atoms using delta-SCF forces,
+    # non-orthogonal overlap matrix, and orthogonal transformation matrix
+    #
+    # \param[in]  smat The Overlap matrix in non-orthogonal basis (CMATRIX)
+    # \param[in]  cmt The Orthogonal transformation matrix (CMATRIX)
+    # \param[in]  nstates is the total number of electronic states.
+    # \param[in]  no_of_atoms is the total number of atoms in the system.
+    # \param[in,out]  all_grads is the list of list of gradient vectors.
+
+    for k in xrange(no_of_atoms):
+        for ex in xrange(nstates):
+            all_grads[ex][k].x=force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,k,0)
+            all_grads[ex][k].y=force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,k,1)
+            all_grads[ex][k].z=force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,k,2)
+
+    return all_grads
+
+
+
 
 def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix):
     ##
