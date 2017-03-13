@@ -76,9 +76,16 @@ def force_orthogonal(smat,cmt,f1,f2,st):
     # \param[in]  cmt Orthogonal transformation matrix (CMATRIX)
     # \param[in]  f1 and f2 Ground and excited state force component
     # \param[in]  st Electronic state
-    orth_force = CMATRIX(2,2)
 
-    F_mat = 0.5*(f1+f2)*(cmt.H())*smat*cmt
+    F = []
+    F.append(f1)
+    F.append(f2)
+    orth_force = CMATRIX(2,2)
+    fmat = CMATRIX(2,2)
+    for i in xrange(2):
+        for j in xrange(2):
+            fmat.set(i,j,0.5*(F[i]+F[j])*smat.get(i,j))
+    F_mat = (cmt.T())*fmat*cmt
     orth_force.set(0,0,F_mat.get(0,0))
     orth_force.set(1,1,F_mat.get(1,1))
 
