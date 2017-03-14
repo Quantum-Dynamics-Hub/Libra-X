@@ -67,30 +67,6 @@ def compute_H_el(E_SD,smat):
                 H_el.set(I,J,(0.5*(E_SD.get(I,I)+E_SD.get(J,J))*smat.get(I,J)))
     return H_el
 
-def force_orthogonal(smat,cmt,f1,f2,st):
-    ##
-    # This function generates orthogonal forces using delta-SCF forces,
-    # non-orthogonal overlap matrix, and orthogonal transformation matrix
-    #
-    # \param[in]  smat Overlap matrix in non-orthogonal basis (CMATRIX)
-    # \param[in]  cmt Orthogonal transformation matrix (CMATRIX)
-    # \param[in]  f1 and f2 Ground and excited state force component
-    # \param[in]  st Electronic state
-
-    F = []
-    F.append(f1)
-    F.append(f2)
-    orth_force = CMATRIX(2,2)
-    fmat = CMATRIX(2,2)
-    for i in xrange(2):
-        for j in xrange(2):
-            fmat.set(i,j,0.5*(F[i]+F[j])*smat.get(i,j))
-    F_mat = (cmt.T())*fmat*cmt
-    orth_force.set(0,0,F_mat.get(0,0))
-    orth_force.set(1,1,F_mat.get(1,1))
-
-    return orth_force.real().get(st,st)
-
 
 def force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,atm_num,x_i):
     ##
@@ -118,7 +94,7 @@ def force_orthogonal_comp(smat,cmt,all_grads,nstates,ex,atm_num,x_i):
     for i in xrange(nstates):
         for j in xrange(nstates):
             fmat.set(i,j,0.5*(F[3*i+x_i]+F[3*j+x_i])*smat.get(i,j))
-    F_mat = (cmt.T())*fmat*cmt
+    F_mat = (cmt.H())*fmat*cmt
 
     return F_mat.real().get(ex,ex)
 
