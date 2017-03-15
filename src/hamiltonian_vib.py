@@ -68,38 +68,45 @@ def compute_H_el(E_SD,smat):
     return H_el
 
 
-def force_orthogonal(smat,cmt,all_grads,nstates,no_of_atoms):
+def force_orthogonal(smat,cmt,grads_non_orth):
     ##
     # This function returns orthogonal gradients of all atoms using delta-SCF forces,
     # non-orthogonal overlap matrix, and orthogonal transformation matrix
     #
     # \param[in]  smat The Overlap matrix in non-orthogonal basis (CMATRIX)
     # \param[in]  cmt The Orthogonal transformation matrix (CMATRIX)
-    # \param[in]  nstates is the total number of electronic states.
-    # \param[in]  no_of_atoms is the total number of atoms in the system.
-    # \param[in,out]  all_grads is the list of list of gradient vectors.
+    # \param[in]  grads_non_orth  The non-orthogonal gradients: list of list of VECTOR objects
+    # \param[out]  grads_orth  Orthogonalized gradients: list of list of VECTOR objects
 
-    for k in xrange(no_of_atoms):
-        F = []
-        for i in xrange(nstates):
-            F.append(all_grads[i][k].x)
-            F.append(all_grads[i][k].y)
-            F.append(all_grads[i][k].z)
-        F_mat = []
-        for xi in xrange(3):  
-        # xi being force component index, 0,1,2 for Fx,Fy,Fz respectively.
-            fmat = CMATRIX(nstates,nstates)
+    nstates = len(grads_non_orth)
+    no_of_atoms = len(grads_non_orth[0])
+    grads_orth=[]
+
+    for ex in xrange(nstates):
+        grads=[]
+        for k in xrange(no_of_atoms):
+            F_mat = []
+            fmat_x = CMATRIX(nstates,nstates)
+            fmat_y = CMATRIX(nstates,nstates)
+            fmat_z = CMATRIX(nstates,nstates)
+
             for i in xrange(nstates):
                 for j in xrange(nstates):
-                    fmat.set(i,j,0.5*(F[3*i+xi]+F[3*j+xi])*smat.get(i,j))
-            F_mat.append((cmt.H())*fmat*cmt)
+                    fmat_x.set(i,j,0.5*(grads_non_orth[i][k].x+grads_non_orth[j][k].x)*smat.get(i,j))
+                    fmat_y.set(i,j,0.5*(grads_non_orth[i][k].y+grads_non_orth[j][k].y)*smat.get(i,j))
+                    fmat_z.set(i,j,0.5*(grads_non_orth[i][k].z+grads_non_orth[j][k].z)*smat.get(i,j))
 
-        for ex in xrange(nstates):
-            all_grads[ex][k].x=F_mat[0].real().get(ex,ex)
-            all_grads[ex][k].y=F_mat[1].real().get(ex,ex)
-            all_grads[ex][k].z=F_mat[2].real().get(ex,ex)
+            F_mat.append((cmt.H())*fmat_x*cmt)
+            F_mat.append((cmt.H())*fmat_y*cmt)
+            F_mat.append((cmt.H())*fmat_z*cmt)
 
-    return all_grads
+            g=VECTOR(F_mat[0].real().get(ex,ex),F_mat[1].real().get(ex,ex),F_mat[2].real().get(ex,ex))
+            grads.append(g)
+
+        grads_orth.append(grads)
+
+    return grads_orth
+    #return grads_orth[0][0].x
 
 
 
@@ -305,3 +312,47 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     #         w.r.t the ground state energy
     # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
     # on the off-diagonals   
+
+
+
+############################################
+#              Unit Test
+############################################
+
+import unittest
+
+def input_force_orthogonal():
+    ##
+    # This function generates sample inputs for unittest
+    # A simple 2 state 2 atomic ststem
+
+    smat=CMATRIX(2,2)
+    smat.set(0,0,1.0)
+    smat.set(1,1,1.0)
+
+    cmt =CMATRIX(2,2)
+    cmt.set(0,0,1.0)
+    cmt.set(1,1,1.0)
+
+    all_grads=[]
+    for i in xrange(2):  # Number of electronic states
+        grads=[]
+        for j in xrange(2):  # number of atoms
+            g=VECTOR(0.1+i*0.01,-0.2+i*0.01,0.3+i*0.01)
+            grads.append(g)
+        all_grads.append(grads)
+
+    return smat,cmt,all_grads
+
+class FirstTest(unittest.TestCase):
+    def test_force_orthogonal(self):
+        #self.assertEqual( force_orthogonal(smat,cmt,all_grads),all_grads[0][0].x)
+        self.assertEqual( force_orthogonal(smat,cmt,all_grads),all_grads)
+
+
+#------------------------------------------------------------
+#  Uncomment the following two lines to perform unittest
+#------------------------------------------------------------
+#smat,cmt,all_grads=input_force_orthogonal()
+#unittest.main()
+
