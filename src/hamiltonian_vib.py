@@ -73,10 +73,15 @@ def force_orthogonal(smat,cmt,grads_non_orth):
     # This function returns orthogonal gradients of all atoms using delta-SCF forces,
     # non-orthogonal overlap matrix, and orthogonal transformation matrix
     #
-    # \param[in]  smat The Overlap matrix in non-orthogonal basis (CMATRIX)
-    # \param[in]  cmt The Orthogonal transformation matrix (CMATRIX)
+    # \param[in]  smat  The Overlap matrix in non-orthogonal basis (CMATRIX)
+    # \param[in]  cmt  The Orthogonal transformation matrix (CMATRIX)
+    #                  cmt transform non-orthogonal MO basis in to orthogonal MO basis
+    #                  obtained by solving eigen value problem: HC=SCE
     # \param[in]  grads_non_orth  The non-orthogonal gradients: list of list of VECTOR objects
+    #                             list of [electronic states] list of [atomic forces] VECTOR objects 
+    #                              , Dimension: [num-of-el-states][num-of-atoms](fx,fy,fz)
     # \param[out]  grads_orth  Orthogonalized gradients: list of list of VECTOR objects
+    #                          The dimensions is the same as the non-orthogonal gradients object .
 
     nstates = len(grads_non_orth)
     no_of_atoms = len(grads_non_orth[0])
@@ -100,13 +105,18 @@ def force_orthogonal(smat,cmt,grads_non_orth):
             F_mat.append((cmt.H())*fmat_y*cmt)
             F_mat.append((cmt.H())*fmat_z*cmt)
 
-            g=VECTOR(F_mat[0].real().get(ex,ex),F_mat[1].real().get(ex,ex),F_mat[2].real().get(ex,ex))
+            #g=VECTOR(F_mat[0].real().get(ex,ex),F_mat[1].real().get(ex,ex),F_mat[2].real().get(ex,ex))
+            g=VECTOR(F_mat[0].get(ex,ex).real,F_mat[1].get(ex,ex).real,F_mat[2].get(ex,ex).real)
             grads.append(g)
 
         grads_orth.append(grads)
 
-    return grads_orth
-    #return grads_orth[0][0].x
+
+    if __name__ =="__main__":
+        return float(grads_orth[0][0].x)
+    else:
+        return grads_orth
+
 
 
 
@@ -323,17 +333,24 @@ import unittest
 
 def input_force_orthogonal():
     ##
-    # This function generates sample inputs for unittest
+    # This function generates sample inputs for unittest: smat, cmt and all_grads
     # A simple 2 state 2 atomic ststem
-
+    
+    # Consider S_01 = 0.5, then the smat becomes,
     smat=CMATRIX(2,2)
     smat.set(0,0,1.0)
     smat.set(1,1,1.0)
-
+    smat.set(0,1,0.5)
+    smat.set(1,0,0.5)
+ 
+    # Construct an orthogonal transformation matrix as the following
     cmt =CMATRIX(2,2)
-    cmt.set(0,0,1.0)
-    cmt.set(1,1,1.0)
+    cmt.set(0,0,0.8)
+    cmt.set(1,1,0.8)
+    cmt.set(0,1,0.6)
+    cmt.set(1,0,0.6)
 
+    # Now create atomic froce components
     all_grads=[]
     for i in xrange(2):  # Number of electronic states
         grads=[]
@@ -344,15 +361,19 @@ def input_force_orthogonal():
 
     return smat,cmt,all_grads
 
-class FirstTest(unittest.TestCase):
+class Unittest_Force_orthogonal(unittest.TestCase):
     def test_force_orthogonal(self):
-        #self.assertEqual( force_orthogonal(smat,cmt,all_grads),all_grads[0][0].x)
-        self.assertEqual( force_orthogonal(smat,cmt,all_grads),all_grads)
+        ##
+        # This function tests if firce_orthogonal giving desired output.
+        # Here we input arbitrary overlap matrix, orthogonal transformation matrix, and
+        # atomic gradients and resulting output is tested against desired value.
+
+        # The expected orthogonal force F[0][0].x = (22.0*f[0][0].x+15.0*f[1][0].x)/25.0, where f being non-orthogonal forces
+        self.assertAlmostEqual( force_orthogonal(smat,cmt,all_grads),0.04*(22.0*all_grads[0][0].x+15.0*all_grads[1][0].x))
+        # This tests accuracy up to 7 decimal places
 
 
-#------------------------------------------------------------
-#  Uncomment the following two lines to perform unittest
-#------------------------------------------------------------
-#smat,cmt,all_grads=input_force_orthogonal()
-#unittest.main()
+if __name__ =="__main__":
+    smat,cmt,all_grads=input_force_orthogonal()
+    unittest.main()
 
