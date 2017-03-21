@@ -111,10 +111,6 @@ def force_orthogonal(smat,cmt,grads_non_orth):
 
         grads_orth.append(grads)
 
-
-    if __name__ =="__main__":
-        return float(grads_orth[0][0].x)
-    else:
         return grads_orth
 
 
@@ -323,57 +319,4 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
     # on the off-diagonals   
 
-
-
-############################################
-#              Unit Test
-############################################
-
-import unittest
-
-def input_force_orthogonal():
-    ##
-    # This function generates sample inputs for unittest: smat, cmt and all_grads
-    # A simple 2 state 2 atomic ststem
-    
-    # Consider S_01 = 0.5, then the smat becomes,
-    smat=CMATRIX(2,2)
-    smat.set(0,0,1.0)
-    smat.set(1,1,1.0)
-    smat.set(0,1,0.5)
-    smat.set(1,0,0.5)
- 
-    # Construct an orthogonal transformation matrix as the following
-    cmt =CMATRIX(2,2)
-    cmt.set(0,0,0.8)
-    cmt.set(1,1,0.8)
-    cmt.set(0,1,0.6)
-    cmt.set(1,0,0.6)
-
-    # Now create atomic froce components
-    all_grads=[]
-    for i in xrange(2):  # Number of electronic states
-        grads=[]
-        for j in xrange(2):  # number of atoms
-            g=VECTOR(0.1+i*0.01,-0.2+i*0.01,0.3+i*0.01)
-            grads.append(g)
-        all_grads.append(grads)
-
-    return smat,cmt,all_grads
-
-class Unittest_Force_orthogonal(unittest.TestCase):
-    def test_force_orthogonal(self):
-        ##
-        # This function tests if firce_orthogonal giving desired output.
-        # Here we input arbitrary overlap matrix, orthogonal transformation matrix, and
-        # atomic gradients and resulting output is tested against desired value.
-
-        # The expected orthogonal force F[0][0].x = (22.0*f[0][0].x+15.0*f[1][0].x)/25.0, where f being non-orthogonal forces
-        self.assertAlmostEqual( force_orthogonal(smat,cmt,all_grads),0.04*(22.0*all_grads[0][0].x+15.0*all_grads[1][0].x))
-        # This tests accuracy up to 7 decimal places
-
-
-if __name__ =="__main__":
-    smat,cmt,all_grads=input_force_orthogonal()
-    unittest.main()
 
