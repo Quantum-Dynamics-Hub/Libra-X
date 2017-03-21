@@ -187,7 +187,11 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
     #S_mol = average_S(P11,P22)  # Average S(t+dt/2) = (S(t) + S(t+dt))/2.0
     S_mol = 0.50 * (P11 + P22)  # Seperate module is not required, directly averaged here
     E_mol = average_E(E,E2)
-    D_mol = NAC(P12,P21,params["dt_nucl"])
+
+    if params["non-orth"] ==1:
+        D_mol = P12
+    else:
+        D_mol = NAC(P12,P21,params["dt_nucl"])
 
     # reduce the matrix size
     #E_mol_red = reduce_matrix(E_mol,params["min_shift"], params["max_shift"],params["HOMO"])

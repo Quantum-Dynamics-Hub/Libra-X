@@ -85,7 +85,7 @@ def main(params):
     ninit = params["nconfig"]  
     SH_type = params["tsh_method"]
     # nspin = params["nspin"]  This parameter is used only in Libra-QE interface.
-    uff = params["uff"]
+    uff = params["ff"]
 
     num_SH_traj = 1
     if SH_type >= 1: # calculate no SH probs.  
@@ -99,10 +99,12 @@ def main(params):
     mo_pool_alp, mo_pool_bet = None, None
 
     if params["interface"]=="QE":
+        #ntraj = nstates*ninit*num_SH_traj
         pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
     elif params["interface"]=="GAMESS":
+        #ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
     #*********************************************************
@@ -267,7 +269,9 @@ def main(params):
     syst_mm = []
     el = []
 
-    Ttemp = 0.0 # nuclei velocities are set 0.
+    Ttemp = 0.0
+    if params["Nstart"] < 0 and params["MD_type"] == 1: # start NA-MD interacting with thermostat @ t=0
+        Ttemp = params["Temperature"]
 
     # all excitations for each nuclear configuration
     for i in xrange(ninit):
@@ -279,8 +283,16 @@ def main(params):
                 x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
                 # Add the connectivity - needed if we plan to use MM
-                if params["is_MM"]: 
-                    LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+                if params["is_MM"]:
+                    if os.path.exists(params["ent_file"]):
+                        LoadMolecule.Load_Molecule(params["U"], x, params["ent_file"], "pdb")
+                    else:
+                        print "is_MM is set to 1, which means you need to provide the \
+                        a file containing the connectivity information for your MM system. \
+                        As of now, such file is called = ", params["ent_file"], " but it cannot \
+                        be found on your system. Pease check if it exists or set is_MM to 0. \
+                        Exiting..."
+                        sys.exit(0)
 
                 syst.append(x)
 
