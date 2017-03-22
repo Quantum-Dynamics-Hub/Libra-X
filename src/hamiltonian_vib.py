@@ -154,7 +154,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     # 
     # \param[in,out]     ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
     # \param[in,out]     ham_vib Vibronic Hamiltonian (CMATRIX)
-    # \param[in] params  contains the dictionary of the input parameters from {gms,qe}_run.py
+    # \param[in] params  contains the dictionary of the input parameters from {gms,qe,g09}_run.py
     # \param[in] E_SD    total excitation energy (MATRIX) 
     ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
     # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
