@@ -100,15 +100,15 @@ def set_defaults(params, interface, recipe=""):
 
     # Whether to compute and print electronic coherences (c^*_i * c_j)
     # Options: 0 -> no, 1 -> yes
-    params["print_coherences"] = 1     
+    params["print_coherences"] = 0     
 
     # Print SD basis vibronic Hamiltonian
     # Options: 0 -> no, 1 -> yes
-    params["print_sd_ham"] = 1 
+    params["print_sd_ham"] = 0 
 
     # Print full and reduced size MO basis vibronic Hamiltonian
     # Options: 0 -> no, 1 -> yes
-    params["print_mo_ham"] = 1
+    params["print_mo_ham"] = 0
 
     # Print the debug info into standard output: hopping probabilities matrices and SH_states 
     # Options: 0 -> no, 1 -> yes

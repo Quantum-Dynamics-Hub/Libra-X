@@ -292,8 +292,32 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                             # update MO and gradients
                             #E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-                            E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            if params["non-orth"] ==1:
+                                # grads_non_orth is non-orthogonal gradients or Delta-SCF gradients
+                                grads_non_orth=[]
+                                E_SD, nac, smat, E[cnt], sd_basis[cnt], grads_non_orth = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            else:
+                                E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
                             #tot_ene.append(E[cnt]), E_mol_red --> E_SD
+
+                        #====================== Update vibronic hamiltonian ======================
+                        # Update the matrices that are bound to the Hamiltonian 
+                        # Compose electronic and vibronic Hamiltonians
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
+
+                        if params["non-orth"] ==1:
+                            cmt=vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                            #================== Update orthogonal force components =================
+                            all_grads = force_orthogonal(smat,cmt,grads_non_orth)
+                        else:
+                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
+                        #print ham_vib[cnt].show_matrix()
+                        #print "ham_adi= \n"; ham_adi[cnt].show_matrix()
+
+
 
                         # ============== Common blocks ==================
                         
@@ -321,14 +345,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
-                        t.stop()
-                        print "time before update vib ham=",t.show(),"sec"
-                        if params["non-orth"] ==1:
-                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
-                        else:
-                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
-                        t.stop()
-                        print "time after update vib ham=",t.show(),"sec"
+                        #t.stop()
+                        #print "time before update vib ham=",t.show(),"sec"
+                        #if params["non-orth"] ==1:
+                        #    vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                        #else:
+                        #    update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        #t.stop()
+                        #print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
 
                         #sys.exit(0)
