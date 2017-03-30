@@ -32,7 +32,7 @@ def compute_nac_sd(MO_old, MO_cur, dt):
     # \param[in] dt nuclear time step
     # NAC - non-adiabatic coupling matrix
     #
-    # Used in: x_to_libra.py/gamess_to_libra
+    # Used in: x_to_libra.py/gamess(g09)_to_libra
 
     # Although the sets MO1 and MO2 are not mutually-orthogonal, so there would be a dS/dt contribution,
     # we compute only the Hermitian part, since the non-Hermitian will cancel out in the solving TD-SE

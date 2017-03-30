@@ -35,7 +35,7 @@ def input_AO_name(l_atoms, atom_spec, basis_type, flag):
     # This function returns the list of atomic orbital type (s, px, py, pz, etc...) and the number
     # of orbitals of each type: S, P, D, L (S + P)
     #
-    # Used in: extract_gms.py/gms_extract_ao_basis
+    # Used in: extract_gms(g09).py/gms(g09)_extract_ao_basis
 
     orb_name = []
 

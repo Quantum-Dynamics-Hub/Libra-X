@@ -35,7 +35,7 @@ def print_one_traj(isnap, iconf, i_ex, itraj, mol, syst, mu, epot, ekin, etot, e
     # \param[in] ekin    current kinetic energy of the system for one trajectory
     # \param[in] etot    = epot + ekin for one trajectory
     # \param[in] eext    = etot + (Thermostat energy) for one trajectory
-    # \param[in] params  list of input parameters from {gms,qe}_run.py
+    # \param[in] params  list of input parameters from {gms,qe,g09}_run.py
     #                                                                                                                                                        
     # Used in:  print_results.py/print_ens_traj
 
@@ -110,7 +110,7 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
     # \param[in] ekin    list of the current kinetic energies of the system
     # \param[in] etot    list of  (epot + ekin)
     # \param[in] eext    list of (etot + Thermostat energy)
-    # \param[in] params  list of input parameters from {gms,qe}_run.py
+    # \param[in] params  list of input parameters from {gms,qe,g09}_run.py
     #
     # Used in:  md.py/run_MD 
 
@@ -255,7 +255,7 @@ def pops_ave_geometry(i,nstates,se_pop,sh_pop,params):
     # \param[in] nstates number of excitation states
     # \param[in] se_pop  list of SE populations averaged over TSH trajectories; the size is nconfig*nstates
     # \param[in] sh_pop  list of SH populations averaged over TSH trajectories; the size is nconfig*nstates 
-    # \param[in] params  list of input parameters from {gms,qe}_run.py 
+    # \param[in] params  list of input parameters from {gms,qe,g09}_run.py 
     #
     # Used in: md.py/run_MD
 
