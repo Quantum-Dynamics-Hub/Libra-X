@@ -68,6 +68,55 @@ def compute_H_el(E_SD,smat):
     return H_el
 
 
+def force_orthogonal(smat,cmt,grads_non_orth):
+    ##
+    # This function returns orthogonal gradients of all atoms using delta-SCF forces,
+    # non-orthogonal overlap matrix, and orthogonal transformation matrix
+    #
+    # \param[in]  smat  The Overlap matrix in non-orthogonal basis (CMATRIX)
+    # \param[in]  cmt  The Orthogonal transformation matrix (CMATRIX)
+    #                  cmt transform non-orthogonal MO basis in to orthogonal MO basis
+    #                  obtained by solving eigen value problem: HC=SCE
+    # \param[in]  grads_non_orth  The non-orthogonal gradients: list of list of VECTOR objects
+    #                             list of [electronic states] list of [atomic forces] VECTOR objects 
+    #                              , Dimension: [num-of-el-states][num-of-atoms](fx,fy,fz)
+    # \param[out]  grads_orth  Orthogonalized gradients: list of list of VECTOR objects
+    #                          The dimensions is the same as the non-orthogonal gradients object .
+
+    nstates = len(grads_non_orth)
+    no_of_atoms = len(grads_non_orth[0])
+    grads_orth=[]
+
+    for ex in xrange(nstates):
+        grads=[]
+        for k in xrange(no_of_atoms):
+            F_mat = []
+            fmat_x = CMATRIX(nstates,nstates)
+            fmat_y = CMATRIX(nstates,nstates)
+            fmat_z = CMATRIX(nstates,nstates)
+
+            for i in xrange(nstates):
+                for j in xrange(nstates):
+                    fmat_x.set(i,j,0.5*(grads_non_orth[i][k].x+grads_non_orth[j][k].x)*smat.get(i,j))
+                    fmat_y.set(i,j,0.5*(grads_non_orth[i][k].y+grads_non_orth[j][k].y)*smat.get(i,j))
+                    fmat_z.set(i,j,0.5*(grads_non_orth[i][k].z+grads_non_orth[j][k].z)*smat.get(i,j))
+
+            F_mat.append((cmt.H())*fmat_x*cmt)
+            F_mat.append((cmt.H())*fmat_y*cmt)
+            F_mat.append((cmt.H())*fmat_z*cmt)
+
+            #g=VECTOR(F_mat[0].real().get(ex,ex),F_mat[1].real().get(ex,ex),F_mat[2].real().get(ex,ex))
+            g=VECTOR(F_mat[0].get(ex,ex).real,F_mat[1].get(ex,ex).real,F_mat[2].get(ex,ex).real)
+            grads.append(g)
+
+        grads_orth.append(grads)
+
+        return grads_orth
+
+
+
+
+
 def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,smat_old,smat_new,suffix):
     ##
     #
@@ -128,7 +177,7 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
 
     #print "E = \n"; E_old.show_matrix()
     #print "C = \n"; C_old.show_matrix()
-    #print "ham_el = \n"; ham_el.show_matrix()
+    print "ham_el = \n"; ham_el.show_matrix()
     #print "ham_vib = \n"; ham_vib.show_matrix()
 
 
@@ -140,6 +189,7 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
     #         w.r.t the ground state energy
     # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
     # on the off-diagonals   
+    return C_new
 
 
 
@@ -154,7 +204,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     # 
     # \param[in,out]     ham_el Electronic (adiabatic) Hamiltonian (MATRIX)
     # \param[in,out]     ham_vib Vibronic Hamiltonian (CMATRIX)
-    # \param[in] params  contains the dictionary of the input parameters from {gms,qe}_run.py
+    # \param[in] params  contains the dictionary of the input parameters from {gms,qe,g09}_run.py
     # \param[in] E_SD    total excitation energy (MATRIX) 
     ##### \param[in] E_mol_red   the matrix of the 1-electron MO energies, in reduced space (MATRIX)
     # \param[in] nac   the matrix of the NACs computed with the 1-electon MOs, in reduced space (CMATRIX)
@@ -179,7 +229,7 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     states = params["excitations"]
     nstates = len(states)  
     H_el = MATRIX(nstates,nstates)  # electronic Hamiltonian
-    D_el = CMATRIX(nstates,nstates)  # nonadiabatic couplings
+    #D_el = CMATRIX(nstates,nstates)  # nonadiabatic couplings
     flag = params["print_sd_ham"]
 
     # Excitation energy : 
@@ -242,15 +292,15 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
                         i = abs(a) - 1
                         j = abs(b) - 1
                         print "pair of SD (",I,",",J,") is coupled via orbitals(in reduced space) ", i,j 
-                        D_el.set(I,J,(-1.0j+0.0)*nac.get(i,j))
+                        #D_el.set(I,J,(-1.0j+0.0)*nac.get(i,j))
                         ham_vib.set(I,J,(-1.0j+0.0)*nac.get(i,j))
                     else:
-                        D_el.set(I,J, 0.0, 0.0)
+                        #D_el.set(I,J, 0.0, 0.0)
                         ham_vib.set(I,J, 0.0, 0.0)
                     print "\n"
 
                 else:  # N-electron approximation - coupling is alreay there
-                    D_el.set(I,J, (-1.0j+0.0)*nac.get(I,J))
+                    #D_el.set(I,J, (-1.0j+0.0)*nac.get(I,J))
                     ham_vib.set(I,J,(-1.0j+0.0)*nac.get(I,J))
                     print "\n"
       
@@ -268,3 +318,5 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     #         w.r.t the ground state energy
     # ham_vib - vibronic Hamiltonian - the complex-valued matrix, also containing nonadiabatic couplings
     # on the off-diagonals   
+
+
