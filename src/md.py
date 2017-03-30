@@ -244,8 +244,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
-                        mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
+                        #mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
+                        #mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
 
                         ## Here, we also need to update coordinates of system objects, because
                         ## this is what the MM Hamiltonian uses - not the coordinates stored in mol
@@ -324,11 +324,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
-                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  for epot(t + dt/2) ; f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)  # for epot(t + dt)
+                        #epot[cnt] = E[cnt].get(0,0)
                         epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt])
-                        etot[cnt] = epot[cnt] + ekin[cnt]
-                        eext[cnt] = etot[cnt]
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt]) # ekin(t + dt/2)
+                        #etot[cnt] = epot[cnt] + ekin[cnt]
+                        #eext[cnt] = etot[cnt]
 
                         t.stop()
                         print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
@@ -337,14 +339,21 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
-                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
+                        #mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
                         # optional thermostat
+                        ebat = 0.0
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                            eext[cnt] = eext[cnt] + therm[cnt].energy() 
+                            #eext[cnt] = eext[cnt] + therm[cnt].energy() 
+                            ebat = therm[cnt].energy() # for ebat(t + dt) 
+
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt]) # ekin(t + dt)
+                        etot[cnt] = epot[cnt] + ekin[cnt]
+                        eext[cnt] = etot[cnt] + ebat
+
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
                         
