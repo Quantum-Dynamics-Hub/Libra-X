@@ -26,8 +26,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
+from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
+from x_to_libra_g09 import *
 from hamiltonian_vib import *
 import print_results
 import include_mm
@@ -270,7 +272,17 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
                             E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = gamess_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
                             #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
-                            
+
+                        elif params["interface"]=="G09":
+                            opt = 1 # use SD wavefunctions constructed by ground state calculation
+                           
+                            write_g09_inp(label[cnt], Q[cnt], params, mol[cnt])
+                            exe_g09(params)
+                       
+                            # update AO, MO, and gradients. Note: add 0 index on sd_basis[cnt] here.
+                            E[cnt], E_SD, nac, sd_basis[cnt], all_grads, mu[cnt] = g09_to_libra(params, ao[cnt], E[cnt], sd_basis[cnt], active_space, str(ij)) # E_mol_red -> E_SD  
+                            #tot_ene.append(tot_ene0); mu.append(mu0); # store total energy and dipole moment
+    
 
                         elif params["interface"]=="QE":
                             opt = 1 # use true SD wavefunctions
@@ -280,8 +292,32 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                             # update MO and gradients
                             #E_SD, nac, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
-                            E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            if params["non-orth"] ==1:
+                                # grads_non_orth is non-orthogonal gradients or Delta-SCF gradients
+                                grads_non_orth=[]
+                                E_SD, nac, smat, E[cnt], sd_basis[cnt], grads_non_orth = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
+                            else:
+                                E_SD, nac, smat, E[cnt], sd_basis[cnt], all_grads = qe_to_libra(params, E[cnt], sd_basis[cnt], label[cnt], mol[cnt], str(ij), active_space)
                             #tot_ene.append(E[cnt]), E_mol_red --> E_SD
+
+                        #====================== Update vibronic hamiltonian ======================
+                        # Update the matrices that are bound to the Hamiltonian 
+                        # Compose electronic and vibronic Hamiltonians
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
+
+                        if params["non-orth"] ==1:
+                            cmt=vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                            #================== Update orthogonal force components =================
+                            all_grads = force_orthogonal(smat,cmt,grads_non_orth)
+                        else:
+                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
+                        #print ham_vib[cnt].show_matrix()
+                        #print "ham_adi= \n"; ham_adi[cnt].show_matrix()
+
+
 
                         # ============== Common blocks ==================
                         
@@ -309,14 +345,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
-                        t.stop()
-                        print "time before update vib ham=",t.show(),"sec"
-                        if params["non-orth"] ==1:
-                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
-                        else:
-                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
-                        t.stop()
-                        print "time after update vib ham=",t.show(),"sec"
+                        #t.stop()
+                        #print "time before update vib ham=",t.show(),"sec"
+                        #if params["non-orth"] ==1:
+                        #    vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                        #else:
+                        #    update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        #t.stop()
+                        #print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
 
                         #sys.exit(0)
@@ -402,7 +438,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                     E_old = ham_vib[cnt].get(old_st[tr],old_st[tr]).real
                     E_new = ham_vib[cnt].get(new_st,new_st).real
                     el[tr].istate, el[tr] = tsh.ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
-
                     
 
             ################### END of TSH ##########################
