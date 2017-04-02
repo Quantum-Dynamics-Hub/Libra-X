@@ -191,7 +191,7 @@ def qe_extract_gradients(inp_str,  flag):
 
 def fermi_pop(e,nel):
     ##
-    # This functions generate occupation scheme based on fermi population
+    # This function generates occupation scheme based on fermi population
     # \param[in] e   List of eigen energies of the Molecular orbitals
     # \param[in] nel Total number of electrons in the system
     # \params[out] occ_new  List of fermi population of the MOs
@@ -237,7 +237,7 @@ def fermi_pop(e,nel):
 #    print "%4.2f"%occ[3][1]
 #######################################################
     if float(occ_new[N-1]) < 0.0 :
-        occ_new[N-2] = float(occ_new[N-2][1]) + float(occ_new[N-1])
+        occ_new[N-2] = float(occ_new[N-2]) + float(occ_new[N-1])
         occ_new[N-1] = 0.00
 #######################################################
 
