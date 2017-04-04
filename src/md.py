@@ -26,10 +26,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
-from create_input_g09 import *
+#from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
-from x_to_libra_g09 import *
+#from x_to_libra_g09 import *
 from hamiltonian_vib import *
 import print_results
 import include_mm
@@ -246,8 +246,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                        #mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
-                        #mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t) -> p(t + dt/2)
+                        mol[cnt].propagate_q(dt_nucl)     # q(t) -> q(t + dt)
 
                         ## Here, we also need to update coordinates of system objects, because
                         ## this is what the MM Hamiltonian uses - not the coordinates stored in mol
@@ -345,14 +345,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
-                        #t.stop()
-                        #print "time before update vib ham=",t.show(),"sec"
-                        #if params["non-orth"] ==1:
-                        #    vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
-                        #else:
-                        #    update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
-                        #t.stop()
-                        #print "time after update vib ham=",t.show(),"sec"
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
+                        if params["non-orth"] ==1:
+                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                        else:
+                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
 
                         #sys.exit(0)

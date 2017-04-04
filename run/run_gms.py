@@ -27,8 +27,8 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
-
+    #libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
+    libra_gamess_int_path = "/home/e1667/dev/LibraX/src"
 elif user==2:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libra-dev/libracode-code/_build/src"
