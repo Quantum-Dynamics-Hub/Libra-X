@@ -55,7 +55,7 @@ params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (
 params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
 params["Temperature"] = 300.0
-params["nu_therm"] = 0.001
+params["nu_therm"] = 0.01
 params["NHC_size"] = 3
 params["thermostat_type"] = "Nose-Hoover"
 params["sigma_pos"] = 0.01  #Displace atomic position randomly

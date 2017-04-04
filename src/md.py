@@ -360,11 +360,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
-                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  for epot(t + dt/2) ; f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)  # for epot(t + dt)
-                        #epot[cnt] = E[cnt].get(0,0)
-                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt]) # ekin(t + dt/2)
+                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)           # evaluated @ t+dt
+                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # function of q(t+dt)
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # function of p(t+dt/2)
                         #etot[cnt] = epot[cnt] + ekin[cnt]
                         #eext[cnt] = etot[cnt]
 
@@ -390,7 +389,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt] + ebat
 
-
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
                         
                         # Electronic propagation: half-step
@@ -415,7 +413,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             #***** End of TD-SE propagation for this step
                     
             ############ Add surface hopping ######################
-
             # store the electronic state
             for tr in xrange(ens_sz):
                 old_st[tr] =el[tr].istate
@@ -438,7 +435,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                     E_old = ham_vib[cnt].get(old_st[tr],old_st[tr]).real
                     E_new = ham_vib[cnt].get(new_st,new_st).real
                     el[tr].istate, el[tr] = tsh.ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
-                    
 
             ################### END of TSH ##########################
             print "Finished TSH"
