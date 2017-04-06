@@ -121,8 +121,7 @@ params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-
-
+params["use_boltz_factor"] = 1         # flag for using Boltzmann factor to rescale transition probablities: 0 -> no, 1-> yes
 
 # ***************************************************************
 
@@ -141,8 +140,22 @@ params["Temperature"] = params["therm"].Temperature # explicitly defined
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
-params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+## including non-bonded reaction only 
+#params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+
+## including bonded and non-bonded reaction
+params["ff"] = ForceField({"bond_functional":"Harmonic", "angle_functional":"Fourier",
+                      "dihedral_functional":"General0", "oop_functional":"Fourier",
+                      "mb_functional":"LJ_Coulomb","R_vdw_on":40.0,"R_vdw_off":55.0 })
+
 LoadUFF.Load_UFF(params["ff"], "uff.d")
+
+# defining parameters related to use_boltz_factor
+if params["use_boltz_factor"] == 1:
+    params["do_rescaling"] = 0
+    params["do_reverse"] = 0
+    params["QM_fraction"] = 0.0
+    params["MM_fraction"] = 1.0  
 
 #params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
 
