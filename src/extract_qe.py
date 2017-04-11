@@ -224,24 +224,22 @@ def fermi_pop(e,nel):
     #print occ
     #print occ[0][1]
     tot_elec = 0.0
-    occ_new = [0.0]*N
     for i in xrange(N):
-        occ_new[i] = "%12.8f"%pop_fermi[i][1]
-        occ_new[i]=float(occ_new[i])
-        tot_elec = tot_elec + float(occ_new[i])
+        tot_elec = tot_elec + pop_fermi[i][1]
 #        print occ[i][1], tot_elec
     #print occ[0][1]
 #    print (2.0 - tot_elec)
 #    print occ[3][1]
-    occ_new[N-1] = float((occ_new[N-1]) + (Nel - tot_elec))
+    pop_fermi[N-1][1] = pop_fermi[N-1][1] + (Nel - tot_elec))
 #    print "%4.2f"%occ[3][1]
 #######################################################
-    if float(occ_new[N-1]) < 0.0 :
-        occ_new[N-2] = float(occ_new[N-2]) + float(occ_new[N-1])
-        occ_new[N-1] = 0.00
+    if pop_fermi[N-1][1] < 0.0 :
+        pop_fermi[N-2][1] = pop_fermi[N-2][1] + pop_fermi[N-1][1]
+        pop_fermi[N-1][1] = 0.00
+
 #######################################################
 
-    return occ_new
+    return [item[1] for item in pop_fermi]
 
 
 def qe_extract_eigenvalues(filename,nel):
