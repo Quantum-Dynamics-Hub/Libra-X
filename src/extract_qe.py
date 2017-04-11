@@ -275,13 +275,8 @@ def qe_extract_eigenvalues(filename,nel):
     for ia in range(eig_num,eig_num_end):  # All MO energies are included in the list
         fa = a[ia].split()
         eig_val.append(float(fa[0]))
-    #en_alp.append(float(eig_val[HOMO-1]))
-    #en_alp.append(float(eig_val[HOMO]))
-    #en_alp.append(float(eig_val[HOMO+1]))
-    #en_alp.append(float(eig_val[HOMO+2]))
-    #print "active space energies",en_alp
 
-    return en_alp
+    return eig_val
 
 def gen_new_occ(ex_st,nel):
 #def extract_orb_energy(HOMO):
