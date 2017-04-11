@@ -1,5 +1,5 @@
 #*********************************************************************************  
-#* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov 
+#* Copyright (C) 2017 Kosuke Sato, Alexey V. Akimov 
 #*
 #* This file is distributed under the terms of the GNU General Public License
 #* as published by the Free Software Foundation, either version 2 of
@@ -8,7 +8,7 @@
 #* or <http://www.gnu.org/licenses/>. 
 #* 
 #*********************************************************************************/
-## \file check_eigenstates.py 
+## \file eigenstates_order.py 
 # This module implements functions that check if the order of eigenstates is changed 
 # during nuclei propagation from "t" to "t+dt".
 # As you know, orders of eigenstates are determined by energy order, not the MO's character.         
