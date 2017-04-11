@@ -32,6 +32,8 @@ def extract_indices(A):
     # returned values:
     # ind_old a list including indices where <phi_i(t)|phi_i(t+dt)> is not close to 1.
     # ind_new a list including indices where <phi_i(t)|phi_j(t+dt)> is close to 1.
+    #
+    # Used in x_to_libra_**.py
 
     _eps = 0.001 # overlap threshold
 
@@ -60,6 +62,8 @@ def commutate_elements(ind_old,ind_new,E,sd):
     # param[in]     ind_new a list including indices where <phi_i(t)|phi_j(t+dt)> is close to 1.
     # param[in,out]       E MATRIX object including eigenenergies in diagonal elements.
     # param[in,out]      sd SDlist including eigenvectors.
+    #
+    # Used in x_to_libra_**.py
 
     Etmp = []
     for i in ind_old:
