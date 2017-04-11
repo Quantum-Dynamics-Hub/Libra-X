@@ -379,7 +379,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
 
-                        #mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
+                        mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
                         # optional thermostat
                         ebat = 0.0
