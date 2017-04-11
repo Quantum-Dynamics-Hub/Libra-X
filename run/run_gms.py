@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -91,7 +91,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
-params["Nsnaps"] = 5                        # the number of total MD snapshots
+params["Nsnaps"] = 20                        # the number of total MD snapshots
 params["Nsteps"] = 1                        # the number of MD steps per 1 snapshot
 params["Ncool"]  = -1                        # in the end of that many initial snapshots 
                                             # we will be cooling the system: resetting momenta to zero
@@ -116,12 +116,12 @@ if test==0:
 elif test==1:
     params["HOMO"] = 91 # In the case of 23 waters, which has 184 electrons, occupied orbitals are 0, 1, ..., 90, and 91.
 
-params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
-params["max_shift"] = 1                # e.g.  1 -> LUMO
+params["min_shift"] = 0               # e.g. -1 -> HOMO-1, HOMO
+params["max_shift"] = 5                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-params["use_boltz_factor"] = 1         # flag for using Boltzmann factor to rescale transition probablities: 0 -> no, 1-> yes
+params["use_boltz_factor"] = 0         # flag for using Boltzmann factor to rescale transition probablities: 0 -> no, 1-> yes
 
 # ***************************************************************
 
@@ -129,6 +129,7 @@ from states import *
 
 # create excitation list
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(0,1,2,1), excitation(0,1,3,1), excitation(0,1,4,1),excitation(0,1,5,1)]
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
 
@@ -146,7 +147,7 @@ params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 ## including bonded and non-bonded reaction
 params["ff"] = ForceField({"bond_functional":"Harmonic", "angle_functional":"Fourier",
                       "dihedral_functional":"General0", "oop_functional":"Fourier",
-                      "mb_functional":"LJ_Coulomb","R_vdw_on":40.0,"R_vdw_off":55.0 })
+                      "mb_functional":"LJ_Coulomb","R_vdw_on":10.0,"R_vdw_off":15.0 })
 
 LoadUFF.Load_UFF(params["ff"], "uff.d")
 
