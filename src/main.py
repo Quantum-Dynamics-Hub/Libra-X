@@ -181,16 +181,6 @@ def main(params):
                     occ_bet = fermi_pop(en_bet,nel)
                     HOMO = nel/2 + nel%2 -1
 
-                    #occ_alp[HOMO-1] = float(occ_alp_new[0][1])
-                    #occ_alp[HOMO]   = float(occ_alp_new[1][1])
-                    #occ_alp[HOMO+1] = float(occ_alp_new[2][1])
-                    #occ_alp[HOMO+2] = float(occ_alp_new[3][1])
-
-                    #occ_bet[HOMO-1] = float(occ_bet_new[0][1])
-                    #occ_bet[HOMO]   = float(occ_bet_new[1][1])
-                    #occ_bet[HOMO+1] = float(occ_bet_new[2][1])
-                    #occ_bet[HOMO+2] = float(occ_bet_new[3][1])
-
     ###########################################
 
             homo = params["nel"]/2 +  params["nel"] % 2

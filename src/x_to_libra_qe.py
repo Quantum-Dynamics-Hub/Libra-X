@@ -129,17 +129,6 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
                 occ_alp = fermi_pop(en_alp,nel)
                 occ_bet = fermi_pop(en_bet,nel)
 
-                #occ_alp[HOMO-1] = float(occ_alp_new[0][1])
-                #occ_alp[HOMO]   = float(occ_alp_new[1][1])
-                #occ_alp[HOMO+1] = float(occ_alp_new[2][1])
-                #occ_alp[HOMO+2] = float(occ_alp_new[3][1])
-
-                #occ_bet[HOMO-1] = float(occ_bet_new[0][1])
-                #occ_bet[HOMO]   = float(occ_bet_new[1][1])
-                #occ_bet[HOMO+1] = float(occ_bet_new[2][1])
-                #occ_bet[HOMO+2] = float(occ_bet_new[3][1])
-
-
 
 #            if flag1!=-1: # when iforce != -1, then break this loop and continue
 #                break
