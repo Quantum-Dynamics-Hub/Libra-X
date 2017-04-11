@@ -230,7 +230,7 @@ def fermi_pop(e,nel):
     #print occ[0][1]
 #    print (2.0 - tot_elec)
 #    print occ[3][1]
-    pop_fermi[N-1][1] = pop_fermi[N-1][1] + (Nel - tot_elec))
+    pop_fermi[N-1][1] = pop_fermi[N-1][1] + (Nel - tot_elec)
 #    print "%4.2f"%occ[3][1]
 #######################################################
     if pop_fermi[N-1][1] < 0.0 :
@@ -561,5 +561,4 @@ def qe_extract(filename, active_space, ex_st, nspin, flag):
 
 
     return tot_ene, label, R, grads, MO_a, MO_b, norb, nel, nat, alat
-
 
