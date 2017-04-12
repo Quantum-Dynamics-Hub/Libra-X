@@ -124,20 +124,16 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ind_old, ind_new = eigenstates_order.extract_indices(P12)
     if len(ind_old) > 0:
         print "The order of eigenstates has been changed."
-        #print "P22 is" 
-        #P22.show_matrix()
-        print "P12 is"
-        P12.show_matrix()
         print "diagonal indices whose elements are not close to 1 are"
         print ind_old
         print "off-diagonal indices whose elements are close to 1 are"
         print ind_new
+        print "old 'E2'  is"; E2.show_matrix();
+        print "old 'P12' is"; P12.show_matrix();
         # commutate elements of E2 and sd_basis2
         eigenstates_order.commutate_elements(ind_old, ind_new, E2, sd_basis2)
-        print "transferred 'E2' matrix is"
-        E2.show_matrix()
-        print "transferred 'sd_basis2' matrix is"
-        SD_overlap(sd_basis,sd_basis2).show_matrix()
+        print "new 'E2' is"; E2.show_matrix();
+        print "new 'P12' is"; SD_overlap(sd_basis,sd_basis2).show_matrix();
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
@@ -184,6 +180,14 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
     # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
+
+    # In SubPc/C60 case, molecular orbitals of SubPc and C60 are so close (LUMO+3 to LUMO+7)
+    # MO energies of C60 should be higher in 0.8eV than now according to DFT ones.
+    #hartree_to_eV = 27.2116 # unit change from hartree to eV
+    #deltaE = 0.8/hartree_to_eV  # 0.8 eV 
+    #E_ave.set(5, 5, deltaE+E_ave.get(5,5))
+    #E_ave.set(6, 6, deltaE+E_ave.get(6,6))
+    #E_ave.set(7, 7, deltaE+E_ave.get(7,7))
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
