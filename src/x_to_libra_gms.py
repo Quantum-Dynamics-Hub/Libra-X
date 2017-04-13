@@ -132,8 +132,10 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "old 'P12' is"; P12.show_matrix();
         # commutate elements of E2 and sd_basis2
         eigenstates_order.commutate_elements(ind_old, ind_new, E2, sd_basis2)
+        P12 = SD_overlap(sd_basis,  sd_basis2)
+        P21 = SD_overlap(sd_basis2, sd_basis)        
         print "new 'E2' is"; E2.show_matrix();
-        print "new 'P12' is"; SD_overlap(sd_basis,sd_basis2).show_matrix();
+        print "new 'P12' is"; P12.show_matrix();
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
