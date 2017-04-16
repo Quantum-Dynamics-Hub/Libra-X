@@ -152,7 +152,7 @@ def print_occupations(occ):
     line = ""
     count = 0
     for f in occ:
-        line = line + "%5.3f " % f 
+        line = line + "%12.8f " % f 
         count = count +1
         if count % 10 ==0:
             line = line + "\n"
