@@ -177,19 +177,9 @@ def main(params):
                 else:
                     en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                     en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
-                    occ_alp_new = fermi_pop(en_alp)
-                    occ_bet_new = fermi_pop(en_bet)
+                    occ_alp = fermi_pop(en_alp,nel)
+                    occ_bet = fermi_pop(en_bet,nel)
                     HOMO = nel/2 + nel%2 -1
-
-                    occ_alp[HOMO-1] = float(occ_alp_new[0][1])
-                    occ_alp[HOMO]   = float(occ_alp_new[1][1])
-                    occ_alp[HOMO+1] = float(occ_alp_new[2][1])
-                    occ_alp[HOMO+2] = float(occ_alp_new[3][1])
-
-                    occ_bet[HOMO-1] = float(occ_bet_new[0][1])
-                    occ_bet[HOMO]   = float(occ_bet_new[1][1])
-                    occ_bet[HOMO+1] = float(occ_bet_new[2][1])
-                    occ_bet[HOMO+2] = float(occ_bet_new[3][1])
 
     ###########################################
 

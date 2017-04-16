@@ -123,23 +123,14 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
                 tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
             else:
-
-                en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
-                en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
-                occ_alp_new = fermi_pop(en_alp)
-                occ_bet_new = fermi_pop(en_bet)
-
-                occ_alp[HOMO-1] = float(occ_alp_new[0][1])
-                occ_alp[HOMO]   = float(occ_alp_new[1][1])
-                occ_alp[HOMO+1] = float(occ_alp_new[2][1])
-                occ_alp[HOMO+2] = float(occ_alp_new[3][1])
-
-                occ_bet[HOMO-1] = float(occ_bet_new[0][1])
-                occ_bet[HOMO]   = float(occ_bet_new[1][1])
-                occ_bet[HOMO+1] = float(occ_bet_new[2][1])
-                occ_bet[HOMO+2] = float(occ_bet_new[3][1])
-
-
+                if params["nspin"] == 2:
+                    en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
+                    en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
+                    occ_alp = fermi_pop(en_alp,nel,params["nspin"])
+                    occ_bet = fermi_pop(en_bet,nel,params["nspin"])
+                if params["nspin"] == 1:
+                    en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
+                    occ = fermi_pop(en_orb,nel,params["nspin"])
 
 #            if flag1!=-1: # when iforce != -1, then break this loop and continue
 #                break
