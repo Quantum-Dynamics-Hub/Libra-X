@@ -189,14 +189,14 @@ def qe_extract_gradients(inp_str,  flag):
 
 #alp_d,bet_d = check_eig_deg()
 
-def fermi_pop(e,nel):
+def fermi_pop(e,nel,nspin):
     ##
     # This function generates occupation scheme based on fermi population
     # \param[in] e   List of eigen energies of the Molecular orbitals
     # \param[in] nel Total number of electrons in the system
     # \params[out] occ_new  List of fermi population of the MOs
+    # \params[in] nspin Spin, = 2,1 for non-polarized and spin-polarized calculations.
 
-    #e = [-1.0, -0.5, -0.4] Energies of list of orbitals
     N = len(e)  # Total number of MOs in the active space
     a = MATRIX(N,N)
     for i in xrange(N):
@@ -205,42 +205,27 @@ def fermi_pop(e,nel):
                 a.set(i,j, e[i])
             else:
                 a.set(i,j, 0.0)
-
-    #a.show_matrix()
-    Nel = nel/2 + nel%2  # Number of electrons in the alpha or beta spin orbital
-                         # At this point, for spin-polarized calculations
-    degen = 1.0 # One orbital can have 1 electrons, in this case of spin-polarization
-    kT = 0.02585  # at 300K
+    if nspin == 2:  # For spin-polarized calculations.
+        Nel = nel/2 + nel%2  # Number of electrons in the alpha or beta spin orbital
+        degen = 1.0 # One orbital can have 1 electrons, in this case of spin-polarization
+    if nspin == 1:  # For non-polarized calculations
+        Nel = nel  # Total number of electrons.
+        degen = 2.0 # One orbital can have 2 electrons, in case of non-polarized calculations
+    kT = 0.000955482 # kT = 0.000955482 Hartree, = 0.02585 eV  # at 300K
     etol = 0.00000001
-    #etol = 0.1
     #Ef = fermi_energy(e, Nel, degen, kT, etol)  # Not needed
-
     bnds = order_bands(a)
     #print bnds
     #print "\n Test5: populate bands"
-    #Nocc = Nel  # Not needed
     pop_opt = 1
     pop_fermi = populate_bands(Nel, degen, kT, etol, pop_opt, bnds)
-    #print occ
-    #print occ[0][1]
-    tot_elec = 0.0
-    for i in xrange(N):
-        tot_elec = tot_elec + pop_fermi[i][1]
-#        print occ[i][1], tot_elec
-    #print occ[0][1]
-#    print (2.0 - tot_elec)
-#    print occ[3][1]
-    pop_fermi[N-1][1] = pop_fermi[N-1][1] + (Nel - tot_elec)
-#    print "%4.2f"%occ[3][1]
+    #tot_elec = 0.0
+    #for i in xrange(N):
+    #    tot_elec = tot_elec + pop_fermi[i][1]
+    # print "tot_elec = ",tot_elec
 #######################################################
-    if pop_fermi[N-1][1] < 0.0 :
-        pop_fermi[N-2][1] = pop_fermi[N-2][1] + pop_fermi[N-1][1]
-        pop_fermi[N-1][1] = 0.00
-
-#######################################################
-
-    return [item[1] for item in pop_fermi]
-
+    occ_new = [item[1] for item in pop_fermi]
+    return occ_new #[item[1] for item in pop_fermi]
 
 def qe_extract_eigenvalues(filename,nel):
     ##
