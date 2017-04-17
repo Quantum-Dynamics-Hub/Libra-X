@@ -178,11 +178,11 @@ def main(params):
                 if params["nspin"] == 2:
                     en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                     en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
-                    occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["kT"])
-                    occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["kT"])
+                    occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["el_sm"])
+                    occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["el_sm"])
                 if params["nspin"] == 1:
                     en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
-                    occ = fermi_pop(en_orb,nel,params["nspin"],params["kT"])
+                    occ = fermi_pop(en_orb,nel,params["nspin"],params["el_sm"])
 
 
     ###########################################
