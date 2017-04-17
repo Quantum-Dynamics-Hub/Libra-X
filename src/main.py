@@ -175,11 +175,15 @@ def main(params):
                     tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
                 else:
+                if params["nspin"] == 2:
                     en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                     en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
-                    occ_alp = fermi_pop(en_alp,nel)
-                    occ_bet = fermi_pop(en_bet,nel)
-                    HOMO = nel/2 + nel%2 -1
+                    occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["electronic_smearing"])
+                    occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["electronic_smearing"])
+                if params["nspin"] == 1:
+                    en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
+                    occ = fermi_pop(en_orb,nel,params["nspin"],params["electronic_smearing"])
+
 
     ###########################################
 
