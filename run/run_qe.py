@@ -44,7 +44,7 @@ params["Nsnaps"]=5      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
 params["Ncool"] = -1
 params["nspin"] = 2
-
+params["electronic_smearing"] = 0.001 # Electronic smearing used in Fermi population calculation
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["num_SH_traj"] = 1

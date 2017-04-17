@@ -189,7 +189,7 @@ def qe_extract_gradients(inp_str,  flag):
 
 #alp_d,bet_d = check_eig_deg()
 
-def fermi_pop(e,nel,nspin):
+def fermi_pop(e,nel,nspin,kT):
     ##
     # This function generates occupation scheme based on fermi population
     # \param[in] e   List of eigen energies of the Molecular orbitals
@@ -211,8 +211,8 @@ def fermi_pop(e,nel,nspin):
     if nspin == 1:  # For non-polarized calculations
         Nel = nel  # Total number of electrons.
         degen = 2.0 # One orbital can have 2 electrons, in case of non-polarized calculations
-    kT = 0.000955482 # kT = 0.000955482 Hartree, = 0.02585 eV  # at 300K
-    etol = 0.00000001
+    #kT = 0.000955482 # kT = 0.000955482 Hartree, = 0.02585 eV  # at 300K
+    etol = 0.0000000001
     #Ef = fermi_energy(e, Nel, degen, kT, etol)  # Not needed
     bnds = order_bands(a)
     #print bnds
