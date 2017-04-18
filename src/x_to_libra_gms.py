@@ -186,10 +186,12 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # In SubPc/C60 case, molecular orbitals of SubPc and C60 are so close (LUMO+3 to LUMO+7)
     # MO energies of C60 should be higher in 0.8eV than now according to DFT ones.
     #hartree_to_eV = 27.2116 # unit change from hartree to eV
-    #deltaE = 0.8/hartree_to_eV  # 0.8 eV 
+    #deltaE = 10.0/hartree_to_eV  # 0.8 eV -> ?? a.u.
+    #E_ave.set(4, 4, deltaE+E_ave.get(4,4))
     #E_ave.set(5, 5, deltaE+E_ave.get(5,5))
     #E_ave.set(6, 6, deltaE+E_ave.get(6,6))
     #E_ave.set(7, 7, deltaE+E_ave.get(7,7))
+    #E_ave.set(8, 8, deltaE+E_ave.get(8,8))
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):
