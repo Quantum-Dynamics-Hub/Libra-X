@@ -35,12 +35,12 @@ def extract_indices(A):
     #
     # Used in x_to_libra_**.py
 
-    _eps = 0.001 # overlap threshold
+    _thres = 0.9 # overlap threshold ()
 
     # extract the indices where <phi_i(t)|phi_i(t+dt)> is not close to 1. 
     ind_old = []
     for i in xrange(A.num_of_rows):
-        if abs(A.get(i,i)) < _eps:
+        if abs(A.get(i,i)) < _thres:
             ind_old.append(i)
     #print "indices not identical are"
     #print ind_los
@@ -50,7 +50,7 @@ def extract_indices(A):
     if len(ind_old) > 0:
         for i in ind_old:
             for j in xrange(A.num_of_rows):
-                if abs(A.get(i,j)) > 0.9 :
+                if abs(A.get(i,j)) > _thres :
                     ind_new.append(j)
                 #print "(%i,%i) element has 1" % (i,j)
 
@@ -197,6 +197,6 @@ def test():
 
    #************* "commutate_elements" test ends ****************
 
-#test()
+test()
 
     
