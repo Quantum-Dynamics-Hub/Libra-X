@@ -35,7 +35,7 @@ def extract_indices(A):
     #
     # Used in x_to_libra_**.py
 
-    _thres = 0.9 # overlap threshold ()
+    _thres = 0.9 # overlap threshold
 
     # extract the indices where <phi_i(t)|phi_i(t+dt)> is not close to 1. 
     ind_old = []
@@ -50,7 +50,7 @@ def extract_indices(A):
     if len(ind_old) > 0:
         for i in ind_old:
             for j in xrange(A.num_of_rows):
-                if abs(A.get(i,j)) > _thres :
+                if abs(A.get(i,j)) > abs(A.get(i,i)) :
                     ind_new.append(j)
                 #print "(%i,%i) element has 1" % (i,j)
 
