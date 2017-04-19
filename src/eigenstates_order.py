@@ -9,8 +9,7 @@
 #* 
 #*********************************************************************************/
 ## \file eigenstates_order.py 
-# This module implements functions that check if the order of eigenstates is changed 
-# during nuclei propagation from "t" to "t+dt".
+# This module implements functions that return the new order of eigenstates.
 # As you know, orders of eigenstates are determined by energy order, not the MO's character.         
 # Say, if states i and j are localized on B and A at "t+dt" while they were on A and B at "t", 
 # we must commutate the indices of eigenstates. (phi_i(t+dt) <--> phi_j(t+dt)))
