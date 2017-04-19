@@ -120,22 +120,42 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     P21 = SD_overlap(sd_basis2, sd_basis)
     #print "Time to compute in SD_overlap= ",t.show(),"sec"
 
-    ## check the order of eigenstates
-    ind_old, ind_new = eigenstates_order.extract_indices(P12)
-    if len(ind_old) > 0:
-        print "The order of eigenstates has been changed."
-        print "diagonal indices whose elements are not close to 1 are"
-        print ind_old
-        print "off-diagonal indices whose elements are close to 1 are"
-        print ind_new
-        print "old 'E2'  is"; E2.show_matrix();
-        print "old 'P12' is"; P12.show_matrix();
-        # commutate elements of E2 and sd_basis2
-        eigenstates_order.commutate_elements(ind_old, ind_new, E2, sd_basis2)
-        P12 = SD_overlap(sd_basis,  sd_basis2)
-        P21 = SD_overlap(sd_basis2, sd_basis)        
-        print "new 'E2' is"; E2.show_matrix();
-        print "new 'P12' is"; P12.show_matrix();
+    # check the order of new eigenstates
+    # If P12 is
+    #
+    # | 1 0 0 0 |   
+    # | 0 0 1 0 |
+    # | 0 0 0 1 |
+    # | 0 1 0 0 |
+    # 
+    # ,then "new_indx" returns a list [0,2,3,1]
+    new_indx = eigenstates_order.extract_indices(P12)
+    print "new_indx is"
+    print new_indx
+    print "old 'E2'  is"; E2.show_matrix();
+    print "old 'P12' is"; P12.show_matrix();
+    # commutate elements of E2 and sd_basis2
+
+    # store elements into off-diagonal part temporarily                                                                                                       
+    sdtmp = [0.0]*4
+    for i in xrange(len(new_indx)):
+        j = new_indx[i]
+        if i != j:
+            E2.set(i,j,E2.get(i,i))
+            sdtmp[j] = SD(sd_basis2[i])
+
+    for i in xrange(len(new_indx)):
+        j = new_indx[i]
+        if i != j:
+            Eb.set(j,j,Eb.get(i,j))
+            Eb.set(i,j,0.0)
+            sd_basis2[i] = sdtmp[i]
+            sdtmp[i] = SD() # deallocate memory
+    
+    P12 = SD_overlap(sd_basis,  sd_basis2)
+    P21 = SD_overlap(sd_basis2, sd_basis)        
+    print "new 'E2' is"; E2.show_matrix();
+    print "new 'P12' is"; P12.show_matrix();
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
