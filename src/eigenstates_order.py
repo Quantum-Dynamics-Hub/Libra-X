@@ -30,52 +30,25 @@ def extract_indices(A):
     #  ,but <phi_i(t)|phi_j(t+dt)> is close. 
     # param[in] A MATRIX object including density matrices <phi_i(t)|phi_j(t+dt)>.
     # returned values:
-    # ind_old a list including indices where <phi_i(t)|phi_i(t+dt)> is not close to 1.
-    # ind_new a list including indices where <phi_i(t)|phi_j(t+dt)> is close to 1.
+    # new_indx a list including indices where <phi_i(t)|phi_j(t+dt)> is close to 1.
     #
     # Used in x_to_libra_**.py
 
     # _thres = 0.9 # overlap threshold
 
     # extract the indices where <phi_i(t)|phi_i(t+dt)> is not close to 1. 
-    ind_old = []; ind_new = [];
+    new_indx = [];
     for i in xrange(A.num_of_rows):
-        atmp = abs(A.get(i,i))
+        atmp = []
         for j in xrange(A.num_of_rows):
-            if i != j and atmp < abs(A.get(i,j)):
-                ind_old.append(i); ind_new.append(j);
+            atmp.append(abs(A.get(i,j)))
+        max_idx = atmp.index(max(atmp))
+        if i == max_idx:
+            new_indx.append(i)
+        else:
+            new_indx.append(max_idx)
 
-    return ind_old, ind_new
-
-def commutate_elements(ind_old,ind_new,E,sd):
-    ## This function commutates elements of matrices following ind_old and ind_new indices.
-    # param[in]     ind_old a list including indices where <phi_i(t)|phi_i(t+dt)> is not close to 1.
-    # param[in]     ind_new a list including indices where <phi_i(t)|phi_j(t+dt)> is close to 1.
-    # param[in,out]       E MATRIX object including eigenenergies in diagonal elements.
-    # param[in,out]      sd SDlist including eigenvectors.
-    #
-    # Used in x_to_libra_**.py
-
-    Etmp = []
-    for i in ind_old:
-        Etmp.append(E.get(i,i))
-
-    # commutate eigenenergies
-    for i in xrange(len(ind_old)):
-        inew = ind_new[i]
-        E.set(inew,inew,Etmp[i])
-
-    # store sd objects
-    sdtmp = []
-    for i in ind_old:
-        #sdtmp[i] = SD(sd[i])
-        sdtmp.append(SD(sd[i]))
-
-    # commutate indices of sd
-    for i in xrange(len(ind_old)):
-        inew = ind_new[i]
-        sd[inew] = SD(sdtmp[i])
-
+    return new_indx
 
 def test():
     ## This function tests the functions above.
@@ -119,25 +92,20 @@ def test():
     print "'c' matrix is"
     c.show_matrix()
 
-    a_ind_old, a_ind_new = extract_indices(a)
-    b_ind_old, b_ind_new = extract_indices(b)
-    c_ind_old, c_ind_new = extract_indices(c)
+    a_ind_new = extract_indices(a)
+    b_ind_new = extract_indices(b)
+    c_ind_new = extract_indices(c)
 
-    print "non-identical indices of 'a' are"
-    print a_ind_old
-    for i in xrange(len(a_ind_old)):
-        print "(%i,%i) element has 1" % (a_ind_old[i],a_ind_new[i])
+    print "new indices of 'a' are"
+    print a_ind_new
 
-    print " non-identical indices of 'b' are"
-    print b_ind_old
-    for i in xrange(len(b_ind_old)):
-        print "(%i,%i) element has 1" % (b_ind_old[i],b_ind_new[i])
+    print " new indices of 'b' are"
+    print b_ind_new
 
-    print " non-identical indices of 'c' are"
-    print c_ind_old
-    for i in xrange(len(c_ind_old)):
-        print "(%i,%i) element has 1" % (c_ind_old[i],c_ind_new[i])
+    print " new indices of 'c' are"
+    print c_ind_new
 
+    #sys.exit(0)
     #************* "extract_indices" test ends *****************
 
     #************* "commutate_elements" test starts ****************
@@ -178,7 +146,23 @@ def test():
     print "overlap matrix of <sd1|sd2> is"
     SD_overlap(sd1,sd2).show_matrix()
 
-    commutate_elements(b_ind_old,b_ind_new,Eb,sd2)
+    # store elements into off-diagonal part temporarily
+    sdtmp = [0.0]*4
+    for i in xrange(len(b_ind_new)):
+        j = b_ind_new[i]
+        if i != j:
+            Eb.set(i,j,Eb.get(i,i))
+            sdtmp[j] = SD(sd2[i])
+
+    for i in xrange(len(b_ind_new)):
+        j = b_ind_new[i]
+        if i != j:
+            Eb.set(j,j,Eb.get(i,j))
+            Eb.set(i,j,0.0)
+            sd2[i] = sdtmp[i]
+            sdtmp[i] = SD() # deallocate memory
+
+            #sd2[i], sd2[j] = sd2[j], sd2[i]
 
     print "***** after commutation *****"
     print "transferred 'Eb' matrix is"
