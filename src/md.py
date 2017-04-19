@@ -179,11 +179,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     if params["is_MM"] == 1: # include MM interactions
         ham_mm = include_mm.init_hamiltonian_mm(syst, params["ff"])
         
-    # When using Boltzmann factor (probability rescaling), input initial forces computed by MM hamiltonian.
-    if params["use_boltz_factor"] == 1:
-        for cnt in xrange(ntraj):
-            etmp = compute_forces(mol[cnt],Electronic(1,0),ham_mm[cnt],1)
-
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
