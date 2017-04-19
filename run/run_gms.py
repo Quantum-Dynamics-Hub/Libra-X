@@ -91,7 +91,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
-params["Nsnaps"] = 20                        # the number of total MD snapshots
+params["Nsnaps"] = 5                        # the number of total MD snapshots
 params["Nsteps"] = 1                        # the number of MD steps per 1 snapshot
 params["Ncool"]  = -1                        # in the end of that many initial snapshots 
                                             # we will be cooling the system: resetting momenta to zero
