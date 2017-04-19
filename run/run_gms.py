@@ -13,7 +13,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
-test = 1 # 0 for 1 water molecule; 1 for 23 water molecules
+test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
@@ -23,18 +23,18 @@ libra_gamess_int_path = "" # set the path name to the source files in libra-game
 if user==0:
     # For Alexey
     libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" 
-    libra_gamess_int_path = "/user/alexeyak/Programming/libra-gamess_interface/src" 
+    libra_x_path = "/user/alexeyak/Programming/Libra-X/src" 
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    #libra_gamess_int_path = "/home/e1667/dev/libra-gamess_interface/src"
-    libra_gamess_int_path = "/home/e1667/dev/LibraX/src"
+    #libra_x_path = "/home/e1667/dev/libra-gamess_interface/src"
+    libra_x_path = "/home/e1667/dev/LibraX/src"
 elif user==2:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libra-dev/libracode-code/_build/src"
-    libra_gamess_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
+    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
 
-os.environ["src_path"] = libra_gamess_int_path
+os.environ["src_path"] = libra_x_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 
@@ -116,20 +116,20 @@ if test==0:
 elif test==1:
     params["HOMO"] = 91 # In the case of 23 waters, which has 184 electrons, occupied orbitals are 0, 1, ..., 90, and 91.
 
-params["min_shift"] = 0               # e.g. -1 -> HOMO-1, HOMO
-params["max_shift"] = 5                # e.g.  1 -> LUMO
+params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
+params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-params["use_boltz_factor"] = 0         # flag for using Boltzmann factor to rescale transition probablities: 0 -> no, 1-> yes
 
 # ***************************************************************
 
 from states import *
 
 # create excitation list
+# IMPORTANT: This should be consistent with the min_shift and max_shift parameters^M
+# that define the active space^M 
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(0,1,2,1), excitation(0,1,3,1), excitation(0,1,4,1),excitation(0,1,5,1)]
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
 
@@ -142,21 +142,9 @@ params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
 ## including non-bonded reaction only 
-#params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-
-## including bonded and non-bonded reaction
-params["ff"] = ForceField({"bond_functional":"Harmonic", "angle_functional":"Fourier",
-                      "dihedral_functional":"General0", "oop_functional":"Fourier",
-                      "mb_functional":"LJ_Coulomb","R_vdw_on":10.0,"R_vdw_off":15.0 })
+params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
 
 LoadUFF.Load_UFF(params["ff"], "uff.d")
-
-# defining parameters related to use_boltz_factor
-if params["use_boltz_factor"] == 1:
-    params["do_rescaling"] = 0
-    params["do_reverse"] = 0
-    params["QM_fraction"] = 0.0
-    params["MM_fraction"] = 1.0  
 
 #params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part
 

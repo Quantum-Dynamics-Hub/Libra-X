@@ -111,7 +111,7 @@ def force_orthogonal(smat,cmt,grads_non_orth):
 
         grads_orth.append(grads)
 
-        return grads_orth
+    return grads_orth
 
 
 
