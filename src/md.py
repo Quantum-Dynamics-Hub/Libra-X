@@ -26,10 +26,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
-from create_input_g09 import *
+#from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
-from x_to_libra_g09 import *
+#from x_to_libra_g09 import *
 from hamiltonian_vib import *
 import print_results
 import include_mm
@@ -167,12 +167,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
     therm = []
-    for i in xrange(ntraj):
-        therm_i = Thermostat(params["therm"])
-        therm_i.set_Nf_t(nnucl)
-        therm_i.set_Nf_r(0)
-        therm_i.init_nhc()
-        therm.append(therm_i)
+    if params["therm"] != None:
+        for i in xrange(ntraj):
+            therm_i = Thermostat(params["therm"])
+            therm_i.set_Nf_t(nnucl)
+            therm_i.set_Nf_r(0)
+            therm_i.init_nhc()
+            therm.append(therm_i)
 
     print "size of therm",len(therm)
 
