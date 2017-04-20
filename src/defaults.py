@@ -188,6 +188,10 @@ def set_defaults(params, interface, recipe=""):
     #          1 -> decoherence
     params["do_collapse"] = 0
 
+    # Whether to use any thermostat
+    # Options: None - not to use
+    params["therm"] = None
+
     ##### Optional MM interactions on top of the QM #####
 
     # The flag controlling whether to include MM interactions
