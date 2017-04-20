@@ -190,8 +190,8 @@ params["excitations_init"] = [0]
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
-params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-LoadUFF.Load_UFF(params["uff"], "uff.d")
+params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["ff"], "uff.d")
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]
