@@ -18,7 +18,7 @@ test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
 libra_bin_path = "" # set the path name to the source files in libracode
-libra_gamess_int_path = "" # set the path name to the source files in libra-gamess_interface
+libra_x_path = "" # set the path name to the source files in Libra-X
 
 if user==0:
     # For Alexey
@@ -74,7 +74,7 @@ elif user==1:
     params["GMSPATH"] = "/home/e1667/install/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work/scr"
+    params["scr_dir"] = os.getcwd() + "/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
