@@ -18,7 +18,7 @@ test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
 libra_bin_path = "" # set the path name to the source files in libracode
-libra_gamess_int_path = "" # set the path name to the source files in libra-gamess_interface
+libra_x_path = "" # set the path name to the source files in Libra-X
 
 if user==0:
     # For Alexey
@@ -39,12 +39,16 @@ elif user==2:
 os.environ["src_path"] = libra_x_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
+import defaults
+
 ########## Setup all manual parameters here ####################
 
 params = {}
 
 # Of course, here we use GAMESS
-params["interface"] = "GAMESS"
+#params["interface"] = "GAMESS" # unnecessary line
+
+defaults.set_defaults(params, "GAMESS")
 
 # GAMESS variables
 # We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in x_to_libra_gms.py/exe_gamess
@@ -121,7 +125,7 @@ elif test==1:
 params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["rep"] = 1                      # representation: 0 - diabatic, 1 - adiabatic
+params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 
