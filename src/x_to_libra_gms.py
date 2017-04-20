@@ -31,7 +31,6 @@ from extract_gms import *
 from moment import *
 from misc import *
 from spin_indx import *
-import eigenstates_order
 
 def exe_gamess(params):
     ##
@@ -119,25 +118,6 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     P12 = SD_overlap(sd_basis,  sd_basis2)
     P21 = SD_overlap(sd_basis2, sd_basis)
     #print "Time to compute in SD_overlap= ",t.show(),"sec"
-
-    ## check the order of eigenstates
-    ind_old, ind_new = eigenstates_order.extract_indices(P12)
-    if len(ind_old) > 0:
-        print "The order of eigenstates has been changed."
-        #print "P22 is" 
-        #P22.show_matrix()
-        print "P12 is"
-        P12.show_matrix()
-        print "diagonal indices whose elements are not close to 1 are"
-        print ind_old
-        print "off-diagonal indices whose elements are close to 1 are"
-        print ind_new
-        # commutate elements of E2 and sd_basis2
-        eigenstates_order.commutate_elements(ind_old, ind_new, E2, sd_basis2)
-        print "transferred 'E2' matrix is"
-        E2.show_matrix()
-        print "transferred 'sd_basis2' matrix is"
-        SD_overlap(sd_basis,sd_basis2).show_matrix()
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>
