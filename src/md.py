@@ -361,9 +361,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)           # evaluated @ t+dt
-                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # function of q(t+dt)
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # function of p(t+dt/2)
+                        #epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)          # epot(t+dt)
+                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # ekin(t+dt/2)
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
 
@@ -387,7 +387,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         #ekin[cnt] = compute_kinetic_energy(mol[cnt]) # ekin(t + dt)
                         #etot[cnt] = epot[cnt] + ekin[cnt]
-                        eext[cnt] = etot[cnt] + ebat
+                        #eext[cnt] = etot[cnt] + ebat
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
                         
