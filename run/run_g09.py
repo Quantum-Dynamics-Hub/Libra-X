@@ -12,79 +12,49 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 0 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
+user = 0 # 0 for Olga; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
 libra_bin_path = "" # set the path name to the source files in libracode
-libra_gamess_int_path = "" # set the path name to the source files in libra-gamess_interface
+libra_g09_int_path = "" # set the path name to the source files in libra-g09_interface
 
 if user==0:
-    # For Alexey
-    libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" 
-    libra_x_path = "/user/alexeyak/Programming/Libra-X/src" 
+    # For Olga
+    libra_bin_path = "/data/ob070/soft/libra-code/src"
+    libra_g09_int_path = "/data/ob070/soft/Libra-X/src"
 
-elif user==1:
-    # For Kosuke
-    libra_bin_path = "/home/e1667/install/libra-code/_build/src"
-    libra_x_path = "/home/e1667/dev/libra-gamess_interface/src"
-
-elif user==2:
-    # For Ekadashi
-    libra_bin_path = "/projects/academic/alexeyak/ekadashi/libra-dev/libracode-code/_build/src"
-    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
-
-os.environ["src_path"] = libra_x_path
+os.environ["src_path"] = libra_g09_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 ########## Setup all manual parameters here ####################
 
 params = {}
 
-# Of course, here we use GAMESS
-params["interface"] = "GAMESS"
+# Of course, here we use G09
+params["interface"] = "G09"
 
-# GAMESS variables
-# We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in x_to_libra_gms.py/exe_gamess
-# Paths of SCR, USERSCR, GMSPATH in the rungms script will be defined by environmental variables later.
-# (Supposed TARGET is already defined as sockets or mpi.)
+# G09 variables
+# We invoke "run_g09a inp" in x_to_libra_g09.py/exe_g09
 
-params["GMSPATH"] = ""            # the directory including GAMESS binary files.
-params["rungms"] = ""             # "rungms" name. On CCR @ UB, use "rungms.slurm".
-params["gms_inp0"] = ""           # initial input file of GAMESS
-params["gms_inp"] = ""            # working input file of GAMESS
-params["gms_out"] = ""            # output file of GAMESS
+params["g09_inp0"] = ""           # initial input file of G09
+params["g09_inp"] = ""            # working input file of G09
+params["g09_out"] = ""            # output file of G09
 params["nproc"] = 1               # the number of processors : default = 1
-params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
-params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.This directory will be created and deleted every GAMESS calculation.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part 
 
-if user==0 or user==2:
-    # For Alexey (setting for CCR @ UB)
-    params["GMSPATH"] = "" # GAMESS path is already taken.
-    params["rungms"] = "rungms.slurm"
-    params["VERNO"] = "01"
-    params["scr_dir"] = os.environ['SLURMTMPDIR'] # slurm type
-
-elif user==1:
-    # For Kosuke
-    params["GMSPATH"] = "/home/e1667/install/gamess"
-    params["rungms"] =  params["GMSPATH"] + "/rungms" 
-    params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work/scr"
-
 if test==0:
-    params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
-    params["gms_inp"] = "H2O_wrk.inp" # working input file of GAMESS
-    params["gms_out"] = "H2O.out"     # output file of GAMESS
+    params["g09_inp0"] = "H2O.inp"    # initial input file of G09
+    params["g09_inp"] = "H2O_wrk.inp" # working input file of G09
+    params["g09_out"] = "H2O.out"     # output file of G09
     params["ent_file"] = "H2O.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 elif test==1:
-    params["gms_inp0"] = "23waters.inp"    # initial input file of GAMESS
-    params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
-    params["gms_out"] = "23waters.out"     # output file of GAMESS
+    params["g09_inp0"] = "23waters.inp"    # initial input file of G09
+    params["g09_inp"] = "23waters_wrk.inp" # working input file of G09
+    params["g09_out"] = "23waters.out"     # output file of G09
     params["ent_file"] = "23waters.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 # MD variables
@@ -139,20 +109,7 @@ params["mo_ham"] = ""  # directory where MO basis vibronic hamiltonians will be 
 params["sd_ham"] = ""  # directory where SD basis vibronic hamiltonians will be printed out
 
 if user==0:
-    # For Alexey
-    params["res"] = "/user/alexeyak/Programming/Libra-X/run/res/"
-    params["mo_ham"] = "/user/alexeyak/Programming/Libra-X/run/mo_ham/" 
-    params["sd_ham"] = "/user/alexeyak/Programming/Libra-X/run/sd_ham/" 
-
-elif user==1:
-    # For Kosuke
-    cwd = os.getcwd()
-    params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
-    params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
-    params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
-
-elif user==2:
-    # For Ekadashi
+    # For Olga
     cwd = os.getcwd()
     params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
     params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
@@ -177,8 +134,6 @@ params["check_tsh_probabilities"] = 0      # print the hopping probabilities if 
 from states import *
 
 # create excitation list
-# IMPORTANT: This should be consistent with the min_shift and max_shift parameters^M
-# that define the active space^M
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
@@ -190,8 +145,8 @@ params["excitations_init"] = [0]
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
-params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-LoadUFF.Load_UFF(params["ff"], "uff.d")
+params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["uff"], "uff.d")
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]
@@ -202,5 +157,3 @@ import main        # import main module of the libra-Gamess-interface code
 
 #data, test_data = main.main(params)  # run actual calculations
 main.main(params)  # run actual calculations
-
-

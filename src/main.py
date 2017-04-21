@@ -19,6 +19,7 @@ import os
 import sys
 import math
 import copy
+import unittest
 
 if sys.platform=="cygwin":
     from cyglibra_core import *
@@ -36,15 +37,18 @@ from spin_indx import *
 from extract_qe import *
 import include_mm
 
+
+
+
 def construct_active_space(params):
-##
-# This function constructs the active space using:
-# params["excitations"] - a list of user-provided excitations to include in the TD-SE basis
-# params["nel"] - the number of electrons in the system - used to determine the index of HOMO
-#
+    """
+     This function constructs the active space using:
+     params[\"excitations\"] - a list of user-provided excitations to include in the TD-SE basis
+     params[\"nel\"] - the number of electrons in the system - used to determine the index of HOMO
+    """
 
     active_space = []
-    homo = params["nel"]/2 +  params["nel"] % 2  # the index of HOMO
+    homo = params["nel"]/2 +  params["nel"] % 2  # the index of HOMO starting from 1 (not 0!)
 
     # Find the lowest orbital from which excitation occurs and find the highest orbital to where
     # electron is sent
@@ -54,6 +58,11 @@ def construct_active_space(params):
 
         if min_from>ex.from_orbit[0]:
             min_from = ex.from_orbit[0]
+            if min_from+homo <= 0:
+                print "Error in construct_active_space: Reconsider the basis of your excitations."
+                print "Specifically %5i %5i -> %5i %5i" %(ex.from_orbit[0], ex.from_spin[0], ex.to_orbit[0], ex.from_spin[0])
+                print "You are trying to excite from the orbital that is below the lowest possible orbital."                                   
+                return [-1]
 
         if max_to<ex.to_orbit[0]:
             max_to = ex.to_orbit[0]
@@ -63,7 +72,29 @@ def construct_active_space(params):
     # excitations)
     active_space = range(min_from + homo, max_to + homo + 1)
 
+    # Returning [-1] means the active space can not be constructed for given number of electrons
+    # and the list of excitations
     return active_space
+
+
+def sanity_check(params):
+    """ 
+        This functions runs some sanity check - 
+        some parameters require specific values of other parameters 
+    """
+
+    ## What happens if you run NVT simulations
+    if params["MD_type"] == 1 :
+
+        if "therm" in params.keys():    
+            if params["therm"] == None:
+                print "NVT simulations reuire some valid thermostat. None is given. Exiting..."
+                sys.exit(0)
+        else:
+            print "NVT simulations require thermostat! Use \"therm\" keyword. Exiting..."
+            sys.exit(0)
+
+
 
 
 def main(params):
@@ -175,12 +206,14 @@ def main(params):
                     tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
                 else:
+
                     if params["nspin"] == 2:
                         en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                         en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
                         occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["electronic_smearing"])
                         occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["electronic_smearing"])
-                    if params["nspin"] == 1:
+
+                    elif params["nspin"] == 1:
                         en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
                         occ = fermi_pop(en_orb,nel,params["nspin"],params["electronic_smearing"])
 
@@ -296,5 +329,49 @@ def main(params):
     print "run MD"
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)
     print "MD is done"
+
+
+
+
+
+class TestConstructActiveSpace(unittest.TestCase):
+    def test_active_space(self):
+        """Tests the construction of the active space"""
+        
+        # For the examples below:  H - HOMO, L - LUMO, a = alpha,b = beta
+        #
+        #                       GS = H(a)->H(a)
+        b1 = [ excitation(0,1, 0,1)]
+        #
+        #                        H(a)->H(a)             H(a)->L(a)          H-1(a) -> L(a)
+        b2 = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ]
+        #
+        #                        H(a)->H(a)             H(a)->L+1(a)          H-1(a) -> L(a)
+        b3 = [ excitation(0,1,0,1), excitation(0,1,2,1), excitation(-1,1,1,-1) ]
+
+        all_params, exp_res = [], []
+        #
+        all_params.append( {"excitations" : b1, "nel" : 4} ); exp_res.append( [2] )
+        all_params.append( {"excitations" : b2, "nel" : 4} ); exp_res.append( [1,2,3] )
+        all_params.append( {"excitations" : b3, "nel" : 4} ); exp_res.append( [1,2,3,4] )
+
+        all_params.append( {"excitations" : b1, "nel" : 3} ); exp_res.append( [2] )
+        all_params.append( {"excitations" : b2, "nel" : 3} ); exp_res.append( [1,2,3] )
+        all_params.append( {"excitations" : b3, "nel" : 3} ); exp_res.append( [1,2,3,4] )
+
+        all_params.append( {"excitations" : b1, "nel" : 2} ); exp_res.append( [1] )
+        all_params.append( {"excitations" : b2, "nel" : 2} ); exp_res.append( [-1] )
+        all_params.append( {"excitations" : b3, "nel" : 2} ); exp_res.append( [-1] )
+
+        
+        for i in range(9):
+            print "Running the test with the parameters", all_params[i]
+            res = construct_active_space(all_params[i])
+            self.assertEqual(res, exp_res[i])
+
+
+
+if __name__=='__main__':
+    unittest.main()
 
 
