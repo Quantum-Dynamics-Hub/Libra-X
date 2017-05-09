@@ -346,14 +346,14 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
                         # Update the matrices that are bound to the Hamiltonian 
                         # Compose electronic and vibronic Hamiltonians
-                        #t.stop()
-                        #print "time before update vib ham=",t.show(),"sec"
-                        #if params["non-orth"] ==1:
-                        #    vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
-                        #else:
-                        #    update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
-                        #t.stop()
-                        #print "time after update vib ham=",t.show(),"sec"
+                        t.stop()
+                        print "time before update vib ham=",t.show(),"sec"
+                        if params["non-orth"] ==1:
+                            vibronic_hamiltonian_non_orth(ham_adi[cnt], ham_vib[cnt], params, E_SD_old,E_SD,nac,smat_old,smat, str(ij))
+                        else:
+                            update_vibronic_hamiltonian(ham_adi[cnt], ham_vib[cnt], params, E_SD,nac, str(ij), opt)
+                        t.stop()
+                        print "time after update vib ham=",t.show(),"sec"
                         #print ham_vib[cnt].show_matrix()
 
                         #sys.exit(0)
@@ -361,9 +361,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
-                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  #  f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt])
+                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    
                         etot[cnt] = epot[cnt] + ekin[cnt]
                         eext[cnt] = etot[cnt]
 
@@ -407,7 +407,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             #***** End of TD-SE propagation for this step
                     
             ############ Add surface hopping ######################
-
             # store the electronic state
             for tr in xrange(ens_sz):
                 old_st[tr] =el[tr].istate
@@ -418,7 +417,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
-                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params)
+                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
                 elif params["interface"]=="QE":
                     tsh.surface_hopping(mol, el, ham, rnd, params)
 
@@ -430,7 +429,6 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                     E_old = ham_vib[cnt].get(old_st[tr],old_st[tr]).real
                     E_new = ham_vib[cnt].get(new_st,new_st).real
                     el[tr].istate, el[tr] = tsh.ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
-                    
 
             ################### END of TSH ##########################
             print "Finished TSH"
