@@ -129,7 +129,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # | 0 1 0 0 |
     # 
     # ,then "new_indx" returns a list [0,2,3,1]
-    new_indx = eigenstates_order.extract_indices(P12)
+    new_indx = get_reordering(P12)
+    #new_indx = eigenstates_order.extract_indices(P12)
     print "new_indx is"
     print new_indx
     print "old 'E2'  is"; E2.show_matrix();
