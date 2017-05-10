@@ -26,10 +26,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
-#from create_input_g09 import *
+from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
-#from x_to_libra_g09 import *
+from x_to_libra_g09 import *
 from hamiltonian_vib import *
 import print_results
 import include_mm
