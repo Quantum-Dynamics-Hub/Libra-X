@@ -231,7 +231,6 @@ def main(params):
                     tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, params["norb"], params["nel"], params["nat"], params["alat"] = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
                 else:
-
                     if params["nspin"] == 2:
                         en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                         en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
@@ -322,7 +321,7 @@ def main(params):
     el = []
 
     Ttemp = 0.0
-    if params["Nstart"] < 0 and params["MD_type"] == 1: # start NA-MD interacting with thermostat @ t=0
+    if params["MD_type"] == 1: # start NA-MD interacting with thermostat @ t=0
         Ttemp = params["Temperature"]
 
     # all excitations for each nuclear configuration
