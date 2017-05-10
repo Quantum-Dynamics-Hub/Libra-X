@@ -30,8 +30,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
+from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
+from x_to_libra_g09 import *
 from md import *
 from spin_indx import *
 from extract_qe import *
@@ -134,7 +136,7 @@ def main(params):
         pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
-    elif params["interface"]=="GAMESS":
+    elif params["interface"]=="GAMESS" or params["interface"]=="G09":
         #ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
@@ -144,6 +146,9 @@ def main(params):
 
     if params["interface"]=="GAMESS": 
         os.system("cp %s %s" %(params["gms_inp0"], params["gms_inp"]))
+
+    elif params["interface"]=="G09": 
+        os.system("cp %s %s" %(params["g09_inp0"], params["g09_inp"]))
 
     elif params["interface"]=="QE":
         for ex_st in xrange(nstates):
@@ -163,6 +168,26 @@ def main(params):
         params["gms_inp_templ"] = read_gms_inp_templ(params["gms_inp"])
         exe_gamess(params)
         label, Q, R, grads, E, c, ao, params["nel"] = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
+        e = MATRIX(E)
+        homo = params["nel"]/2 +  params["nel"] % 2
+
+        for ex_st in xrange(nstates): 
+            mo_pool_alp = CMATRIX(c)
+            mo_pool_bet = CMATRIX(c)
+            alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+
+            # use excitation object to create proper SD object for different excited state
+            sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
+            sd_basis.append(sd)
+            all_grads.append(copy.deepcopy(grads)) # newly defined
+
+    elif params["interface"]=="G09":
+        params["g09_inp_templ"] = read_g09_inp_templ(params["g09_inp"])
+        exe_g09(params)
+        while not os.path.exists(params["g09_out"]):
+            time.sleep(1)
+	
+        label, Q, R, grads, E, c, ao, params["nel"] = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
         e = MATRIX(E)
         homo = params["nel"]/2 +  params["nel"] % 2
 
