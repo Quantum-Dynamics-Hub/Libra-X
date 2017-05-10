@@ -1,6 +1,6 @@
 #*********************************************************************************
 #* Copyright (C) 2016 Kosuke Sato, Alexey V. Akimov
-#* 
+#* Olga S. Bokareva 
 #* This file is distributed under the terms of the GNU General Public License
 #* as published by the Free Software Foundation, either version 2 of
 #* the License, or (at your option) any later version.
@@ -9,7 +9,7 @@
 #*
 #*********************************************************************************/
 
-## \file x_to_libra_gms.py 
+## \file x_to_libra_g09.py 
 # This module implements the functions that extract parameters from the gamess output file:
 # atomic forces , molecular energies, molecular orbitals, and atomic basis information.
 # The forces are used for simulating Classical MD on Libra 
@@ -25,45 +25,25 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
-from extract_gms import *
+from extract_g09 import *
 #from overlap import *
 #from hamiltonian_el import *
 from moment import *
 from misc import *
 from spin_indx import *
 
-def exe_gamess(params):
+def exe_g09(params): # DONE!!!
     ##
-    # This is a function that call GAMESS execution on the compute node
+    # This is a function that call G09 execution on the compute node
     # \param[in] params Input data containing all manual settings and some extracted data.
-    #
+    # I call it in a very simple way: "run_g09a inp"
     # Used in main.py/main and md.py/run_MD
+    inp = params["g09_inp"]
+    os.system("run_g09a %s" % (inp))
+    filename, file_extension = os.path.splitext(inp)
+    params["g09_out"] = filename + ".log"
 
-    inp = params["gms_inp"]
-    out = params["gms_out"]
-    nproc = params["nproc"]
-
-    scr_dir = params["scr_dir"]
-    rungms = params["rungms"]
-    VERNO = params["VERNO"]
-
-    # set environmental variables for GAMESS execution
-    os.environ["SCR"] = scr_dir
-    os.environ["USERSCR"] = scr_dir
-    os.environ["GMSPATH"] = params["GMSPATH"]
-
-    # create scratch directory
-    os.system("mkdir %s" % (scr_dir))
-
-    #os.system("/usr/bin/time rungms.slurm %s 01 %s > %s" % (inp,nproc,out))
-    os.system("/usr/bin/time %s %s %s %s > %s" % (rungms,inp,VERNO,nproc,out))
-
-    # delete the files except input and output ones to do another GAMESS calculation.
-    os.system("rm *.dat")
-    os.system("rm -r %s" % (scr_dir))
-
-
-def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
+def g09_to_libra(params, ao, E, sd_basis, active_space,suff): # DONE
     ## 
     # Finds the keywords and their patterns and extracts the parameters
     # \param[in] params         contains input parameters , in the directory form
@@ -85,7 +65,7 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     sz = len(active_space)
 
     # 2-nd file - time "t+dt"  new
-    label, Q, R, Grad, E2, c2, ao2, nel = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
+    label, Q, R, Grad, E2, c2, ao2, nel = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_g09_unpack"])
 
     #e2 = MATRIX(E2)
     homo = params["nel"]/2 +  params["nel"] % 2
@@ -164,16 +144,6 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #E_mol_red.show_matrix(params["mo_ham"] + "reduced_re_Ham_" + suff)
     #D_mol.show_matrix(params["mo_ham"] + "reduced_im_Ham_" + suff)
     # ********** "CMATRIX.show_matrix(filename)" is not exported ****** 
-
-    # In SubPc/C60 case, molecular orbitals of SubPc and C60 are so close (LUMO+3 to LUMO+7)
-    # MO energies of C60 should be higher in 0.8eV than now according to DFT ones.
-    #hartree_to_eV = 27.2116 # unit change from hartree to eV
-    #deltaE = 10.0/hartree_to_eV  # 0.8 eV -> ?? a.u.
-    #E_ave.set(4, 4, deltaE+E_ave.get(4,4))
-    #E_ave.set(5, 5, deltaE+E_ave.get(5,5))
-    #E_ave.set(6, 6, deltaE+E_ave.get(6,6))
-    #E_ave.set(7, 7, deltaE+E_ave.get(7,7))
-    #E_ave.set(8, 8, deltaE+E_ave.get(8,8))
 
     # store "t+dt"(new) parameters on "t"(old) ones
     for i in range(0,len(ao2)):

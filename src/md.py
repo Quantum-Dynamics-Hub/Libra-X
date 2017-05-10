@@ -167,23 +167,19 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     #therm = init_ensembles.init_therms(ntraj, nnucl, params, verbose)
 
     therm = []
-    for i in xrange(ntraj):
-        therm_i = Thermostat(params["therm"])
-        therm_i.set_Nf_t(nnucl)
-        therm_i.set_Nf_r(0)
-        therm_i.init_nhc()
-        therm.append(therm_i)
+    if params["therm"] != None:
+        for i in xrange(ntraj):
+            therm_i = Thermostat(params["therm"])
+            therm_i.set_Nf_t(nnucl)
+            therm_i.set_Nf_r(0)
+            therm_i.init_nhc()
+            therm.append(therm_i)
 
     print "size of therm",len(therm)
 
     if params["is_MM"] == 1: # include MM interactions
         ham_mm = include_mm.init_hamiltonian_mm(syst, params["ff"])
         
-    # When using Boltzmann factor (probability rescaling), input initial forces computed by MM hamiltonian.
-    if params["use_boltz_factor"] == 1:
-        for cnt in xrange(ntraj):
-            etmp = compute_forces(mol[cnt],Electronic(1,0),ham_mm[cnt],1)
-
     # Initialize forces and Hamiltonians **********************************************
     #epot = data["tot_ene"]  # total energy from GAMESS which is the potential energy acting on nuclei
     #write_gms_inp(data, params, mol)
@@ -366,11 +362,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = E[cnt].get(el[cnt].istate,el[cnt].istate)           # evaluated @ t+dt
-                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # function of q(t+dt)
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # function of p(t+dt/2)
-                        #etot[cnt] = epot[cnt] + ekin[cnt]
-                        #eext[cnt] = etot[cnt]
+                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    
+                        etot[cnt] = epot[cnt] + ekin[cnt]
+                        eext[cnt] = etot[cnt]
 
                         t.stop()
                         print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
@@ -382,17 +377,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
                         # optional thermostat
-                        ebat = 0.0
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                            #eext[cnt] = eext[cnt] + therm[cnt].energy() 
-                            ebat = therm[cnt].energy() # for ebat(t + dt) 
-
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt]) # ekin(t + dt)
-                        etot[cnt] = epot[cnt] + ekin[cnt]
-                        eext[cnt] = etot[cnt] + ebat
+                            eext[cnt] = eext[cnt] + therm[cnt].energy() 
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
                         
@@ -428,10 +417,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
-                    if params["use_boltz_factor"] == 1:
-                        tsh.surface_hopping_cpa(mol, el, ham, rnd, params) # velocity rescaling isn't done.
-                    else:
-                        tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
+                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
                 elif params["interface"]=="QE":
                     tsh.surface_hopping(mol, el, ham, rnd, params)
 

@@ -10,21 +10,21 @@ from libra_py import *
 
 
 
-user = 1  # 0 - Alexey, 1 - Ekadashi
+user = 0  # 0 - Alexey, 1 - Ekadashi
 
 ################ System-specific settings ########################
 if user==0:
     # For Alexey
     libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" # set the path name to the source files in libracode
-    libra_qe_int_path = "/user/alexeyak/Programming/libra-gamess_interface/src"
+    libra_x_path = "/user/alexeyak/Programming/Libra-X/src"
 
 elif user==1:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
-    libra_qe_int_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
+    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
 
 
-os.environ["src_path"] = libra_qe_int_path   # Path to the source code
+os.environ["src_path"] = libra_x_path   # Path to the source code
 sys.path.insert(1,os.environ["src_path"])    # Path to the source code
 
 
@@ -42,8 +42,9 @@ params["nproc"] = 12              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
 params["Nsnaps"]=5      # the number of MD rounds
 params["Nsteps"]=1      # the number of MD steps per snap
+params["Ncool"] = -1
 params["nspin"] = 2
-
+params["electronic_smearing"] = 0.001 # Electronic smearing used in Fermi population calculation
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["num_SH_traj"] = 1
@@ -54,10 +55,12 @@ params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (
 
 params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
-params["Temperature"] = 300.0
-params["nu_therm"] = 0.001
-params["NHC_size"] = 3
-params["thermostat_type"] = "Nose-Hoover"
+params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":3})
+params["Temperature"] = params["therm"].Temperature
+#params["Temperature"] = 300.0
+#params["nu_therm"] = 0.001
+#params["NHC_size"] = 3
+#params["thermostat_type"] = "Nose-Hoover"
 params["sigma_pos"] = 0.01  #Displace atomic position randomly
 params["Nstart"] = 0
 
