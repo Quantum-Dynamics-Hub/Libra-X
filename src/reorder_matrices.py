@@ -111,8 +111,13 @@ class Test_unavoided(unittest.TestCase):
         a,b,c = _prepare_density_matrices()
         Ea,Eb,Ec = _prepare_energy_matrices()
 
-        '''extract indices for reordering '''
+        p4 = range(a.num_of_rows) 
+        p6 = range(c.num_of_rows) 
 
+        print "p4 is ",p4
+        print "p6 is ",p6
+
+        '''extract indices for reordering '''
         perm_a = unavoided.get_reordering(a)
         print "Input density matrix a"; a.show_matrix()
         print "Permutation a = ", perm_a
@@ -132,17 +137,20 @@ class Test_unavoided(unittest.TestCase):
 
         ''' permutation according to "perm" list '''
 
-        reorder(perm_a,a,Ea)
+        if p4 != perm_a:
+            reorder(perm_a,a,Ea); print "Matrix a is reordered"
         print "Output density matrix a"; a.show_matrix()
         print "Output energy matrix Ea"; Ea.show_matrix()
         print "Permutation a = ", perm_a
 
-        reorder(perm_b,b,Eb)
+        if p4 != perm_b:
+            reorder(perm_b,b,Eb); print "Matrix b is reordered"
         print "Output density matrix b"; b.show_matrix()
         print "Output energy matrix Eb"; Eb.show_matrix()
         print "Permutation b = ", perm_b
 
-        reorder(perm_c,c,Ec)
+        if p6 != perm_c:
+            reorder(perm_c,c,Ec); print "Matrix c is reordered"
         print "Output density matrix c"; c.show_matrix()
         print "Output energy matrix Ec"; Ec.show_matrix()
         print "Permutation c = ", perm_c

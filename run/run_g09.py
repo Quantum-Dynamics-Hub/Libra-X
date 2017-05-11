@@ -12,7 +12,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 0 # 0 for Olga; others should input the path they use
+user = 1 # 0 for Olga; 1 for Kosuke; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -25,6 +25,11 @@ if user==0:
     libra_bin_path = "/data/ob070/soft/libra-code/src"
     libra_g09_int_path = "/data/ob070/soft/Libra-X/src"
 
+elif user==1:
+    # For Kosuke
+    libra_bin_path = "/install/libra-code/_build/src"
+    libra_g09_int_path = os.getcwd() + "/../src"
+
 os.environ["src_path"] = libra_g09_int_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
@@ -35,15 +40,23 @@ params = {}
 # Of course, here we use G09
 params["interface"] = "G09"
 
+defaults.set_defaults(params, "G09")
+
 # G09 variables
 # We invoke "run_g09a inp" in x_to_libra_g09.py/exe_g09
 
+params["rung09"] = ""             # script for G09 execution 
 params["g09_inp0"] = ""           # initial input file of G09
 params["g09_inp"] = ""            # working input file of G09
 params["g09_out"] = ""            # output file of G09
 params["nproc"] = 1               # the number of processors : default = 1
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part 
+
+if user==0:
+    params["rung09"] = "run_g09a"
+elif user==1:
+    params["rung09"] = "g09"
 
 if test==0:
     params["g09_inp0"] = "H2O.inp"    # initial input file of G09
@@ -73,10 +86,14 @@ params["Nstart"] = 6       # the printout cycle when we will initiate NA-MD and
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
 params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
-params["nu_therm"] = 0.001                  # shows thermostat frequency
-params["NHC_size"] = 5                      # the size of Nose-Hoover chains
-params["Temperature"] = 300.0               # Target temperature in thermostat
-params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
+
+'''= These part is unnecessary ='''
+#params["nu_therm"] = 0.001                  # shows thermostat frequency
+#params["NHC_size"] = 5                      # the size of Nose-Hoover chains
+#params["Temperature"] = 300.0               # Target temperature in thermostat
+#params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
+'''============================='''
+
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
 params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
@@ -97,10 +114,13 @@ params["el_mts"] = 1                   # electronic time steps per one nuclear t
 params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
 params["rep"] = 1                      # representation: 0 - diabatic, 1 - adiabatic
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
-params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 0             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
-params["do_reverse"] = 0               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
+'''= unnecessary ='''
+#params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
+#params["do_rescaling"] = 0             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
+#params["do_reverse"] = 0               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
                                        # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
+'''==============='''
+
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 
 # select directories where the results will be printed out.
@@ -116,18 +136,20 @@ if user==0:
     params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
 
 
+'''= unnecessary ='''
 # flags for debugging
-params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
-params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
-params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
-params["print_SH_results_with_scaling"] = 0 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
-params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
-params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
+#params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
+#params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
+#params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
+#params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
+#params["print_SH_results_with_scaling"] = 0 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
+#params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
+#params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
+#params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
 #params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
-params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
+#params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
+#params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
+'''================'''
 
 # ***************************************************************
 
@@ -139,7 +161,7 @@ params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-
 params["excitations_init"] = [0]
 
 # create thermostat
-#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
 
 # create Universe
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
