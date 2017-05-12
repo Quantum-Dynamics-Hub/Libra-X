@@ -42,8 +42,9 @@ def read_g09_inp_templ(inp_filename):
     for i in range(0,N):
         s = templ[i].split()
 
-        if len(s) > 0 and s[0] == "template":
-            ikeep = i + 2
+        #if len(s) > 0 and s[0] == "template":
+        if len(s) > 0 and s[0] == "Gfinput" and s[1]=="IOP(6/7=3)":
+            ikeep = i # + 2
             break
 
     templ[ikeep+1:N] = []
@@ -76,9 +77,10 @@ def write_g09_inp(label, Q, params, mol):
 
     # Important: Blank line
     g.write("\n")
-    g.write("current calculation")
+    g.write("current calculation \n")
     g.write("\n")
-    g.write("%d,%d" % (mult,charge))
+    g.write("%d,%d \n" % (charge,mult))
+
 
     # Print coordinates
     Natoms = len(label)
