@@ -364,6 +364,27 @@ def g09_extract_gradient(inp_str,flag): # DONE!!!
     return grad
 
 
+def g09_extract_first(filename,flag): 
+    ##
+    # This function only extracts number of electrons in a system.
+    # In the main.py, this information is needed to construct active space
+    #
+    # \param[in] filename    The name of the Gaussian09 output file from which we will be getting info
+    # info["Nele"] returns total number of electrons
+    # 
+    # Used in: main.py/main
+
+    f = open(filename,"r")
+    A = f.readlines()
+    f.close()
+
+    # detect the lines including information from gamess output file
+    info = detect_g09.detect(A,flag)
+
+    return info["Nele"]
+
+
+
 def g09_extract(filename,states,min_shift,active_space,flag): # ONLY SLIGHTLY MODIFIED
     ##
     # This function extracts all the necessary information (energies, gradients, coordinates, MOs, 

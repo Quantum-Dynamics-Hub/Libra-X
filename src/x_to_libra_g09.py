@@ -75,8 +75,8 @@ def g09_to_libra(params, ao, E, sd_basis, active_space,suff): # DONE
     for ex_st in xrange(nstates): 
         mo_pool_alp = CMATRIX(c2)
         mo_pool_bet = CMATRIX(c2)
-        #alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
-        alp,bet = index_spin(params["excitations"][0],active_space, homo)
+        alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+        #alp,bet = index_spin(params["excitations"][0],active_space, homo)
 
         # use excitation object to create proper SD object for different excited state
         sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))

@@ -112,7 +112,7 @@ def main(params):
     # and executes run_MD function where NA-MD calculation is done.
     #
     # Used in:  run.py
-
+    #params["nel"] = 10
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
     nstates_init = len(params["excitations_init"])
@@ -137,7 +137,7 @@ def main(params):
         pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
-    elif params["interface"]=="GAMESS" or params["interface"]=="G09":
+    elif params["interface"]=="GAMESS": # or params["interface"]=="G09":
         #ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
@@ -187,16 +187,17 @@ def main(params):
         exe_g09(params)
         #while not os.path.exists(params["g09_out"]):
         #    time.sleep(1)
-	
-        label, Q, R, grads, E, c, ao, params["nel"] = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
+        params["nel"] = g09_extract_first(params["g09_out"],params["debug_g09_unpack"])
+	active_space = construct_active_space(params)
+        label, Q, R, grads, E, c, ao, params["nel"] = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_g09_unpack"])
         e = MATRIX(E)
         homo = params["nel"]/2 +  params["nel"] % 2
 
         for ex_st in xrange(nstates): 
             mo_pool_alp = CMATRIX(c)
             mo_pool_bet = CMATRIX(c)
-            #alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
-            alp,bet = index_spin(params["excitations"][0],active_space, homo)
+            alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+            #alp,bet = index_spin(params["excitations"][0],active_space, homo)
             print "MO_pool",mo_pool_alp.show_matrix()
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
