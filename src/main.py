@@ -197,7 +197,7 @@ def main(params):
             mo_pool_bet = CMATRIX(c)
             #alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
             alp,bet = index_spin(params["excitations"][0],active_space, homo)
-
+            print "MO_pool",mo_pool_alp.show_matrix()
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
             sd_basis.append(sd)

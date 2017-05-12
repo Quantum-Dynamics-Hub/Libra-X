@@ -36,7 +36,7 @@ def set_defaults(params, interface, recipe=""):
 # type of simulations (recipe) you want to perform.
 # Options (yet to be defined): ""
 
-    if interface=="GAMESS" or interface=="QE":
+    if interface=="GAMESS" or interface=="QE" or interface=="G09":
         params["interface"] = interface
         print "Setting default parameters for Libra-",interface, " calculations"
     else:
