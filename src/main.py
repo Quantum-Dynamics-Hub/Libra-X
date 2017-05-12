@@ -37,6 +37,7 @@ from x_to_libra_g09 import *
 from md import *
 from spin_indx import *
 from extract_qe import *
+from extract_g09 import *
 import include_mm
 
 
@@ -184,8 +185,8 @@ def main(params):
     elif params["interface"]=="G09":
         params["g09_inp_templ"] = read_g09_inp_templ(params["g09_inp"])
         exe_g09(params)
-        while not os.path.exists(params["g09_out"]):
-            time.sleep(1)
+        #while not os.path.exists(params["g09_out"]):
+        #    time.sleep(1)
 	
         label, Q, R, grads, E, c, ao, params["nel"] = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
         e = MATRIX(E)
@@ -194,7 +195,8 @@ def main(params):
         for ex_st in xrange(nstates): 
             mo_pool_alp = CMATRIX(c)
             mo_pool_bet = CMATRIX(c)
-            alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+            #alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+            alp,bet = index_spin(params["excitations"][0],active_space, homo)
 
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
