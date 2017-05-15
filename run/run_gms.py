@@ -28,8 +28,10 @@ if user==0:
 elif user==1:
     # For Kosuke
     libra_bin_path = "/home/e1667/install/libra-code/_build/src"
+    #libra_bin_path = "/home/e1667/software/libra-code/_build/src"
     #libra_x_path = "/home/e1667/dev/libra-gamess_interface/src"
-    libra_x_path = "/home/e1667/dev/LibraX/src"
+    libra_x_path = "/home/e1667/dev/Libra-X/src"
+    #libra_x_path = "/home/e1667/software/Libra-X/src"
 
 elif user==2:
     # For Ekadashi
