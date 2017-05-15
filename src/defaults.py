@@ -36,7 +36,7 @@ def set_defaults(params, interface, recipe=""):
 # type of simulations (recipe) you want to perform.
 # Options (yet to be defined): ""
 
-    if interface=="GAMESS" or interface=="QE" or interface=="G09":
+    if interface=="GAMESS" or interface=="QE":
         params["interface"] = interface
         print "Setting default parameters for Libra-",interface, " calculations"
     else:
@@ -121,13 +121,13 @@ def set_defaults(params, interface, recipe=""):
     # Flag for printing out the information about atomic orbital basis
     # Options: 1 -> yes. otherwise -> no. 
     # Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
-    if interface=="GAMESS" or interface=="G09":
+    if interface=="GAMESS":
         params["flag_ao"] = 1
     elif interface=="QE":
         params["flag_ao"] = 0
 
 
-    if interface=="GAMESS" or interface=="G09":
+    if interface=="GAMESS":
         # Flag to print MD, Energy, and dipole moment results of 
         # the SH calculation with velocity rescaling
         # Options: 0 -> no, 1 -> yes
