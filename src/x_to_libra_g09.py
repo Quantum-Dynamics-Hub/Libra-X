@@ -39,11 +39,9 @@ def exe_g09(params): # DONE!!!
     # I call it in a very simple way: "run_g09a inp"
     # Used in main.py/main and md.py/run_MD
     inp = params["g09_inp"]
-    rung09 = params["rung09"]
-    os.system("%s %s" % (rung09,inp))
-    #os.system("run_g09a %s" % (inp))
-    #filename, file_extension = os.path.splitext(inp)
-    #params["g09_out"] = filename + ".log"
+    os.system("run_g09a %s" % (inp))
+    filename, file_extension = os.path.splitext(inp)
+    params["g09_out"] = filename + ".log"
 
 def g09_to_libra(params, ao, E, sd_basis, active_space,suff): # DONE
     ## 
