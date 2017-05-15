@@ -27,6 +27,10 @@ elif sys.platform=="linux" or sys.platform=="linux2":
 from libra_py import *
 
 def reorder(p,A,E):
+    # This function reorders columns of density matrix "A" and diagonal elements of energy "E"
+    # following permutation "p".
+    # Note: reordering columns of "A" means reordering newer eigenvectors "sd_basis2". 
+    #
     # param[in]     p a list of permutation indices
     # param[in,out] A MATRIX object including density matrix <phi_i(t)|phi_j(t+dt)>
     # param[in,out] E MATRIX object including energies in diagonal elements
