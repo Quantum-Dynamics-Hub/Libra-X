@@ -78,9 +78,10 @@ if user==0 or user==2:
 elif user==1:
     # For Kosuke
     params["GMSPATH"] = "/home/e1667/install/gamess"
+    #params["GMSPATH"] = "/home/e1667/software/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work/scr"
+    params["scr_dir"] = os.getcwd() + "/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
