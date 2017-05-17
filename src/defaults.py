@@ -159,8 +159,8 @@ def set_defaults(params, interface, recipe=""):
 
     # Representation - this parameter is used only to determine
     # how to perform velocity rescaling
-    # Options: 0 -> diabatic (uniform rescaling, needs only energies, not derivaive coplings)
-    #          1 - adiabatic - derivaive coupling vectors are needed
+    # Options: 0 -> diabatic (uniform rescaling, needs only energies, not derivative couplings)
+    #          1 - adiabatic - derivative coupling vectors are needed
     params["rep"] = 0      
 
     # A flag to select the Boltzmann scaling in lieu of the hop rejection and 
