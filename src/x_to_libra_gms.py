@@ -25,12 +25,14 @@ if sys.platform=="cygwin":
 elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
+from libra_py import *
 from extract_gms import *
 #from overlap import *
 #from hamiltonian_el import *
 from moment import *
 from misc import *
 from spin_indx import *
+import reorder_matrices
 
 def exe_gamess(params):
     ##
@@ -118,6 +120,15 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     P12 = SD_overlap(sd_basis,  sd_basis2)
     P21 = SD_overlap(sd_basis2, sd_basis)
     #print "Time to compute in SD_overlap= ",t.show(),"sec"
+
+    p0 = range(nstates)
+    perm = unavoided.get_reordering(P12) # 
+    if p0 != perm:
+        print "trivial crossings occured!"
+        print "perm is", perm
+        print "P12 is"; P12.show_matrix()
+        reorder_matrices.reorder(perm,P12,E2)
+        P21 = P12.H()
 
     # calculate transition dipole moment matrices in the MO basis:
     # mu_x = <i|x|j>, mu_y = <i|y|j>, mu_z = <i|z|j>

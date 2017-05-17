@@ -22,18 +22,16 @@ libra_x_path = "" # set the path name to the source files in Libra-X
 
 if user==0:
     # For Alexey
-    libra_bin_path = "/projects/academic/alexeyak/alexeyak/libra-dev/libracode-code/_build/src" 
     libra_x_path = "/user/alexeyak/Programming/Libra-X/src" 
 
 elif user==1:
     # For Kosuke
-    libra_bin_path = "/home/e1667/install/libra-code/_build/src"
     #libra_x_path = "/home/e1667/dev/libra-gamess_interface/src"
-    libra_x_path = "/home/e1667/dev/LibraX/src"
+    libra_x_path = "/home/e1667/dev/Libra-X/src"
+    #libra_x_path = "/home/e1667/software/Libra-X/src"
 
 elif user==2:
     # For Ekadashi
-    libra_bin_path = "/projects/academic/alexeyak/ekadashi/libra-dev/libracode-code/_build/src"
     libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
 
 os.environ["src_path"] = libra_x_path
@@ -76,9 +74,10 @@ if user==0 or user==2:
 elif user==1:
     # For Kosuke
     params["GMSPATH"] = "/home/e1667/install/gamess"
+    #params["GMSPATH"] = "/home/e1667/software/gamess"
     params["rungms"] =  params["GMSPATH"] + "/rungms" 
     params["VERNO"] = "00"
-    params["scr_dir"] = "/home/e1667/work/scr"
+    params["scr_dir"] = os.getcwd() + "/scr"
 
 if test==0:
     params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
