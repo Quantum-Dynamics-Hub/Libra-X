@@ -12,7 +12,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 0 # 0 for Olga; others should input the path they use
+user = 1 # 0 for Olga, 1 - Alexey; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
@@ -23,9 +23,14 @@ libra_g09_int_path = "" # set the path name to the source files in libra-g09_int
 if user==0:
     # For Olga
     libra_bin_path = "/data/ob070/soft/libra-code/src"
-    libra_g09_int_path = "/data/ob070/soft/Libra-X/src"
+    libra_x_path = "/data/ob070/soft/Libra-X/src"
+elif user==1:
+    # For Alexey
+    libra_bin_path = "/user/alexeyak/Soft/libra-code/_build/src"
+    libra_x_path = "/user/alexeyak/Programming/Libra-X/src"
 
-os.environ["src_path"] = libra_g09_int_path
+
+os.environ["src_path"] = libra_x_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 ########## Setup all manual parameters here ####################
@@ -145,8 +150,8 @@ params["excitations_init"] = [0]
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
 
 # Create force field                                                                                                                                 
-params["uff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
-LoadUFF.Load_UFF(params["uff"], "uff.d")
+params["ff"] = ForceField({"mb_functional":"LJ_Coulomb","R_vdw_on": 10.0,"R_vdw_off":15.0 })
+LoadUFF.Load_UFF(params["ff"], "uff.d")
 
 #HOMO = params["HOMO"]
 #Nmin = params["HOMO"] + params["min_shift"]
