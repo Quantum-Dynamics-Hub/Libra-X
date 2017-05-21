@@ -26,10 +26,10 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
-#from create_input_g09 import *
+from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
-#from x_to_libra_g09 import *
+from x_to_libra_g09 import *
 from hamiltonian_vib import *
 import print_results
 import include_mm
@@ -417,6 +417,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
+                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
+                if params["interface"]=="G09":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
                 elif params["interface"]=="QE":
                     tsh.surface_hopping(mol, el, ham, rnd, params)
