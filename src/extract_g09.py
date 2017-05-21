@@ -352,7 +352,8 @@ def g09_extract_gradient(inp_str,flag): # DONE!!!
         x = float(spline[len(spline)-3])
         y = float(spline[len(spline)-2])
         z = float(spline[len(spline)-1])
-        g = VECTOR(x,y,z)
+        g = VECTOR(-x,-y,-z)  # Note: Gaussian outputs forces
+                              # not gradients
 
         grad.append(g)
 
