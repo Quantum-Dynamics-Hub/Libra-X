@@ -73,7 +73,7 @@ elif test==1:
 # MD variables
 
 params["dt_nucl"] = 20.0                    # time step in a.u. for nuclear dynamics. 20 a.u. is close to 0.5 fsec.
-params["Nsnaps"] = 5                        # the number of total MD snapshots
+params["Nsnaps"] = 10                       # the number of total MD snapshots
 params["Nsteps"] = 1                        # the number of MD steps per 1 snapshot
 params["Ncool"]  = 3                        # in the end of that many initial snapshots 
                                             # we will be cooling the system: resetting momenta to zero
@@ -149,6 +149,9 @@ params["excitations_init"] = [0]
 
 # create thermostat
 params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["Temperature"] = 300.0 ### ACHTUNG: This is a temporary measure
+                              ### set the temperature in the SH procedure
+                              ### based on the current kinetic energy!
 
 params["debug_g09_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
 params["non-orth"] = 0
