@@ -12,58 +12,83 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 from libra_py import *
 
-user = 1 # 0 for Olga; others should input the path they use
+user = 1 # 0 for Alexey, 1 for Kosuke, and 2 for Ekadashi; others should input the path they use
 test = 0 # 0 for 1 water molecule; 1 for 23 water molecules
 
 # input the paths of libra binary files and libra-gamess_interface source files. 
 
 libra_bin_path = "" # set the path name to the source files in libracode
-libra_g09_int_path = "" # set the path name to the source files in libra-g09_interface
+libra_x_path = "" # set the path name to the source files in Libra-X
 
 if user==0:
-    # For Olga
-    libra_bin_path = "/data/ob070/soft/libra-code/src"
-    libra_g09_int_path = "/data/ob070/soft/Libra-X/src"
+    # For Alexey
+    libra_x_path = "/user/alexeyak/Programming/Libra-X/src" 
 
 elif user==1:
-    # For Ekadashi
-    libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
-    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
-    #libra_x_path = "/gpfs/scratch/ekadashi/Libra-X/src"
+    # For Kosuke
+    #libra_x_path = "/home/e1667/dev/libra-gamess_interface/src"
+    libra_x_path = "/home/e1667/dev/Libra-X/src"
+    #libra_x_path = "/home/e1667/software/Libra-X/src"
 
-os.environ["src_path"] = libra_x_path   # Path to the source code
+elif user==2:
+    # For Ekadashi
+    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
+
+os.environ["src_path"] = libra_x_path
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
+
+import defaults
 
 ########## Setup all manual parameters here ####################
 
 params = {}
 
-# Of course, here we use G09
-params["interface"] = "G09"
+# Of course, here we use GAMESS
+#params["interface"] = "GAMESS" # unnecessary line
 
-# G09 variables
-# We invoke "run_g09a inp" in x_to_libra_g09.py/exe_g09
+defaults.set_defaults(params, "GAMESS")
 
-params["g09_inp0"] = ""           # initial input file of G09
-params["g09_inp"] = ""            # working input file of G09
-params["g09_out"] = ""            # output file of G09
+# GAMESS variables
+# We invoke "/usr/bin/time rungms gms_inp VERNO nproc > gms_out" in x_to_libra_gms.py/exe_gamess
+# Paths of SCR, USERSCR, GMSPATH in the rungms script will be defined by environmental variables later.
+# (Supposed TARGET is already defined as sockets or mpi.)
+
+params["GMSPATH"] = ""            # the directory including GAMESS binary files.
+params["rungms"] = ""             # "rungms" name. On CCR @ UB, use "rungms.slurm".
+params["gms_inp0"] = ""           # initial input file of GAMESS
+params["gms_inp"] = ""            # working input file of GAMESS
+params["gms_out"] = ""            # output file of GAMESS
 params["nproc"] = 1               # the number of processors : default = 1
+params["VERNO"] = ""              # Version No., e.g. 00, 01, etc....
+params["scr_dir"] = ""            # scratch directory including GAMESS temporary files.This directory will be created and deleted every GAMESS calculation.
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part 
 
-params["mult"] = 1
-params["charge"] = 0
+if user==0 or user==2:
+    # For Alexey (setting for CCR @ UB)
+    params["GMSPATH"] = "" # GAMESS path is already taken.
+    params["rungms"] = "rungms.slurm"
+    params["VERNO"] = "01"
+    params["scr_dir"] = os.environ['SLURMTMPDIR'] # slurm type
+
+elif user==1:
+    # For Kosuke
+    params["GMSPATH"] = "/home/e1667/install/gamess"
+    #params["GMSPATH"] = "/home/e1667/software/gamess"
+    params["rungms"] =  params["GMSPATH"] + "/rungms" 
+    params["VERNO"] = "00"
+    params["scr_dir"] = os.getcwd() + "/scr"
 
 if test==0:
-    params["g09_inp0"] = "H2O_g09.inp"    # initial input file of G09
-    params["g09_inp"] = "H2O_wrk_g09.inp" # working input file of G09
-    params["g09_out"] = "H2O_g09.out"     # output file of G09
-    params["ent_file"] = "H2O_g09.ent"    # file including atomic coordinates and conncectivity information for MM part
+    params["gms_inp0"] = "H2O.inp"    # initial input file of GAMESS
+    params["gms_inp"] = "H2O_wrk.inp" # working input file of GAMESS
+    params["gms_out"] = "H2O.out"     # output file of GAMESS
+    params["ent_file"] = "H2O.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 elif test==1:
-    params["g09_inp0"] = "23waters.inp"    # initial input file of G09
-    params["g09_inp"] = "23waters_wrk.inp" # working input file of G09
-    params["g09_out"] = "23waters.out"     # output file of G09
+    params["gms_inp0"] = "23waters.inp"    # initial input file of GAMESS
+    params["gms_inp"] = "23waters_wrk.inp" # working input file of GAMESS
+    params["gms_out"] = "23waters.out"     # output file of GAMESS
     params["ent_file"] = "23waters.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 # MD variables
@@ -81,7 +106,7 @@ params["Nstart"] = 6       # the printout cycle when we will initiate NA-MD and
                            # electronic dynamics with surface hoping
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
-params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
+params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
 params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
@@ -99,55 +124,24 @@ elif test==1:
 params["min_shift"] = -1               # e.g. -1 -> HOMO-1, HOMO
 params["max_shift"] = 1                # e.g.  1 -> LUMO
 params["el_mts"] = 1                   # electronic time steps per one nuclear time step
-params["tsh_method"] = 1               # Surface Hopping type : option  1 -> FSSH, 2 -> GFSH , 3 -> MSSH
-params["rep"] = 1                      # representation: 0 - diabatic, 1 - adiabatic
+params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
-params["use_boltz_factor"] = 0         # A flag to select the Boltzmann scaling in lieu of hop rejection/velocity rescaling scheme: 0 -> no, 1-> yes
-params["do_rescaling"] = 0             # The flag to control velocity rescaling: 0 - no velocity rescaling, 1 - do rescaling
-params["do_reverse"] = 0               # The option that determines what to do if the hop was rejected because of the energy conservation(frustrated hop): 
-                                       # do_reverse = 0 - nuclear momenta(velocities) stay unchanged; do_reverse = 1 - nuclear momenta (velocities) are inverted.
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
-
-# select directories where the results will be printed out.
-params["res"] = ""     # directory where the all results will be printed out
-params["mo_ham"] = ""  # directory where MO basis vibronic hamiltonians will be printed out
-params["sd_ham"] = ""  # directory where SD basis vibronic hamiltonians will be printed out
-
-if user==0:
-    # For Olga
-    cwd = os.getcwd()
-    params["res"] =  cwd + "/res/" #; print "res is located on ",params["res"] ; 
-    params["mo_ham"] =  cwd + "/mo_ham/" #; print "mo_ham is located on ",params["mo_ham"] ;
-    params["sd_ham"] = cwd + "/sd_ham/" #; print "sd_ham is located on ",params["sd_ham"] ;
-
-
-# flags for debugging
-params["print_aux_results"] = 1             # print auxiliary results ; a large amount of files(MD, Energy trajectories, etc..) will be printed out.
-params["print_coherences"] = 1              # compute and print electronic coherences (c^*_i * c_j) : option 0 -> no , 1 -> yes
-params["print_sd_ham"] = 1                  # print SD basis vibronic Hamiltonian
-params["print_mo_ham"] = 1                  # print full and reduced size MO basis vibronic Hamiltonian
-params["print_SH_results_with_scaling"] = 0 # print MD, Energy, and dipole moment results of SH calculation with velocity rescaling  
-params["debug_densmat_output"] = 1          # print the debug info into standard output: density matrices, also including for the wavefunctions at different time steps
-params["debug_mu_output"] = 0               # print the debug info into standard output: transition dipole moment matrices
-params["debug_gms_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
-#params["debug_ham_ex"] = 1                  # print the debug info into standard output: external hamiltonian matrices for SH calculation
-params["print_tsh_probabilities"] = 0      # print the debug info into standard output: hopping probabilities matrices and SH_states
-params["check_tsh_probabilities"] = 0      # print the hopping probabilities if they are larger than 1.(To check whether dt_nucl is too large or not.)
 
 # ***************************************************************
 
 from states import *
 
 # create excitation list
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
+# IMPORTANT: This should be consistent with the min_shift and max_shift parameters^M
+# that define the active space^M
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
 
 # create thermostat
 params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
-
-params["debug_g09_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
-params["non-orth"] = 0
+params["Temperature"] = params["therm"].Temperature # explicitly defined
 
 # create Universe
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
@@ -162,7 +156,8 @@ LoadUFF.Load_UFF(params["ff"], "uff.d")
 #params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
-import defaults
-defaults.set_defaults(params, "G09")
+
 #data, test_data = main.main(params)  # run actual calculations
 main.main(params)  # run actual calculations
+
+
