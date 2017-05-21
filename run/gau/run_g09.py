@@ -29,8 +29,13 @@ elif user==1:
     libra_bin_path = "/user/alexeyak/Soft/libra-code/_build/src"
     libra_x_path = "/user/alexeyak/Programming/Libra-X/src"
 
+elif user==2:
+    # For Ekadashi
+    libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
+    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
+    #libra_x_path = "/gpfs/scratch/ekadashi/Libra-X/src"
 
-os.environ["src_path"] = libra_x_path
+os.environ["src_path"] = libra_x_path   # Path to the source code
 sys.path.insert(1,os.environ["src_path"]) # Path to the source code
 
 ########## Setup all manual parameters here ####################
@@ -50,11 +55,14 @@ params["nproc"] = 1               # the number of processors : default = 1
 params["basis_option"] = 2        # ab initio or Semi-Empirical calculation?  Options: \"ab_initio\" = 1 , \"semi_empirical\" = 2
 params["ent_file"] = ""           # file including atomic coordinates and connectivity information for MM part 
 
+params["mult"] = 1
+params["charge"] = 0
+
 if test==0:
-    params["g09_inp0"] = "H2O.inp"    # initial input file of G09
-    params["g09_inp"] = "H2O_wrk.inp" # working input file of G09
-    params["g09_out"] = "H2O.out"     # output file of G09
-    params["ent_file"] = "H2O.ent"    # file including atomic coordinates and conncectivity information for MM part
+    params["g09_inp0"] = "H2O_g09.inp"    # initial input file of G09
+    params["g09_inp"] = "H2O_wrk_g09.inp" # working input file of G09
+    params["g09_out"] = "H2O_g09.out"     # output file of G09
+    params["ent_file"] = "H2O_g09.ent"    # file including atomic coordinates and conncectivity information for MM part
 
 elif test==1:
     params["g09_inp0"] = "23waters.inp"    # initial input file of G09
@@ -77,11 +85,7 @@ params["Nstart"] = 6       # the printout cycle when we will initiate NA-MD and
                            # electronic dynamics with surface hoping
 params["nconfig"] = 1                       # the number of initial nuclear/velocity geometry
 params["flag_ao"] = 1                       # flag for atomic orbital basis : option 1 -> yes. otherwise -> no. Don't choose 1 when you use PM6: PM6 calculation doesn't output it at present.
-params["MD_type"] = 1                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
-params["nu_therm"] = 0.001                  # shows thermostat frequency
-params["NHC_size"] = 5                      # the size of Nose-Hoover chains
-params["Temperature"] = 300.0               # Target temperature in thermostat
-params["thermostat_type"] = "Nose-Hoover"   # option : "Nose-Hoover" or "Nose-Poincare"
+params["MD_type"] = 0                       # option 1 -> NVT, otherwise -> NVE ; If this is 1, the parameters below should be selected.
 params["sigma_pos"] = 0.01                  # Magnitude of random atomic displacements 
 params["is_MM"] = 1                         # flag for including MM interaction : option 1 -> yes, otherwise -> no.
 params["MM_fraction"] = 0.0              # For a QM/MM mixing: E_total = (1-f)*E(QM) + f*E(MM), same for forces!
@@ -139,12 +143,15 @@ params["check_tsh_probabilities"] = 0      # print the hopping probabilities if 
 from states import *
 
 # create excitation list
-params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
+params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
 
 # create thermostat
-#params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})
+
+params["debug_g09_unpack"] = 0              # print the debug info into standard output: unpacked data from GAMESS
+params["non-orth"] = 0
 
 # create Universe
 params["U"] = Universe(); LoadPT.Load_PT(params["U"], "elements.txt");
@@ -159,6 +166,7 @@ LoadUFF.Load_UFF(params["ff"], "uff.d")
 #params["excitations"] = create_states(Nmin,HOMO,Nmax,spin,flip) # generate a list of "excitation" objects.
 
 import main        # import main module of the libra-Gamess-interface code
-
+import defaults
+defaults.set_defaults(params, "G09")
 #data, test_data = main.main(params)  # run actual calculations
 main.main(params)  # run actual calculations
