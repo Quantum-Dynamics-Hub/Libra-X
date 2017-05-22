@@ -30,11 +30,14 @@ from libra_py import *
 
 from create_input_gms import *
 from create_input_qe import *
+from create_input_g09 import *
 from x_to_libra_gms import *
 from x_to_libra_qe import *
+from x_to_libra_g09 import *
 from md import *
 from spin_indx import *
 from extract_qe import *
+from extract_g09 import *
 import include_mm
 
 
@@ -109,7 +112,7 @@ def main(params):
     # and executes run_MD function where NA-MD calculation is done.
     #
     # Used in:  run.py
-
+    #params["nel"] = 10
     dt_nucl = params["dt_nucl"]
     nstates = len(params["excitations"])
     nstates_init = len(params["excitations_init"])
@@ -134,7 +137,7 @@ def main(params):
         pass
 #        active_space = [5,6,7]  # For C2H4 
 #    #********** active space is defined here *****************
-    elif params["interface"]=="GAMESS":
+    elif params["interface"]=="GAMESS": # or params["interface"]=="G09":
         #ntraj = nstates_init*ninit*num_SH_traj
         for i in range(params["min_shift"],params["max_shift"]+1):
             active_space.append(i+params["HOMO"]+1) # Here MO order start from 1, not 0.
@@ -144,6 +147,9 @@ def main(params):
 
     if params["interface"]=="GAMESS": 
         os.system("cp %s %s" %(params["gms_inp0"], params["gms_inp"]))
+
+    elif params["interface"]=="G09": 
+        os.system("cp %s %s" %(params["g09_inp0"], params["g09_inp"]))
 
     elif params["interface"]=="QE":
         for ex_st in xrange(nstates):
@@ -171,6 +177,28 @@ def main(params):
             mo_pool_bet = CMATRIX(c)
             alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
 
+            # use excitation object to create proper SD object for different excited state
+            sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
+            sd_basis.append(sd)
+            all_grads.append(copy.deepcopy(grads)) # newly defined
+
+    elif params["interface"]=="G09":
+        params["g09_inp_templ"] = read_g09_inp_templ(params["g09_inp"])
+        exe_g09(params)
+        #while not os.path.exists(params["g09_out"]):
+        #    time.sleep(1)
+        params["nel"] = g09_extract_first(params["g09_out"],params["debug_g09_unpack"])
+	active_space = construct_active_space(params)
+        label, Q, R, grads, E, c, ao, params["nel"] = g09_extract(params["g09_out"],params["excitations"],params["min_shift"],active_space,params["debug_g09_unpack"])
+        e = MATRIX(E)
+        homo = params["nel"]/2 +  params["nel"] % 2
+
+        for ex_st in xrange(nstates): 
+            mo_pool_alp = CMATRIX(c)
+            mo_pool_bet = CMATRIX(c)
+            alp,bet = index_spin(params["excitations"][ex_st],active_space, homo)
+            #alp,bet = index_spin(params["excitations"][0],active_space, homo)
+            print "MO_pool",mo_pool_alp.show_matrix()
             # use excitation object to create proper SD object for different excited state
             sd = SD(mo_pool_alp, mo_pool_bet, Py2Cpp_int(alp), Py2Cpp_int(bet))
             sd_basis.append(sd)
@@ -211,6 +239,7 @@ def main(params):
                         en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
                         occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["electronic_smearing"])
                         occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["electronic_smearing"])
+
                     elif params["nspin"] == 1:
                         en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
                         occ = fermi_pop(en_orb,nel,params["nspin"],params["electronic_smearing"])

@@ -352,7 +352,8 @@ def g09_extract_gradient(inp_str,flag): # DONE!!!
         x = float(spline[len(spline)-3])
         y = float(spline[len(spline)-2])
         z = float(spline[len(spline)-1])
-        g = VECTOR(x,y,z)
+        g = VECTOR(-x,-y,-z)  # Note: Gaussian outputs forces
+                              # not gradients
 
         grad.append(g)
 
@@ -362,6 +363,27 @@ def g09_extract_gradient(inp_str,flag): # DONE!!!
             print grad.index(g), g, g.x, g.y, g.z
 
     return grad
+
+
+def g09_extract_first(filename,flag): 
+    ##
+    # This function only extracts number of electrons in a system.
+    # In the main.py, this information is needed to construct active space
+    #
+    # \param[in] filename    The name of the Gaussian09 output file from which we will be getting info
+    # info["Nele"] returns total number of electrons
+    # 
+    # Used in: main.py/main
+
+    f = open(filename,"r")
+    A = f.readlines()
+    f.close()
+
+    # detect the lines including information from gamess output file
+    info = detect_g09.detect(A,flag)
+
+    return info["Nele"]
+
 
 
 def g09_extract(filename,states,min_shift,active_space,flag): # ONLY SLIGHTLY MODIFIED
