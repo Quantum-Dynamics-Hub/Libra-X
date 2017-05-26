@@ -42,87 +42,111 @@ def get_reordering(time_overlap):
 
     \param[in] time_overlap ( MATRIX ) the time overlap matrix, <phi_i(t)|phi_j(t+dt)>.
     Returns:
-    perm - list of integers that describe the permutation. That is:
-    perm[i] - is the index identifying the "older" state "i". Now, it may be labeled
-    by some other index, j. 
+    perm - list of integers that describe all possible permutation. That is:
+    perm[i] - contains all possible permutations
+    (ex. [0,1,2,...,np-1,0,2,1,...,np-1,...],which can be divided into every "np".
+    "np" is assumed to be more than 1 if we have mixed states during calculation.)
+    In a permutation, say, [0,1,...,i-1,j,i+1,...], the index identifying the "older" state "i".
+    Now, it may be labeled by some other index, j. 
     iperm[j] - if we were looking at a specific state labeled "j", iperm[j] this will be
     the index of that state in the present list of states (e.g. energies, etc.)
 
     """
-    # define Random object
-    rnd = Random()
 
     # extract the indices where <phi_i(t)|phi_i(t+dt)> is not close to 1. 
     S = CMATRIX(time_overlap)   # just a temporary working object
     sz = time_overlap.num_of_rows
-    perm = range(sz)  # original permutation
+    #perm = range(sz)  # original permutation
+    perm_wrk = range(sz) # working permutation
 
-    # Before reordering matrices, we must find the indices pointing the same state.
+    # Before getting indices for reordering, we must find ones pointing the same state.
     # If we get a list [0,1,1,3],
     # we find that new states 1 and 2 (starting from 0) will be assigned by old state 1.
     # In this case, they are also close to old state 2.
-    # So, we determine randomly 2 transitions,
-    # (1,2) -> (1,2) or (1,2) -> (2,1) with the same probabilities (both are 50%).
-    # Once doing that, we no longer reorder the columns of the indices.
+    # So, we have 2 permutations for transition: (1,2) or (2,1).
 
-    pini = range(sz) # for storing initial indices 
+    perm_ini = range(sz) # for storing initial indices 
     for col in xrange(sz):
         val = 0.0+0.0j
-        # Find the max element in the given column "col"                                                                                                  
-        [pini[col], val] = S.max_col_elt(col)
+        # Find the max element in the given column "col"                                                                   
+        [perm_ini[col], val] = S.max_col_elt(col)
 
-    print "pini is"; print pini
+    #print "pini is"; print pini
     # create a list "du" including duplicate numbers
     t = set()
-    du = list(set([x for x in pini if x in t or t.add(x)])) 
+    du = list(set([x for x in perm_ini if x in t or t.add(x)])) 
 
-    esc = [] # this list including indices for escaping from reordering.
-    if len(du) > 0: # when duplication happens in pini
-        print "duplicate numbers are"; print du
+    esc = [] # including indices of states for avoid reordering.
+    perm_mix = [] # including groups of indices related to mixed states. 
+    if len(du) > 0: # when duplication is found in pini
+        #print "duplicate numbers are"; print du
         for dnum in du:
-            ksi = rnd.uniform(0.0, 1.0) # generate random number
-            ind = [ i for i , x in enumerate(pini) if dnum == x] # extract indices related to duplication
-            print "ksi is %f" % (ksi)
-            print "indices concerning duplication are"; print ind
+            ind = [ i for i , x in enumerate(perm_ini) if dnum == x] # extract indices related to duplication
+            #print "mixed states are"; print ind
             esc.extend(ind) # extract elements of ind, not the list itself.
             
-            ind_sz = len(ind)
-            aperm = list(itertools.permutations(ind)) # generate permutation from the numbers of ind
-            print aperm
-            aperm_sz = len(aperm)
-            itra = 0
-            for i in xrange(aperm_sz):
-                if i < aperm_sz*ksi and aperm_sz*ksi < i+1: # state assigning is done randomly
-                    itra = i
-            print "selected transition is"; print aperm[itra];
+            perm_mix.append(ind) # extract groups of mixed states, say, [[0,1][2,3][4,5]]
+            print perm_mix
 
-            # reindex the perm list
-            for i in xrange(ind_sz): 
-                ip = ind[i]
-                perm[ip] = aperm[itra][i]
-            #print aperm[itra][0], aperm[itra][1]
+    #print "indices for mixed states are"; print esc;
+    #print "groups of mixed states are"; print perm_mix
 
-    print "esc list is"; print esc;
+    #sys.exit(0)
 
-    '''     transition part ends     '''
-
+    ''' reordering part starts '''
     for col in xrange(sz):
 
         indx = -1
         val = 0.0+0.0j
-        if all((col!=j for j in esc)): # do not reorder the indices of "esc" list
-            while indx!=col and all((col!=j for j in esc)):
+        if all((col!=x for x in esc)): # avoid indices of mixed states
+            while indx!=col:
 
                 # Find the max element in the given column "col"
                 [indx, val] = S.max_col_elt(col)
-            
+
                 # Apply permutation (col, indx) to the present "perm" list
-                tmp = perm[col]
-                perm[col] = perm[indx]
-                perm[indx] = tmp
+                tmp = perm_wrk[col]
+                perm_wrk[col] = perm_wrk[indx]
+                perm_wrk[indx] = tmp
 
                 # Do the corresponding swap of the columns in the S matrix
                 S.swap_cols(col,indx)
+            
+    #sys.exit(0)
+    #print "After being reordered, the working permutation is"; print perm_wrk
+
+    ''' Then, all posible permutations will be generated. '''
+
+    Nperm = 1 # number of permutations
+    for ip in perm_mix:
+        Nperm *= math.factorial(len(ip)) # in the case [[1,2][3,4]], Nperm=2!x2!=4
+    #print "number of permutations is %i" % Nperm
+
+    perm_g = [] # contains groups of permutations, say, [[(1,2),(2,1)][(3,4),(4,3)]]
+    for i in xrange(len(perm_mix)):
+        perm_g.append(list(itertools.permutations(perm_mix[i])))
+    #print "groups of permutations are "; print perm_g
+
+    perm_com = [] # contains combined permutations of perm_g, say,
+                  # [(1,2,3,4),(1,2,4,3),(2,1,3,4),(2,1,4,3)]
+    if len(perm_g) == 1:
+        for i in xrange(Nperm):
+            perm_com.append(perm_g[0][i]) 
+    if len(perm_g) > 1:
+        for i in xrange(len(perm_mix)-1):
+            ptmp = []
+            for j in xrange(len(perm_g[i])):
+                for k in xrange(len(perm_g[i+1])):
+                    ptmp.append(perm_g[i][j]+perm_g[i+1][k])
+            perm_g[i+1] = ptmp
+        perm_com = perm_g[len(perm_mix)-1]
+    #print "combined permutations are"; print perm_com
+
+    perm = perm_wrk*Nperm # generate perm_wrk "Nperm" times,
+    # say, [0,1,2,3,4,0,1,2,4,3,0,2,1,3,4,0,2,1,4,3]
+    for i in xrange(len(perm_com)):
+        for j in xrange(len(perm_com[0])):
+                perm[i*sz+perm_com[0][j]] = perm_com[i][j]
 
     return perm
 
@@ -203,19 +227,19 @@ def _test_setup():
     f.set(3,1,0.79+0j); f.set(3,2,0.80+0j); f.set(3,3,0.82+0j);
     f.set(4,4,1.0+0j);
 
-    # non-identical matrix (corresponding to very complicated condition)
-    # | 1 0 0    0    0    0    0|
-    # | 0 0 1    0    0    0    0|
-    # | 0 1 0    0    0    0    0|
-    # | 0 0 0 0.71 0.72    0    0|
-    # | 0 0 0 0.74 0.78    0    0|
-    # | 0 0 0    0    0 0.77 0.78|
-    # | 0 0 0    0    0 0.79 0.81|
+    # non-identical matrix (corresponding to 3 groups of doubly mixed states)
+    # | 1    0    0    0    0    0    0|
+    # | 0 0.73 0.75    0    0    0    0|
+    # | 0 0.74 0.76    0    0    0    0|
+    # | 0    0    0 0.71 0.72    0    0|
+    # | 0    0    0 0.74 0.78    0    0|
+    # | 0    0    0    0    0 0.77 0.78|
+    # | 0    0    0    0    0 0.79 0.81|
     
     g = CMATRIX(7,7)
     g.set(0,0,1.0+0j);
-    g.set(1,2,1.0+0j);
-    g.set(2,1,1.0+0j);
+    g.set(1,1,0.73+0j); g.set(1,2,0.75+0j);
+    g.set(2,1,0.74+0j); g.set(2,2,0.76+0j);
     g.set(3,3,0.71+0j); g.set(3,4,0.72+0j);
     g.set(4,3,0.74+0j); g.set(4,4,0.78+0j);
     g.set(5,5,0.77+0j); g.set(5,6,0.78+0j);
@@ -244,21 +268,23 @@ class TestUnavoided(unittest.TestCase):
         print "Permutation = ", perm_c
         self.assertEqual(perm_c, [1,2,0,3])
 
-        # Note: the 3 examples can't exactly output the permutation
-        #       because some elements of it are determined randomly
-        #       , that is, using random number.
-
         perm_e = get_reordering(e)
         print "Input matrix "; e.show_matrix()
         print "Permutation = ", perm_e
+        self.assertEqual(perm_e, [0,1,2,3,0,2,1,3])
 
         perm_f = get_reordering(f)
         print "Input matrix "; f.show_matrix()
         print "Permutation = ", perm_f
+        perm_f_eq = [0, 1, 2, 3, 4, 0, 1, 3, 2, 4, 0, 2, 1, 3, 4, 0, 2, 3, 1, 4, 0, 3, 1, 2, 4, 0, 3, 2, 1, 4]
+        self.assertEqual(perm_f, perm_f_eq)
 
         perm_g = get_reordering(g)
         print "Input matrix "; g.show_matrix()
         print "Permutation = ", perm_g
+        perm_g_eq = [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 6, 5, 0, 1, 2, 4, 3, 5, 6, 0, 1, 2, 4, 3, 6, 5,\
+                         0, 2, 1, 3, 4, 5, 6, 0, 2, 1, 3, 4, 6, 5, 0, 2, 1, 4, 3, 5, 6, 0, 2, 1, 4, 3, 6, 5]
+        self.assertEqual(perm_g, perm_g_eq)
 
 if __name__=='__main__':
     unittest.main()
