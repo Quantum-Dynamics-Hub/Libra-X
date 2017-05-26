@@ -25,6 +25,7 @@ elif sys.platform=="linux" or sys.platform=="linux2":
     from liblibra_core import *
 
 from libra_py import *
+import unavoided_tmp # This will be deleted when it is merged into unavoided.py of libra_py
 
 def reorder(p,A,E):
     # This function reorders columns of density matrix "A" and diagonal elements of energy "E"
@@ -83,7 +84,24 @@ def _prepare_density_matrices():
     c.set(0,2,1.0+0j);  c.set(1,3,1.0+0j);  c.set(2,0,1.0+0j);  c.set(3,5,1.0+0j);
     c.set(4,4,1.0+0j);  c.set(5,1,1.0+0j);
 
-    return a,b,c
+    # non-identical (7x7) matrix (This contains 3 groups of doubly mixed states)
+    # | 1    0    0    0    0    0    0 |
+    # | 0 0.71 0.72    0    0    0    0 |
+    # | 0 0.73 0.74    0    0    0    0 |
+    # | 0    0    0 0.72 0.73    0    0 |
+    # | 0    0    0 0.74 0.75    0    0 |
+    # | 0    0    0    0    0 0.76 0.77 |
+    # | 0    0    0    0    0 0.78 0.79 |
+    d = CMATRIX(7,7)
+    d.set(0,0,1.0+0j);
+    d.set(1,1,0.71+0j); d.set(1,2,0.72+0j);
+    d.set(2,1,0.73+0j); d.set(2,2,0.74+0j); 
+    d.set(3,3,0.72+0j); d.set(3,4,0.73+0j);
+    d.set(4,3,0.74+0j); d.set(4,4,0.75+0j);
+    d.set(5,5,0.76+0j); d.set(5,6,0.77+0j);
+    d.set(6,5,0.78+0j); d.set(6,6,0.79+0j);
+
+    return a,b,c,d
 
 def _prepare_energy_matrices():
 
@@ -107,38 +125,66 @@ def _prepare_energy_matrices():
     Ec.set(0,0,0.0+0j); Ec.set(1,1,11.0+0j); Ec.set(2,2,22.0+0j); Ec.set(3,3,33.0+0j);
     Ec.set(4,4,44.0+0j); Ec.set(5,5,55.0+0j);
 
-    return Ea,Eb,Ec
+    # | 0  0  0  0  0  0  0 |
+    # | 0 11  0  0  0  0  0 |
+    # | 0  0 22  0  0  0  0 |
+    # | 0  0  0 33  0  0  0 |
+    # | 0  0  0  0 44  0  0 |
+    # | 0  0  0  0  0 55  0 |
+    # | 0  0  0  0  0  0 66 |
+
+    Ed = CMATRIX(7,7) # eigenenergy matrix (diagonal)
+    Ed.set(0,0,0.0+0j); Ed.set(1,1,11.0+0j); Ed.set(2,2,22.0+0j); Ed.set(3,3,33.0+0j);
+    Ed.set(4,4,44.0+0j); Ed.set(5,5,55.0+0j); Ed.set(6,6,66.0+0j);
+
+    return Ea,Eb,Ec,Ed
 
 class Test_unavoided(unittest.TestCase):
     def test_reorder(self):
 
-        a,b,c = _prepare_density_matrices()
-        Ea,Eb,Ec = _prepare_energy_matrices()
+        rnd = Random()
 
-        p4 = range(a.num_of_rows) 
-        p6 = range(c.num_of_rows) 
+        a,b,c,d = _prepare_density_matrices()
+        Ea,Eb,Ec,Ed = _prepare_energy_matrices()
+        #sys.exit(0)
+
+        p4 = range(a.num_of_rows) # [0,1,2,3]
+        p6 = range(c.num_of_rows) # [0,1,2,3,4,5]
+        p7 = range(d.num_of_rows) # [0,1,2,3,4,5,6]
 
         print "p4 is ",p4
         print "p6 is ",p6
+        print "p7 is ",p7
 
         '''extract indices for reordering '''
-        perm_a = unavoided.get_reordering(a)
+        #perm_a = unavoided.get_reordering(a)
+        perm_a = unavoided_tmp.get_reordering(a)
         print "Input density matrix a"; a.show_matrix()
         print "Permutation a = ", perm_a
         self.assertEqual(perm_a, [0,1,2,3])
 
-        perm_b = unavoided.get_reordering(b)
+        #perm_b = unavoided.get_reordering(b)
+        perm_b = unavoided_tmp.get_reordering(b)
         print "Input density matrix b"; b.show_matrix()
         print "Input energy matrix Eb" ; Eb.show_matrix()
         print "Permutation b = ", perm_b
         self.assertEqual(perm_b, [0,2,3,1])
 
-        perm_c = unavoided.get_reordering(c)
+        #perm_c = unavoided.get_reordering(c)
+        perm_c = unavoided_tmp.get_reordering(c)
         print "Input density matrix c"; c.show_matrix()
         print "Input energy matrix Ec"; Ec.show_matrix()
         print "Permutation c = ", perm_c
         self.assertEqual(perm_c, [2,3,0,5,4,1])
 
+        perm_d = unavoided_tmp.get_reordering(d)
+        print "Input density matrix d"; d.show_matrix()
+        print "Input energy matrix Ed"; Ed.show_matrix()
+        print "Permutation d = ", perm_d
+        perm_d_eq = [0,1,2,3,4,5,6,0,1,2,3,4,6,5,0,1,2,4,3,5,6,0,1,2,4,3,6,5,0,2,1,3,4,5,6,0,2,1,3,4,6,5,0,2,1,4,3,5,6,0,2,1,4,3,6,5]
+        self.assertEqual(perm_d, perm_d_eq)
+
+        #sys.exit(0)
         ''' permutation according to "perm" list '''
 
         if p4 != perm_a:
@@ -158,6 +204,17 @@ class Test_unavoided(unittest.TestCase):
         print "Output density matrix c"; c.show_matrix()
         print "Output energy matrix Ec"; Ec.show_matrix()
         print "Permutation c = ", perm_c
+
+        if p7 != perm_d:
+            ksi = rnd.uniform(0.0,1.0)
+            ip = int(d.num_of_rows*ksi)
+            istart = ip*d.num_of_rows
+            iend = (ip+1)*d.num_of_rows
+            ptmp = perm_d[istart:iend]
+            reorder(ptmp,d,Ed); print "Matrix d is reordered"
+        print "Output density matrix d"; d.show_matrix()
+        print "Output energy matrix Ed"; Ed.show_matrix()
+        print "Permutation d = ", perm_d
 
 
 if __name__=='__main__':
