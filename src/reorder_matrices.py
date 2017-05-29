@@ -207,11 +207,13 @@ class Test_unavoided(unittest.TestCase):
 
         if p7 != perm_d:
             ksi = rnd.uniform(0.0,1.0)
-            ip = int(d.num_of_rows*ksi)
+            Np = len(perm_d)/d.num_of_rows # the number of permutations
+            ip = int(Np*ksi)
             istart = ip*d.num_of_rows
             iend = (ip+1)*d.num_of_rows
             ptmp = perm_d[istart:iend]
             reorder(ptmp,d,Ed); print "Matrix d is reordered"
+            print "ip is %i" % ip
         print "Output density matrix d"; d.show_matrix()
         print "Output energy matrix Ed"; Ed.show_matrix()
         print "Permutation d = ", perm_d

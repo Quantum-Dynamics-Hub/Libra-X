@@ -33,6 +33,7 @@ from moment import *
 from misc import *
 from spin_indx import *
 import reorder_matrices
+import unavoided_tmp # set temporally
 
 def exe_gamess(params):
     ##
@@ -86,6 +87,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     nstates = len(params["excitations"])
     sz = len(active_space)
 
+    rnd = Random()
+
     # 2-nd file - time "t+dt"  new
     label, Q, R, Grad, E2, c2, ao2, nel = gms_extract(params["gms_out"],params["excitations"],params["min_shift"],active_space,params["debug_gms_unpack"])
 
@@ -122,12 +125,22 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     #print "Time to compute in SD_overlap= ",t.show(),"sec"
 
     p0 = range(nstates)
-    perm = unavoided.get_reordering(P12) # 
+    #perm = unavoided.get_reordering(P12)
+    perm = unavoided_tmp.get_reordering(P12) # temporally
     if p0 != perm:
         print "trivial crossings occured!"
         print "perm is", perm
         print "P12 is"; P12.show_matrix()
-        reorder_matrices.reorder(perm,P12,E2)
+        ksi = rnd.uniform(0.0,1.0)
+        Np = len(perm)/nstates
+        ip = int(Np*ksi)
+        istart = ip*nstates
+        iend = (ip+1)*nstates
+        ptmp = perm[istart:iend]
+        print "The selected number is %i" % ip
+        print "selected permutation is "; print ptmp
+
+        reorder_matrices.reorder(ptmp,P12,E2)
         P21 = P12.H()
 
     # calculate transition dipole moment matrices in the MO basis:
