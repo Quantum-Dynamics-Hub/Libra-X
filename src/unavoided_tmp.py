@@ -86,7 +86,7 @@ def get_reordering(time_overlap):
             esc.extend(ind) # extract elements of ind, not the list itself.
             
             perm_mix.append(ind) # extract groups of mixed states, say, [[0,1][2,3][4,5]]
-            print perm_mix
+            #print perm_mix
 
     #print "indices for mixed states are"; print esc;
     #print "groups of mixed states are"; print perm_mix
@@ -98,6 +98,7 @@ def get_reordering(time_overlap):
 
         indx = -1
         val = 0.0+0.0j
+        cnt = 0
         if all((col!=x for x in esc)): # avoid indices of mixed states
             while indx!=col:
 
@@ -111,8 +112,11 @@ def get_reordering(time_overlap):
 
                 # Do the corresponding swap of the columns in the S matrix
                 S.swap_cols(col,indx)
-            
-    #sys.exit(0)
+
+                # check if this loop ends or not.
+                cnt+=1
+                if cnt > sz:
+                    sys.exit(0)
     #print "After being reordered, the working permutation is"; print perm_wrk
 
     ''' Then, all posible permutations will be generated. '''
