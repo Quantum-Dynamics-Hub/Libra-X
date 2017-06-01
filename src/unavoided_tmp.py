@@ -339,7 +339,7 @@ class TestUnavoided(unittest.TestCase):
         perm_h1 = get_reordering(h1)
         print "Input matrix "; h1.show_matrix()
         print "Permutation = ", perm_h1
-        perm_h1_eq = [0, 1, 2, 3, 4, 0, 1, 3, 2, 4, 0, 2, 1, 3, 4, 0, 2, 3, 1, 4, 0, 3, 1, 2, 4, 0, 3, 2, 1, 4]
+        perm_h1_eq = [0, 1, 2, 3, 4, 0, 3, 2, 1, 4, 0, 1, 3, 2, 4, 0, 2, 3, 1, 4, 0, 3, 1, 2, 4, 0, 2, 1, 3, 4]
         self.assertEqual(perm_h1, perm_h1_eq)
 
 if __name__=='__main__':
