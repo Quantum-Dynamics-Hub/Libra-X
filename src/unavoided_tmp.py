@@ -82,11 +82,20 @@ def get_reordering(time_overlap):
         #print "duplicate numbers are"; print du
         for dnum in du:
             ind = [ i for i , x in enumerate(perm_ini) if dnum == x] # extract indices related to duplication
+
+            # extract the indices pointing the states related to duplication
+            ltmp = []
+            for i in xrange(len(perm_ini)):
+                x = perm_ini[i]
+                if x != dnum and x in ind: 
+                    ltmp.append(i)
+            ind.extend(ltmp)
+
             #print "mixed states are"; print ind
             esc.extend(ind) # extract elements of ind, not the list itself.
             
             perm_mix.append(ind) # extract groups of mixed states, say, [[0,1][2,3][4,5]]
-            print perm_mix
+            #print perm_mix
 
     #print "indices for mixed states are"; print esc;
     #print "groups of mixed states are"; print perm_mix
@@ -98,6 +107,7 @@ def get_reordering(time_overlap):
 
         indx = -1
         val = 0.0+0.0j
+        cnt = 0
         if all((col!=x for x in esc)): # avoid indices of mixed states
             while indx!=col:
 
@@ -111,8 +121,14 @@ def get_reordering(time_overlap):
 
                 # Do the corresponding swap of the columns in the S matrix
                 S.swap_cols(col,indx)
-            
-    #sys.exit(0)
+
+                # check if this loop ends or not.
+                cnt+=1
+                if cnt > sz:
+                    print "reordering counts reached the given threshold "
+                    print "The matrix is "; S.show_matrix();
+                    print "The (col,indx) pair is (%i,%i)" % (col,indx)
+                    print "exitting..."; sys.exit(0)
     #print "After being reordered, the working permutation is"; print perm_wrk
 
     ''' Then, all posible permutations will be generated. '''
@@ -245,13 +261,41 @@ def _test_setup():
     g.set(5,5,0.77+0j); g.set(5,6,0.78+0j);
     g.set(6,5,0.79+0j); g.set(6,6,0.81+0j);
 
-    return a, b, c, d, e, f, g
+    # non-identical matrix (corresponding to triply mixed states)
+    # | 1    0    0    0 0 |
+    # | 0 0.77 0.78 0.65 0 |
+    # | 0 0.76 0.75 0.89 0 |
+    # | 0 0.65 0.54 0.77 0 |
+    # | 0    0    0    0 1 | 
+
+    h = CMATRIX(5,5)
+    h.set(0,0,1.0+0j);
+    h.set(1,1,0.77+0j); h.set(1,2,0.78+0j); h.set(1,3,0.65+0j);
+    h.set(2,1,0.76+0j); h.set(2,2,0.75+0j); h.set(2,3,0.89+0j);
+    h.set(3,1,0.65+0j); h.set(3,2,0.54+0j); h.set(3,3,0.77+0j);
+    h.set(4,4,1.00+0j);
+
+    # non-identical matrix (corresponding to triply mixed states)
+    # | 1    0    0    0 0 | 
+    # | 0 0.65 0.78 0.77 0 |
+    # | 0 0.89 0.75 0.76 0 |
+    # | 0 0.77 0.54 0.65 0 |
+    # | 0    0    0    0 1 |
+
+    h1 = CMATRIX(5,5)
+    h1.set(0,0,1.0+0j);
+    h1.set(1,3,0.77+0j); h1.set(1,2,0.78+0j); h1.set(1,1,0.65+0j);
+    h1.set(2,3,0.76+0j); h1.set(2,2,0.75+0j); h1.set(2,1,0.89+0j);
+    h1.set(3,3,0.65+0j); h1.set(3,2,0.54+0j); h1.set(3,1,0.77+0j);
+    h1.set(4,4,1.00+0j);
+
+    return a, b, c, d, e, f, g, h, h1
 
 
 class TestUnavoided(unittest.TestCase):
     def test_reordering(self):
         """Tests the reordering algorithm"""
-        a,b,c,d,e,f,g = _test_setup()
+        a,b,c,d,e,f,g,h, h1 = _test_setup()
 
         perm_a = get_reordering(a)
         print "Input matrix "; a.show_matrix()
@@ -285,6 +329,18 @@ class TestUnavoided(unittest.TestCase):
         perm_g_eq = [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 6, 5, 0, 1, 2, 4, 3, 5, 6, 0, 1, 2, 4, 3, 6, 5,\
                          0, 2, 1, 3, 4, 5, 6, 0, 2, 1, 3, 4, 6, 5, 0, 2, 1, 4, 3, 5, 6, 0, 2, 1, 4, 3, 6, 5]
         self.assertEqual(perm_g, perm_g_eq)
+
+        perm_h = get_reordering(h)
+        print "Input matrix "; h.show_matrix()
+        print "Permutation = ", perm_h
+        perm_h_eq = [0, 1, 2, 3, 4, 0, 1, 3, 2, 4, 0, 2, 1, 3, 4, 0, 2, 3, 1, 4, 0, 3, 1, 2, 4, 0, 3, 2, 1, 4]
+        self.assertEqual(perm_h, perm_h_eq)
+
+        perm_h1 = get_reordering(h1)
+        print "Input matrix "; h1.show_matrix()
+        print "Permutation = ", perm_h1
+        perm_h1_eq = [0, 1, 2, 3, 4, 0, 3, 2, 1, 4, 0, 1, 3, 2, 4, 0, 2, 3, 1, 4, 0, 3, 1, 2, 4, 0, 2, 1, 3, 4]
+        self.assertEqual(perm_h1, perm_h1_eq)
 
 if __name__=='__main__':
     unittest.main()
