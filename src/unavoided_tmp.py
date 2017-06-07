@@ -125,10 +125,16 @@ def get_reordering(time_overlap):
                 # check if this loop ends or not.
                 cnt+=1
                 if cnt > sz:
+                    print "***********************************************"
                     print "reordering counts reached the given threshold "
-                    print "The matrix is "; S.show_matrix();
-                    print "The (col,indx) pair is (%i,%i)" % (col,indx)
+                    print "The original matrix is "; time_overlap.show_matrix();
+                    print "row numbers indicating maximum value of each column are"; print perm_ini;
+                    print "duplicate numbers are"; print du;
+                    print "column numbers for escaping from reordering are"; print esc;
+                    print "The reordered matrix is"; S.show_matrix();
+                    print "The (col,indx) pair occuring errors is (%i,%i)" % (col,indx)
                     print "exitting..."; sys.exit(0)
+
     #print "After being reordered, the working permutation is"; print perm_wrk
 
     ''' Then, all posible permutations will be generated. '''
