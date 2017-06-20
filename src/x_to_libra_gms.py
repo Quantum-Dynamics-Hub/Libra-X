@@ -131,16 +131,8 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
         print "trivial crossings occured!"
         print "perm is", perm
         print "P12 is"; P12.show_matrix()
-        ksi = rnd.uniform(0.0,1.0)
-        Np = len(perm)/nstates
-        ip = int(Np*ksi)
-        istart = ip*nstates
-        iend = (ip+1)*nstates
-        ptmp = perm[istart:iend]
-        print "The selected number is %i" % ip
-        print "selected permutation is "; print ptmp
 
-        reorder_matrices.reorder(ptmp,P12,E2)
+        reorder_matrices.reorder(perm,P12,E2)
         P21 = P12.H()
 
     # calculate transition dipole moment matrices in the MO basis:
