@@ -1,6 +1,6 @@
-# Libra-GAMESS_interface
+# Libra-X program
 
-   This file introduces how to execute Libra-GAMESS_interface.
+   This file introduces how to execute Libra-X_program
 
 0. Install Libra and GAMESS on your PC or server.
    For installation, access the websites below:
