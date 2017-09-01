@@ -362,17 +362,18 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
-                        epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
+                        #epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
+                        epot[cnt] = qm_frac*E[cnt].get(el[cnt].istate,el[cnt].istate) + mm_frac*epot_mm[cnt] 
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])                    
-                        etot[cnt] = epot[cnt] + ekin[cnt]
-                        eext[cnt] = etot[cnt]
 
                         t.stop()
                         print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
 
                         # propagate thermostat variables
+                        etherm = 0.0
                         if MD_type == 1 and params["Ncool"] < i: # NVT-MD
                             therm[cnt].propagate_nhc(dt_nucl, ekin[cnt], 0.0, 0.0)
+                            etherm = therm[cnt].energy()
 
                         mol[cnt].propagate_p(0.5*dt_nucl) # p(t + dt/2) -> p(t + dt)
 
@@ -381,7 +382,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                             for k in xrange(3*syst[cnt].Number_of_atoms):
                                 mol[cnt].p[k] = mol[cnt].p[k] * therm[cnt].vel_scale(0.5*dt_nucl)
 
-                            eext[cnt] = eext[cnt] + therm[cnt].energy() 
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])
+                        etot[cnt] = ekin[cnt] + epot[cnt]
+                        eext[cnt] = etot[cnt] + etherm
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
                         
