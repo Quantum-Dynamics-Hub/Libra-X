@@ -363,8 +363,8 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # excited states, so no need for reference energy)
                         epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
                         #epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
-                        epot[cnt] = qm_frac*E[cnt].get(el[cnt].istate,el[cnt].istate) + mm_frac*epot_mm[cnt] 
-                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    
+                        epot[cnt] = qm_frac*E[cnt].get(el[cnt].istate,el[cnt].istate) + mm_frac*epot_mm[cnt] # the above conflict is repaired.
+                        ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # for propagating thermostat variables.
 
                         t.stop()
                         print "time after computing epot and ekin, eext, etot=",t.show(),"sec"
