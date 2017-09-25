@@ -421,6 +421,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
+                    #tsh.surface_hopping_cpa(mol, el, ham, rnd, params) # velocity rescaling is not done.
                 if params["interface"]=="G09":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
                 elif params["interface"]=="QE":
