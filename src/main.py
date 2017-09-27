@@ -91,7 +91,7 @@ def sanity_check(params):
 
         if "therm" in params.keys():    
             if params["therm"] == None:
-                print "NVT simulations reuire some valid thermostat. None is given. Exiting..."
+                print "NVT simulations require some valid thermostat. None is given. Exiting..."
                 sys.exit(0)
         else:
             print "NVT simulations require thermostat! Use \"therm\" keyword. Exiting..."
@@ -344,7 +344,7 @@ def main(params):
                         print "is_MM is set to 1, which means you need to provide the \
                         a file containing the connectivity information for your MM system. \
                         As of now, such file is called = ", params["ent_file"], " but it cannot \
-                        be found on your system. Pease check if it exists or set is_MM to 0. \
+                        be found on your system. Please check if it exists or set is_MM to 0. \
                         Exiting..."
                         sys.exit(0)
 
