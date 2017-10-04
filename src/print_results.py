@@ -121,9 +121,12 @@ def print_ens_traj(isnap,mol,syst,mu,epot,ekin,etot,eext,params):
 
     for iconf in xrange(nconfig):
         for i_ex in xrange(nstates_init):
+            cnt = iconf*nstates_init + i_ex
             for itraj in xrange(num_SH_traj):
 
-                cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                if params["do_rescaling"] ==1:
+                    cnt = cnt_inc_el
                 print_one_traj(isnap,iconf,params["excitations_init"][i_ex],itraj,mol[cnt],syst[cnt],mu[cnt],epot[cnt], ekin[cnt], etot[cnt], eext[cnt],params)
 
 

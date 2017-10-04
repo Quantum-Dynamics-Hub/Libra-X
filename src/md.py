@@ -197,11 +197,11 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
     #epot, ekin, etot, eext = 0.0, 0.0, 0.0, 0.0
     ens_sz = nconfig * nstates_init * num_SH_traj
-    epot    = [0.0]*ens_sz
-    epot_mm = [0.0]*ens_sz
-    ekin    = [0.0]*ens_sz
-    etot    = [0.0]*ens_sz
-    eext    = [0.0]*ens_sz
+    epot    = [0.0]*ntraj#ens_sz
+    epot_mm = [0.0]*ntraj#ens_sz
+    ekin    = [0.0]*ntraj#ens_sz
+    etot    = [0.0]*ntraj#ens_sz
+    eext    = [0.0]*ntraj#ens_sz
 
     old_st = [0]*ens_sz
 
@@ -210,10 +210,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
     smat = CMATRIX(nstates,nstates)
     for i in xrange(nstates):
         smat.set(i,i,1.0,0.0)
-    for i in xrange(ens_sz):
+    for i in xrange(ntraj):#ens_sz):
         mu.append(MATRIX())
 
-    #sys.exit(0)
+    #sys.exit(0) # debug
 
     for i in xrange(Nsnaps):   # number of printouts
 
@@ -225,10 +225,13 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                 for i_ex in xrange(nstates_init):  # consider initial excitations to be on all the basis
                                                    # states - this may be unnecessary for all cases, 
                                                    # so we may want to make this part customizable
-
+                    cnt = iconf*nstates_init + i_ex # cnt doesn't include the number of TSH trajectory
+                        
                     for itraj in xrange(num_SH_traj): # all stochastic SH realizations
 
-                        cnt = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                        cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                        if params["do_rescaling"] == 1:
+                            cnt = cnt_inc_el
 
                         print "Initial geometry %i, initial excitation %i, tsh trajectory %i"%(iconf,params["excitations_init"][i_ex],itraj)
                         #t.start()
@@ -237,9 +240,17 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         if params["Nstart"] < i:
                             for k in xrange(el_mts):
                                 if params["smat_inc"] == 1:
-                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                    el[cnt_inc_el].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
                                 else:
-                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                                    el[cnt_inc_el].propagate_electronic(0.5*dt_elec, ham[cnt])
+
+                    Nsh = 1
+                    if params["do_rescaling"] == 1:
+                        Nsh = num_SH_traj
+                    for itraj in xrange(Nsh):#num_SH_traj): # all stochastic SH realizations 
+                        cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                        if params["do_rescaling"] == 1:
+                            cnt = cnt_inc_el
 
                         # >>>>>>>>>>> Nuclear propagation starts <<<<<<<<<<<<
                         # Optional thermostat            
@@ -361,9 +372,9 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         # according to new convention (yet to be implemented for GMS and need to
                         # check for QE - the Hamiltonians will contain the total energies of 
                         # excited states, so no need for reference energy)
-                        epot[cnt] = compute_forces(mol[cnt], el[cnt], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
+                        epot[cnt] = compute_forces(mol[cnt], el[cnt_inc_el], ham[cnt], f_pot)  # f_pot = 0 - Ehrenfest, 1 - TSH
                         #epot[cnt] = qm_frac*epot[cnt] + mm_frac*epot_mm[cnt]            # Note: epot is evaluated @ t+dt/2 while epot_mm is @ t+dt
-                        epot[cnt] = qm_frac*E[cnt].get(el[cnt].istate,el[cnt].istate) + mm_frac*epot_mm[cnt] # the above conflict is repaired.
+                        epot[cnt] = qm_frac*E[cnt].get(el[cnt_inc_el].istate,el[cnt_inc_el].istate) + mm_frac*epot_mm[cnt] # the above conflict is repaired.
                         ekin[cnt] = compute_kinetic_energy(mol[cnt])                    # for propagating thermostat variables.
 
                         t.stop()
@@ -387,14 +398,18 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         eext[cnt] = etot[cnt] + etherm
 
                         # >>>>>>>>>>> Nuclear propagation ends <<<<<<<<<<<<
+                    for itraj in xrange(Nsh):#num_SH_traj): # all stochastic SH realizations
+                        cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                        if params["do_rescaling"] == 1:
+                            cnt = cnt_inc_el
                         
                         # Electronic propagation: half-step
                         if params["Nstart"] < i:
                             for k in xrange(el_mts):
                                 if params["smat_inc"] == 1:
-                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
+                                    el[cnt_inc_el].propagate_electronic(0.5*dt_elec, ham[cnt], smat)  # el propagate using S-matrix
                                 else:
-                                    el[cnt].propagate_electronic(0.5*dt_elec, ham[cnt])
+                                    el[cnt_inc_el].propagate_electronic(0.5*dt_elec, ham[cnt])
                         #####################################################################
                         if "print_S_mat" in params.keys():
                             if params["print_S_mat"] == 1:
@@ -420,8 +435,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             if SH_type>=1 and params["Nstart"] < i:
                 if params["interface"]=="GAMESS":
-                    tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
-                    #tsh.surface_hopping_cpa(mol, el, ham, rnd, params) # velocity rescaling is not done; Electronic back reaction is neglected.
+                    if params["do_rescaling"] == 1: # default
+                        tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
+                    elif params["do_rescaling"] == 0:
+                        tsh.surface_hopping_cpa(mol, el, ham, rnd, params) # velocity rescaling is not done; Electronic back reaction is neglected.
                 if params["interface"]=="G09":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
                 elif params["interface"]=="QE":
@@ -429,13 +446,19 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
 
             # induce decoherence 
             if params["do_collapse"] == 1:
-                for tr in xrange(ens_sz):
-                    new_st = el[tr].istate
-                    ksi = rnd.uniform(0.0, 1.0)
-                    E_old = ham_vib[cnt].get(old_st[tr],old_st[tr]).real
-                    E_new = ham_vib[cnt].get(new_st,new_st).real
-                    el[tr].istate, el[tr] = tsh.ida_py(el[tr], old_st[tr], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
+                for iconf in xrange(nconfig): 
+                    for i_ex in xrange(nstates_init):
+                        cnt = iconf*nstates_init + i_ex
+                        for itraj in xrange(num_SH_traj):
+                            cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+                            if params["do_rescaling"] == 1:
+                                cnt = cnt_inc_el
 
+                                new_st = el[cnt_inc_el].istate
+                                ksi = rnd.uniform(0.0, 1.0)
+                                E_old = ham_vib[cnt].get(old_st[cnt_inc_el],old_st[cnt_inc_el]).real
+                                E_new = ham_vib[cnt].get(new_st,new_st).real
+                                el[cnt_inc_el].istate, el[cnt_inc_el] = tsh.ida_py(el[cnt_inc_el], old_st[cnt_inc_el], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
             ################### END of TSH ##########################
             print "Finished TSH"
             t.stop()
@@ -447,7 +470,10 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
         #****************** cooling process ***********************   
         if params["interface"]=="GAMESS":
             if i <= params["Ncool"]:
-                for cnt in xrange(ntraj):
+                Nsys = ntraj
+                if params["do_rescaling"] == 1:
+                    Nsys = num_SH_traj
+                for cnt in xrange(Nsys):
                     syst[cnt].cool()
                     syst[cnt].extract_atomic_p(mol[cnt].p)  # syst -> mol
 
