@@ -437,7 +437,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                 if params["interface"]=="GAMESS":
                     if params["do_rescaling"] == 1: # default
                         tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
-                    elif params["do_rescaling"] == 0:
+                    else:
                         tsh.surface_hopping_cpa(mol, el, ham, rnd, params) # velocity rescaling is not done; Electronic back reaction is neglected.
                 if params["interface"]=="G09":
                     tsh.surface_hopping_cpa2(mol, el, ham, rnd, params) # velocity rescaling is done.
@@ -451,14 +451,15 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
                         cnt = iconf*nstates_init + i_ex
                         for itraj in xrange(num_SH_traj):
                             cnt_inc_el = iconf*nstates_init*num_SH_traj + i_ex*num_SH_traj + itraj
+
                             if params["do_rescaling"] == 1:
                                 cnt = cnt_inc_el
 
-                                new_st = el[cnt_inc_el].istate
-                                ksi = rnd.uniform(0.0, 1.0)
-                                E_old = ham_vib[cnt].get(old_st[cnt_inc_el],old_st[cnt_inc_el]).real
-                                E_new = ham_vib[cnt].get(new_st,new_st).real
-                                el[cnt_inc_el].istate, el[cnt_inc_el] = tsh.ida_py(el[cnt_inc_el], old_st[cnt_inc_el], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
+                            new_st = el[cnt_inc_el].istate
+                            ksi = rnd.uniform(0.0, 1.0)
+                            E_old = ham_vib[cnt].get(old_st[cnt_inc_el],old_st[cnt_inc_el]).real
+                            E_new = ham_vib[cnt].get(new_st,new_st).real
+                            el[cnt_inc_el].istate, el[cnt_inc_el] = tsh.ida_py(el[cnt_inc_el], old_st[cnt_inc_el], new_st, E_old, E_new, params["Temperature"], ksi, params["do_collapse"]) 
             ################### END of TSH ##########################
             print "Finished TSH"
             t.stop()
@@ -472,7 +473,7 @@ def run_MD(syst,el,ao,E,sd_basis,params,label,Q, active_space):
             if i <= params["Ncool"]:
                 Nsys = ntraj
                 if params["do_rescaling"] == 1:
-                    Nsys = num_SH_traj
+                    Nsys = ntraj * num_SH_traj
                 for cnt in xrange(Nsys):
                     syst[cnt].cool()
                     syst[cnt].extract_atomic_p(mol[cnt].p)  # syst -> mol
