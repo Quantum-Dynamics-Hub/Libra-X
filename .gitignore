@@ -9,7 +9,6 @@ slurm*
 *.dat
 Ham_*
 *wrk.inp
-run/H2O_wrk.inp
 *.nfs*
 re_*
 im_*
@@ -27,5 +26,5 @@ wfc*
 *.err
 *_re_*
 *_im_*
-
+hop_probs
 

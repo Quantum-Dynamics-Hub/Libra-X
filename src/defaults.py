@@ -60,6 +60,8 @@ def set_defaults(params, interface, recipe=""):
     # directory where SD basis vibronic hamiltonians will be printed out
     params["sd_ham"] = cwd+"/sd_ham/" 
 
+    # directory where hop probabilities will be printed out
+    params["hop_probs"] = cwd+"/hop_probs/"
 
     if interface=="QE":
         # The file into which the MD trajectorie will be printed out
