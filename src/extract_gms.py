@@ -368,7 +368,7 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     for i in xrange(nstates):
         #h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
         #e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
-        print "%i th excitation" %(i)
+        #print "%i th excitation" %(i)
         h_indx = states[i].from_orbit[0] + homo - 1
         e_indx = states[i].to_orbit[0] + homo - 1
         EX_ene = info["tot_ene"] + E_MO.get(e_indx,e_indx) - E_MO.get(h_indx,h_indx) # excitation energy
