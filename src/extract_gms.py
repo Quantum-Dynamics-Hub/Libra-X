@@ -217,10 +217,10 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         print "active space is not defined correctly, exit....."
         sys.exit(0)
 
-    E = MATRIX(sz,sz)
-    for i in xrange(sz):
-        imo = active_space[i]-1
-        E.set(i,i,E_full.get(imo,imo))
+    #E = MATRIX(sz,sz)
+    #for i in xrange(sz):
+    #    imo = active_space[i]-1
+    #    E.set(i,i,E_full.get(imo,imo))
 
     #C = CMATRIX(C_full) # input full matrix
     C = CMATRIX(Ngbf,sz)
@@ -241,10 +241,10 @@ def gms_extract_mo(inp_str,Ngbf,active_space,flag):
         print "C_full(Ngbf-1,Ngbf-1) is",C_full.get(Ngbf-1,Ngbf-1)
         print "*** reduced matrix ****"
         print "active_space=",active_space
-        print "E Matrix is"; E.show_matrix()
+        #print "E Matrix is"; E.show_matrix()
         print "C Matrix is"; C.show_matrix()
 
-    return E, C
+    return E_full, C
     
 def gms_extract_coordinates(inp_str,flag):
     ##
@@ -362,15 +362,23 @@ def gms_extract(filename,states,min_shift,active_space,flag):
     # the total energies of excited states (1-electron basis)
 
     # *********Here, KS excitation energy -> total excitation energy***************
+    homo = active_space[0] - min_shift # HOMO : number ordering starts from 1, not 0.
     nstates = len(states)
     E = MATRIX(nstates,nstates)
     for i in xrange(nstates):
-        h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
-        e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
+        #h_indx = states[i].from_orbit[0] - min_shift  # index of the hole orbital w.r.t. the lowest included in the active space orbital
+        #e_indx = states[i].to_orbit[0]   - min_shift  # --- same, only for the electron orbital
+        print "%i th excitation" %(i)
+        h_indx = states[i].from_orbit[0] + homo - 1
+        e_indx = states[i].to_orbit[0] + homo - 1
         EX_ene = info["tot_ene"] + E_MO.get(e_indx,e_indx) - E_MO.get(h_indx,h_indx) # excitation energy
         #EX_ene = info["tot_ene"] # for debugging MD without electron dynamics 
         E.set(i,i,EX_ene)
-
+        if 0==1: # debug
+            print "e_indx is %i" %(e_indx)
+            print "MO energy is %f" %( E_MO.get(e_indx,e_indx))
+            print "h_indx is %i" %(h_indx)
+            print "MO energy is %f" %( E_MO.get(h_indx,h_indx))
     # ******************************************************************************
 
     if flag == 1:
