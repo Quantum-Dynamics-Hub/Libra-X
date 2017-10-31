@@ -308,8 +308,9 @@ def update_vibronic_hamiltonian(ham_el, ham_vib, params,E_SD,nac,suffix, opt):
     if "inactive_states" in params:
         for ist in params["inactive_states"]:
             for jst in xrange(nstates):
-                ham_vib.set(ist,jst, 0.0, 0.0)
-                ham_vib.set(jst,ist, 0.0, 0.0)
+                if ist!=jst:
+                    ham_vib.set(ist,jst, 0.0, 0.0)
+                    ham_vib.set(jst,ist, 0.0, 0.0)
 
     if params["print_sd_ham"] == 1:
         ham_vib.real().show_matrix(params["sd_ham"] + "Ham_vib_re_" + suffix)
