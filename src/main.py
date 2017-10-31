@@ -91,7 +91,7 @@ def sanity_check(params):
 
         if "therm" in params.keys():    
             if params["therm"] == None:
-                print "NVT simulations reuire some valid thermostat. None is given. Exiting..."
+                print "NVT simulations require some valid thermostat. None is given. Exiting..."
                 sys.exit(0)
         else:
             print "NVT simulations require thermostat! Use \"therm\" keyword. Exiting..."
@@ -125,8 +125,9 @@ def main(params):
     if SH_type >= 1: # calculate no SH probs.  
         num_SH_traj = params["num_SH_traj"]
 
-    ntraj = nstates_init*ninit*num_SH_traj
-
+    ntraj = ninit*nstates_init
+    if params["do_rescaling"] == 1: # nuclear trajectory depends eletronic hops.
+        ntraj = ninit*nstates_init*num_SH_traj
 
 
     active_space = []
@@ -327,10 +328,13 @@ def main(params):
     if params["MD_type"] == 1: # start NA-MD interacting with thermostat @ t=0
         Ttemp = params["Temperature"]
 
-    # all excitations for each nuclear configuration
+    # create system object
+    Nsh = 1
+    if params["do_rescaling"] == 1:
+        Nsh = num_SH_traj
     for i in xrange(ninit):
         for i_ex in params["excitations_init"]:
-            for itraj in xrange(num_SH_traj):
+            for itraj in xrange(Nsh):
                 df = 0 # debug flag
                 # Here we use libra_py module!
                 # Utilize the gradients on the ground (0) excited state
@@ -344,14 +348,20 @@ def main(params):
                         print "is_MM is set to 1, which means you need to provide the \
                         a file containing the connectivity information for your MM system. \
                         As of now, such file is called = ", params["ent_file"], " but it cannot \
-                        be found on your system. Pease check if it exists or set is_MM to 0. \
+                        be found on your system. Please check if it exists or set is_MM to 0. \
                         Exiting..."
                         sys.exit(0)
 
                 syst.append(x)
 
+    # all excitations for each nuclear configuration
+    for i in xrange(ninit):
+        for i_ex in params["excitations_init"]:
+            for itraj in xrange(num_SH_traj):
                 el.append(Electronic(nstates,i_ex))
-    
+
+
+    #sys.exit(0) # debug
     # set list of SH state trajectories
     print "run MD"
     run_MD(syst,el,ao_list,e_list,sd_basis_list,params,label_list, Q_list, active_space)

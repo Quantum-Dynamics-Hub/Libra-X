@@ -127,6 +127,7 @@ params["el_mts"] = 1                   # electronic time steps per one nuclear t
 params["rep"] = 0                      # representation: 0 - diabatic, 1 - adiabatic
 params["num_SH_traj"] = 1              # number of excited states trajectories per initial nuclei geometry and excited states
 params["smat_inc"] = 0                 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
+params["do_rescaling"] = 1
 
 # ***************************************************************
 
@@ -138,6 +139,12 @@ from states import *
 params["excitations"] = [ excitation(0,1,0,1), excitation(0,1,1,1), excitation(-1,1,1,1) ] 
 #params["excitations"] = [ excitation(0,1,0,1)]
 params["excitations_init"] = [0]
+
+# shifting energies. The values must be defined in eV unit. This is optional; you can delete this parameter.
+params["shift_E"] = [0.0, 0.0, 0.0] # shifts diagonal elements of vibronic hamiltonian (exciting energies).
+                                    # If it is defined as [a, b, c], then exciting energies E0, E1, E2 are shifted
+                                    # E0 -> E0 + a, E1 -> E1 + b, E2 -> E2 + c
+                                    # Keep in mind that the length of this list must be equal to that of "excitations" list.
 
 # create thermostat
 params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":5})

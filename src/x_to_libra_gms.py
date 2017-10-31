@@ -69,7 +69,7 @@ def exe_gamess(params):
 def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     ## 
     # Finds the keywords and their patterns and extracts the parameters
-    # \param[in] params         contains input parameters , in the directory form
+    # \param[in] params         contains input parameters , in the dictionary form
     # \param[in,out] ao         atomic orbital basis at "t" old
     # \param[in,out] E          total excitation energies at "t" old
     # \param[in] sd_basis       Basis of Slater determinants at "t" old (list of CMATRIX object).
@@ -171,6 +171,15 @@ def gamess_to_libra(params, ao, E, sd_basis, active_space,suff):
     # Here, explicit computation would be more convinient than using outer functions (in hamiltonian_el.py).
     E_ave = 0.50 * ( E + E2 )
     nac = 0.50/params["dt_nucl"] * ( P12 - P21 )
+
+    # shift exciting energies according to "shift_E" list.
+    if "shift_E" in params:
+        eV_to_au = 0.036749
+        #print "before shifting E(0,0) is %f " % E_ave.get(0,0)
+        for i in xrange(nstates):
+            etmp = E_ave.get(i,i) + params["shift_E"][i]*eV_to_au
+            E_ave.set(i, i, etmp)
+        #print "after shifting E(0,0) is %f " % E_ave.get(0,0)
 
     # here, E_ave and nac are printed for debugging 
     #if 0==1:
