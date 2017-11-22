@@ -338,7 +338,10 @@ def main(params):
                 df = 0 # debug flag
                 # Here we use libra_py module!
                 # Utilize the gradients on the ground (0) excited state
-                x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
+                if params["interface"]=="QE": # For Delta-SCF-NAMD, initialize with excited state (i_ex) gradients.
+                    x = init_system.init_system(label_list[i], R_list[i], grad_list[i][i_ex], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
+                else:
+                    x = init_system.init_system(label_list[i], R_list[i], grad_list[i][0], rnd, Ttemp, params["sigma_pos"], df, "elements.txt")
 
                 # Add the connectivity - needed if we plan to use MM
                 if params["is_MM"]:

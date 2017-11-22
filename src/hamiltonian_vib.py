@@ -154,10 +154,10 @@ def vibronic_hamiltonian_non_orth(ham_el, ham_vib, params,E_SD_old,E_SD_new,nac,
 
     sz = ham_el.num_of_cols
     C_old = CMATRIX(sz, sz);  E_old = CMATRIX(sz, sz)
-    solve_eigen_gen(sz, H_el_old, smat_old, E_old, C_old)  # H * C = S * C * E  ^M
+    solve_eigen(H_el_old, smat_old, E_old, C_old,0)  # H * C = S * C * E  ^M
 
     C_new = CMATRIX(sz, sz);  E_new = CMATRIX(sz, sz)
-    solve_eigen_gen(sz, H_el_new, smat_new, E_new, C_new)  # H * C = S * C * E  ^M
+    solve_eigen(H_el_new, smat_new, E_new, C_new,0)  # H * C = S * C * E  ^M
 
     Dmo_adi = MATRIX(sz,sz)
     Dmo_adi = C_old.T() * nac * C_new
