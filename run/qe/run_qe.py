@@ -21,7 +21,7 @@ if user==0:
 elif user==1:
     # For Ekadashi
     libra_bin_path = "/projects/academic/alexeyak/ekadashi/libracode-dev/libracode-code/_build/src"
-    libra_x_path = "/projects/academic/alexeyak/ekadashi/devel/libra-gamess_interface/src"
+    libra_x_path = "/projects/academic/alexeyak/ekadashi/Libra-X/src"
 
 
 os.environ["src_path"] = libra_x_path   # Path to the source code
