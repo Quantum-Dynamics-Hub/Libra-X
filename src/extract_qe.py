@@ -189,42 +189,59 @@ def qe_extract_gradients(inp_str,  flag):
 
 #alp_d,bet_d = check_eig_deg()
 
-def fermi_pop(e,nel,nspin,kT):
+def fermi_pop(e,nel,nspin,kT,el_st):
     ##
     # This function generates occupation scheme based on fermi population
     # \param[in] e   List of eigen energies of the Molecular orbitals
     # \param[in] nel Total number of electrons in the system
     # \params[out] occ_new  List of fermi population of the MOs
     # \params[in] nspin Spin, = 2,1 for non-polarized and spin-polarized calculations.
+    # \params[in] el_st electronic state index; different fractional scheme for different electronic states.
 
     N = len(e)  # Total number of MOs in the active space
-    a = MATRIX(N,N)
-    for i in xrange(N):
-        for j in xrange(N):
-            if i==j:
-                a.set(i,j, e[i])
-            else:
-                a.set(i,j, 0.0)
-    if nspin == 2:  # For spin-polarized calculations.
-        Nel = nel/2 + nel%2  # Number of electrons in the alpha or beta spin orbital
-        degen = 1.0 # One orbital can have 1 electrons, in this case of spin-polarization
-    if nspin == 1:  # For non-polarized calculations
-        Nel = nel  # Total number of electrons.
-        degen = 2.0 # One orbital can have 2 electrons, in case of non-polarized calculations
-    #kT = 0.000955482 # kT = 0.000955482 Hartree, = 0.02585 eV  # at 300K
+    pop_opt,occ_tot,occ_new = 1,[],[]
     etol = 0.0000000001
-    #Ef = fermi_energy(e, Nel, degen, kT, etol)  # Not needed
-    bnds = order_bands(a)
-    #print bnds
-    #print "\n Test5: populate bands"
-    pop_opt = 1
-    pop_fermi = populate_bands(Nel, degen, kT, etol, pop_opt, bnds)
+    a = MATRIX(N,N)
+    if el_st==0: # For S0 
+        el_scheme = [0]
+    elif el_st==1: # For S1
+        el_scheme = [-1,0,1]
+    elif el_st==2:  # For S2
+        el_scheme = [-1,1,2]
+
+    for ib in xrange(N):
+        occ_new.append(0.0)
+
+    for ia in el_scheme: # in el_scheme [-1,0,1], first element for N-1, second for N, and third for N+1 electrons.
+        for i in xrange(N):
+            for j in xrange(N):
+                if i==j:
+                    a.set(i,j, e[i])
+                else:
+                    a.set(i,j, 0.0)
+        if nspin == 2:  # For spin-polarized calculations.
+            Nel = nel/2 + nel%2 + ia # Number of electrons in the alpha or beta spin orbital
+            degen = 1.0 # One orbital can have 1 electrons, in this case of spin-polarization
+        if nspin == 1:  # For non-polarized calculations
+            Nel = nel + ia # Total number of electrons.
+            degen = 2.0 # One orbital can have 2 electrons, in case of non-polarized calculations
+        bnds = order_bands(a)
+        #print bnds
+        #print "\n Test5: populate bands"
+        pop_fermi = populate_bands(Nel, degen, kT, etol, pop_opt, bnds)
+        occ_tot.append([item[1] for item in pop_fermi]) #  pop_fermi[:10][1]
     #tot_elec = 0.0
     #for i in xrange(N):
     #    tot_elec = tot_elec + pop_fermi[i][1]
     # print "tot_elec = ",tot_elec
 #######################################################
-    occ_new = [item[1] for item in pop_fermi]
+    for ic in xrange(N):
+        if el_st ==0: # For S0
+            occ_new[ic] = occ_tot[0][ic] 
+        else: # For S1 and S2
+            occ_new[ic] = occ_tot[0][ic]+occ_tot[2][ic] - occ_tot[1][ic]
+
+    #occ_new = [item[1] for item in pop_fermi]
     return occ_new #[item[1] for item in pop_fermi]
 
 def qe_extract_eigenvalues(filename,nel):
@@ -523,7 +540,7 @@ def qe_extract(filename, active_space, ex_st, nspin, flag):
     label, R = qe_extract_coordinates(A[icoord+1:icoord+1+nat], alat, flag)
 
     # Get gradients
-    grads = qe_extract_gradients(A[iforce+4:iforce+4+nat], flag)
+    grads = qe_extract_gradients(A[iforce+2:iforce+2+nat], flag)
 
     MO_a, MO_b = None, None
 
