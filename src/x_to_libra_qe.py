@@ -101,6 +101,7 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
         #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st,nspin)
         ###########################################
         flag = 0
+        mx_itr = params["max_iteration"]
         #while flag1! = 0: #for i in xrange(5):
         #    write_qe_input(ex_st,label,mol,params,flag1,occ_a,occ_b)
         #    exe_espresso(ex_st)
@@ -127,7 +128,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
             else:
                 if coount==1:
                     restart_flag = 10
-                if coount==30:  # Maximum 30 iteration, else exit
+                if coount>mx_itr:  # Maximum 30 iteration, else exit
+                    print "Warning! Maximum iteration for the Fermi scheme reached, please check electronic_smearing parameter - exiting"
                     sys.exit(0)
                 else:
                     restart_flag = 11

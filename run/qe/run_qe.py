@@ -48,7 +48,8 @@ params["electronic_smearing"] = 0.01 # Electronic smearing used in Fermi populat
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["num_SH_traj"] = 1
-params["scf_itr"] = 10  # Number of steps in the fractional occupation update
+params["scf_itr"] = 10  # Number of SCF steps in each fractional occupation update
+params["max_iteration"] = 30 # Maximum number of fractional Fermi cycle
 params["non-orth"] = 1  # = 1 when MOs are non-orthogonal, = 0 when calculated in orthogonal MO basis
 params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
 params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation

@@ -170,7 +170,11 @@ def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet,restart_flag):
 # \param[in] label Element symbols for all atoms in the system (list of strings)
 # \param[in] mol The object containing nuclear DOF
 # \param[in] params The general control parameters (dictionary)
-#
+# \param[in] occ a list of occupation numbers of the total orbitals (doubly degenerate)
+# \param[in] occ_alp a list of occupation numbers of the alpha orbitals
+# \param[in] occ_bet a list of occupation numbers of the beta orbitals
+# \param[in] restart_flag index 10 is used at this point for the very first iteration, 11 for consecutive
+#            steps where restart from the previous wavefunction and density is performed.
 
     HOMO = params["nel"]/2 - 1 # It must be integer, This is HOMO index
     excitation = params["excitations"][ex_st]
@@ -234,6 +238,17 @@ def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet,restart_flag):
     g.close()
 
 def write_qe_input_first(filename,occ,occ_alp,occ_bet,nspin,params,restart_flag):
+##
+# Creates QE inputs for the very first step, used in main.py
+# \param[in] filename QE input filename to be written.
+# \param[in] occ a list of occupation numbers of the total orbitals (doubly degenerate)
+# \param[in] occ_alp a list of occupation numbers of the alpha orbitals
+# \param[in] occ_bet a list of occupation numbers of the beta orbitals
+# \param[in] nspin Spin-polarization index: 1 for spin restricted and 2 for spin unrestricted calculation
+# \param[in] params The general control parameters (dictionary)
+# \param[in] restart_flag index 10 is used at this point for the very first iteration, 11 for consecutive
+#            steps where restart from the previous wavefunction and density is performed.
+
     f = open(filename,"r+")
     a = f.readlines()
     N = len(a)
