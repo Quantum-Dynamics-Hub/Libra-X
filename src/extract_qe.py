@@ -203,11 +203,16 @@ def fermi_pop(e,nel,nspin,kT,el_st):
     etol = 0.0000000001
     a = MATRIX(N,N)
     if el_st==0: # For S0 
-        el_scheme = [0]
+        el_scheme = [0] # el_scheme is the fractional Fermi occupation scheme
+                        # el_scheme is a list of integers representing indexes for orbitals
+                        # with respect to the HOMO
     elif el_st==1: # For S1
-        el_scheme = [-1,0,1]
+        el_scheme = [-1,0,1]  # n_i^(N-1) + n_i^(N+1) - n_i^(N)
     elif el_st==2:  # For S2
-        el_scheme = [-1,1,2]
+        el_scheme = [-1,1,2]  # n_i^(N-1) + n_i^(N+2) - n_i^(N+1)
+    else:
+        print "Error, check out el_st, shouldn't be larger than 2 at this point, >S2 not implemented yet, exiting"
+        sys.exit(0)
 
     for ib in xrange(N):
         occ_new.append(0.0)
@@ -238,8 +243,11 @@ def fermi_pop(e,nel,nspin,kT,el_st):
     for ic in xrange(N):
         if el_st ==0: # For S0
             occ_new[ic] = occ_tot[0][ic] 
-        else: # For S1 and S2
+        elif el_st ==1 or el_st ==2: # For S1 and S2
             occ_new[ic] = occ_tot[0][ic]+occ_tot[2][ic] - occ_tot[1][ic]
+        else:
+            print "Warning: Higher excited states (>S2) are not implemented yet, exiting"
+            sys.exit(0)
 
     #occ_new = [item[1] for item in pop_fermi]
     return occ_new #[item[1] for item in pop_fermi]

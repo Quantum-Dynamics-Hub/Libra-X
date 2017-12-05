@@ -40,20 +40,20 @@ defaults.set_defaults(params, "QE")
 
 params["nproc"] = 12              # the number of processors
 params["dt_nucl"]=20.0  # time step for nuclear dynamics  ex) 20 a.u. = 0.5 fsec
-params["Nsnaps"]=200    # the number of MD rounds
+params["Nsnaps"]=5    # the number of MD rounds
 params["Nsteps"]=2      # the number of MD steps per snap
 params["Ncool"] = -1
 params["nspin"] = 2
-params["electronic_smearing"] = 0.001 # Electronic smearing used in Fermi population calculation
+params["electronic_smearing"] = 0.01 # Electronic smearing used in Fermi population calculation
 params["nconfig"] = 1
 params["el_mts"] = 1
 params["num_SH_traj"] = 1
-params["scf_itr"] = 5  # Number of steps in the fractional occupation update
+params["scf_itr"] = 10  # Number of steps in the fractional occupation update
 params["non-orth"] = 1  # = 1 when MOs are non-orthogonal, = 0 when calculated in orthogonal MO basis
 params["print_S_mat"] = 0 # 1 if S-matrix printing required, 0 if not required
 params["smat_inc"] = 0 # 1 Including overlap matrix (S), 0 when overlap matrix (S) not included in el propagation
 
-params["MD_type"] = 0  # 1 NVT ensamble, 0 NVE ensamble
+params["MD_type"] = 1  # 1 NVT ensamble, 0 NVE ensamble
 # Thermostat parameters
 params["therm"] = Thermostat({"thermostat_type":"Nose-Hoover","nu_therm":0.001,"Temperature":300.0,"NHC_size":3})
 params["Temperature"] = params["therm"].Temperature
