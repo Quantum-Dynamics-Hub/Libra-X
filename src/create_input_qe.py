@@ -162,7 +162,7 @@ def print_occupations(occ):
 
 
 
-def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet):
+def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet,restart_flag):
 ##
 # Creates the Quantum Espresso input using the data provided
 # \param[in] ex_st The index of the excited state we want to compute - so it controls which input file
@@ -170,12 +170,15 @@ def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet):
 # \param[in] label Element symbols for all atoms in the system (list of strings)
 # \param[in] mol The object containing nuclear DOF
 # \param[in] params The general control parameters (dictionary)
-#
+# \param[in] occ a list of occupation numbers of the total orbitals (doubly degenerate)
+# \param[in] occ_alp a list of occupation numbers of the alpha orbitals
+# \param[in] occ_bet a list of occupation numbers of the beta orbitals
+# \param[in] restart_flag index 10 is used at this point for the very first iteration, 11 for consecutive
+#            steps where restart from the previous wavefunction and density is performed.
 
     HOMO = params["nel"]/2 - 1 # It must be integer, This is HOMO index
     excitation = params["excitations"][ex_st]
     qe_inp = "x%i.scf_wrk.in" % ex_st
-
 
     qe_inp_templ = params["qe_inp_templ"][ex_st]
     cell_dm = params["alat"]
@@ -187,8 +190,15 @@ def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet):
     for a in qe_inp_templ:
         aa = a.split()
         if len(aa) >0 and aa[0] == "prefix":
-            #aa[2] = "'%s',"%pfx
-            a = "  prefix = '%s',\n"%pfx        
+            a = "  prefix = '%s',\n"%pfx
+        if len(aa) >0 and aa[0] == "&ELECTRONS" and restart_flag==11:
+            a = "&ELECTRONS \n startingwfc = 'file', \n startingpot = 'file', \n"
+        if len(aa) >0 and aa[0] == "&ELECTRONS" and restart_flag==10:
+            a = "&ELECTRONS \n"
+        if len(aa) >0 and aa[0] == "electron_maxstep" and restart_flag>9:
+            #a = " electron_maxstep = 2, \n "
+            a = " electron_maxstep = %i, \n "%params["scf_itr"]
+
         g.write(a)
     g.write("\n")
 
@@ -227,7 +237,18 @@ def write_qe_input(ex_st, label, mol, params,occ,occ_alp,occ_bet):
         
     g.close()
 
-def write_qe_input_first(filename,occ,occ_alp,occ_bet,nspin):
+def write_qe_input_first(filename,occ,occ_alp,occ_bet,nspin,params,restart_flag):
+##
+# Creates QE inputs for the very first step, used in main.py
+# \param[in] filename QE input filename to be written.
+# \param[in] occ a list of occupation numbers of the total orbitals (doubly degenerate)
+# \param[in] occ_alp a list of occupation numbers of the alpha orbitals
+# \param[in] occ_bet a list of occupation numbers of the beta orbitals
+# \param[in] nspin Spin-polarization index: 1 for spin restricted and 2 for spin unrestricted calculation
+# \param[in] params The general control parameters (dictionary)
+# \param[in] restart_flag index 10 is used at this point for the very first iteration, 11 for consecutive
+#            steps where restart from the previous wavefunction and density is performed.
+
     f = open(filename,"r+")
     a = f.readlines()
     N = len(a)
@@ -240,6 +261,15 @@ def write_qe_input_first(filename,occ,occ_alp,occ_bet,nspin):
     a[i_alp:N] = []
 
     for i in range(0,i_alp):
+        aa = a[i].split()
+        if len(aa) >0 and aa[0] == "&ELECTRONS" and restart_flag==11:
+            a[i] = "&ELECTRONS \n startingwfc = 'file', \n startingpot = 'file', \n"
+        if len(aa) >0 and aa[0] == "&ELECTRONS" and restart_flag==10:
+            a[i] = "&ELECTRONS \n"
+        if len(aa) >0 and aa[0] == "electron_maxstep" and restart_flag>9:
+            #a = " electron_maxstep = 2, \n "
+            a[i] = " electron_maxstep = %i, \n "%params["scf_itr"]
+
         f.write(a[i])
 
     # Write occupation

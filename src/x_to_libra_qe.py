@@ -101,6 +101,7 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
         #tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, flag, active_space, ex_st,nspin)
         ###########################################
         flag = 0
+        mx_itr = params["max_iteration"]
         #while flag1! = 0: #for i in xrange(5):
         #    write_qe_input(ex_st,label,mol,params,flag1,occ_a,occ_b)
         #    exe_espresso(ex_st)
@@ -114,20 +115,29 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
         excitation = params["excitations"][ex_st]
         occ, occ_alp, occ_bet = excitation_to_qe_occ(params, excitation)
         status = -1
-
+        restart_flag = 0
+        coount = 0
         while status != 0: #for i in xrange(5):
-            write_qe_input(ex_st,label,mol,params,occ,occ_alp,occ_bet)
+            coount = coount + 1
+            write_qe_input(ex_st,label,mol,params,occ,occ_alp,occ_bet,restart_flag)
             exe_espresso(ex_st)
             status = check_convergence("x%i.scf.out" % ex_st) # returns 0 if SCF converges, 1 if not converges
             if status == 0:
                 tot_ene, label, R, grads, mo_pool_alp, mo_pool_bet, norb, nel, nat, alat = qe_extract("x%i.scf.out" % ex_st, active_space, ex_st, nspin, flag)
 
             else:
+                if coount==1:
+                    restart_flag = 10
+                if coount>mx_itr:  # Maximum 30 iteration, else exit
+                    print "Warning! Maximum iteration for the Fermi scheme reached, please check electronic_smearing parameter - exiting"
+                    sys.exit(0)
+                else:
+                    restart_flag = 11
                 if params["nspin"] == 2:
                     en_alp = qe_extract_eigenvalues("x%i.save/K00001/eigenval1.xml"%ex_st,nel)
                     en_bet = qe_extract_eigenvalues("x%i.save/K00001/eigenval2.xml"%ex_st,nel)
-                    occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["electronic_smearing"])
-                    occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["electronic_smearing"])
+                    occ_alp = fermi_pop(en_alp,nel,params["nspin"],params["electronic_smearing"],ex_st)
+                    occ_bet = fermi_pop(en_bet,nel,params["nspin"],params["electronic_smearing"],0)
                 if params["nspin"] == 1:
                     en_orb = qe_extract_eigenvalues("x%i.save/K00001/eigenval.xml"%ex_st,nel)
                     occ = fermi_pop(en_orb,nel,params["nspin"],params["electronic_smearing"])
