@@ -127,6 +127,8 @@ def qe_to_libra(params, E, sd_basis, label, mol, suff, active_space):
             else:
                 if coount==1:
                     restart_flag = 10
+                if coount==30:  # Maximum 30 iteration, else exit
+                    sys.exit(0)
                 else:
                     restart_flag = 11
                 if params["nspin"] == 2:
