@@ -40,10 +40,7 @@ ATOMIC_SPECIES
  C  12.01  C_pbe_v1.2.uspp.F.UPF
  H  1.008  H.pbe-rrkjus_psl.0.1.UPF
 
-
-K_POINTS automatic
-1 1 1  0 0 0
- 
+K_POINTS gamma
                                
 CELL_PARAMETERS
     12.0000000    0.0000000    0.0000000
