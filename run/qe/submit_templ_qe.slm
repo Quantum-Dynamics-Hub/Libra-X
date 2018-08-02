@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH --partition=valhalla
+#SBATCH --partition=valhalla --qos=valhalla
 ##SBATCH --partition=general-compute
 #SBATCH --clusters=chemistry
 #SBATCH --time=10:10:00
